@@ -5,12 +5,13 @@
   "description": "Your project description here",
   "author": "Your Name",
   "type": "module",
-  "main": "electron/main.js",
+  "electron": "electron .",
+  "main": "electron.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "electron": "electron electron/main.js",
+    "electron": "electron electron.js",
     "package": "electron-builder"
   },
   "devDependencies": {
@@ -23,16 +24,41 @@
     "vite": "^5.4.8"
   },
   "dependencies": {
+    "electron-is-dev": "^3.0.1",
     "path": "^0.12.7",
     "sqlite3": "^5.1.7"
   },
-  "build": {
-    "files": [
-      "dist/**/*",
-      "electron/**/*"
-    ],
-    "linux": {
-      "category": "Utility"
-    }
+"build": {
+   "appId": "com.example.your_app",
+   "productName": "your_app",
+   "directories": {
+     "output": "dist_electron"
+   },
+   "files": [
+     "dist/**/*",
+     "electron.js"
+   ],
+   "extraResources": {
+     "from": "dist/",
+     "to": "app/dist/"
+   },
+   "win": {
+     "target": [
+       {
+         "target": "nsis",
+         "arch": [
+           "x64"
+         ]
+       }
+     ]
+   },
+   "linux": {
+     "target": [
+       "AppImage",
+       "deb",
+       "tar.gz"
+     ],
+     "category": "Utility"
+   }
   }
 }
