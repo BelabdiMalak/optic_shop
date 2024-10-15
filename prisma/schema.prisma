@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"  // Path to the SQLite database file
+}
+
+model User {
+  id              String     @id @default(uuid())
+  name            String
+  surename        String
+  shpere          String
+  cylinder        String
+  axis            String
+
+  // metadata
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  // relations
+  orders          Order[]
+}
+
+model Type {
+  id              String     @id @default(uuid())
+  name            String
+
+  // metadata
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // relations
+  products        Product[]
+}
+
+model SubType {
+  id              String     @id @default(uuid())
+  name            String
+
+  // metadata
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  // relations
+  products        Product[]
+}
+
+model Stock {
+  id              String     @id @default(uuid())
+  date            DateTime   @default(now())
+  type            String
+  quantity        Int
+
+  // metadata
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  // relations
+  productId       String
+  product         Product       @relation(fields: [productId], references: [id])
+}
+
+model Product {
+  id              String     @id @default(uuid())
+  stockQuantity   Int        @default(0)
+
+  // metadata
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  // relations
+  typeId          String
+  type            Type       @relation(fields: [typeId], references: [id])
+
+  subTypeId       String
+  subType         SubType    @relation(fields: [subTypeId], references: [id])
+
+  orders          Order[]
+  stocks          Stock[]
+}
+
+model Order {
+  id              String     @id @default(uuid())
+  date            DateTime   @default(now())
+  deposit         Int        @default(0)
+  framePrice      Int
+  productPrice    Int
+  status          String
+
+  // metadata
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  // relations
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  productId       String
+  product         Product     @relation(fields: [productId], references: [id])
+}

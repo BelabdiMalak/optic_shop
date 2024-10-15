@@ -3,7 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "description": "Desktop app for optical shop management",
-  "author": "Malak BELABDI",
+  "author": {
+    "name": "BELABDI Malak",
+    "email": "malakbelabdi@gmail.com"
+  },
   "type": "module",
   "electron": "electron .",
   "main": "electron.js",
@@ -23,10 +26,12 @@
     "concurrently": "^9.0.1",
     "electron": "^32.1.2",
     "electron-builder": "^25.1.7",
+    "prisma": "^5.20.0",
     "typescript": "^5.5.3",
     "vite": "^5.4.8"
   },
   "dependencies": {
+    "@prisma/client": "^5.20.0",
     "electron-is-dev": "^3.0.1",
     "path": "^0.12.7",
     "sqlite3": "^5.1.7"

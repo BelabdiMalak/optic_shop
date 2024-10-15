@@ -14,6 +14,7 @@ try {
       height: 920,
       autoHideMenuBar: true,
       webPreferences: {
+        preload: join(__dirname, 'preload.js'),
         nodeIntegration: true,
         contextIsolation: false,
         webSecurity: true,
