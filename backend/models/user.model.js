@@ -1,4 +1,4 @@
-const prisma = require('../../config/prisma.config');
+const prisma = require('../../config/prisma.config.js');
 
 const createOne = async (data) => {
     try {
@@ -10,6 +10,15 @@ const createOne = async (data) => {
     }
 }
 
+const findMany = async () => {
+    try {
+        return await prisma.user.findMany({});
+    } catch (error) {
+        throw new Error('Error in finding many users: ', error);
+    }
+}
+
 module.exports = {
-    createOne
+    createOne,
+    findMany
 }

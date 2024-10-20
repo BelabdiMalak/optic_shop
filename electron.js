@@ -1,11 +1,11 @@
-import { app, BrowserWindow } from 'electron';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-import isDev from 'electron-is-dev';
+const { registerAllHandlers } = require('./ipcHandlers/index.js');
+const { app, BrowserWindow } = require('electron');
+const { join } = require('path');
+const isDev =true; // TODO:  (await import('electron-is-dev')).default
 
 try {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
+  const __dirname = process.cwd();
+  const preloadPath = join(__dirname, 'preload.js')
   
   let mainWindow;
   function createWindow() {
@@ -14,9 +14,9 @@ try {
       height: 920,
       autoHideMenuBar: true,
       webPreferences: {
-        preload: join(__dirname, 'preload.js'),
+        preload: preloadPath,
         nodeIntegration: true,
-        contextIsolation: false,
+        contextIsolation: true,
         webSecurity: true,
       },
     });
@@ -28,6 +28,9 @@ try {
       startURL = `file://${join(__dirname, 'dist', 'index.html')}`;
     }
     mainWindow.loadURL(startURL);
+
+    registerAllHandlers();
+    
     mainWindow.on('closed', () => (mainWindow = null));
   }
   

@@ -7,7 +7,6 @@
     "name": "BELABDI Malak",
     "email": "malakbelabdi@gmail.com"
   },
-  "type": "module",
   "electron": "electron .",
   "main": "electron.js",
   "scripts": {
@@ -33,6 +32,7 @@
   "dependencies": {
     "@prisma/client": "^5.20.0",
     "electron-is-dev": "^3.0.1",
+    "ipc": "^0.0.1",
     "path": "^0.12.7",
     "sqlite3": "^5.1.7"
   },
