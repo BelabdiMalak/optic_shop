@@ -25,7 +25,7 @@ model User {
 
 model Type {
   id              String     @id @default(uuid())
-  name            String
+  name            String     @unique
 
   // metadata
   createdAt       DateTime   @default(now())
@@ -37,7 +37,7 @@ model Type {
 
 model SubType {
   id              String     @id @default(uuid())
-  name            String
+  name            String     @unique
 
   // metadata
   createdAt       DateTime   @default(now())
@@ -79,6 +79,8 @@ model Product {
 
   orders          Order[]
   stocks          Stock[]
+  
+  @@unique([typeId, subTypeId])
 }
 
 model Order {
