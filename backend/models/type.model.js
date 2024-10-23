@@ -10,7 +10,27 @@ const createOne = async (data) => {
     }
 }
 
-const findMany = async () => {
+const findMany = async ({ page, limit, orderField, orderBy, name }) => {
+    try {
+        return await prisma.type.findMany({
+            where: {
+                ...(name && {
+                    name: {
+                      contains: name,
+                      mode: 'insensitive',
+                    },
+                  }),
+            },
+            take: limit,
+            skip: page ? (page - 1) * limit : undefined,
+            orderBy: { [orderField]: orderBy },
+        });
+    } catch (error) {
+        throw new Error('Error in finding many types: ' + error.message);
+    }
+}
+
+const _findMany = async () => {
     try {
         return await prisma.type.findMany({});
     } catch (error) {
@@ -54,5 +74,6 @@ module.exports = {
     findMany,
     findUnique,
     updateOne,
-    findBy
+    findBy,
+    _findMany
 }

@@ -10,7 +10,29 @@ const createOne = async (data) => {
     }
 }
 
-const findMany = async () => {
+const findMany = async ({ page, limit, orderField, orderBy, userId, productId, status, date }) => {
+    try {
+        return await prisma.product.findMany({
+            where: {
+                ...(userId && { userId }),
+                ...(productId && { productId }),
+                ...(status && { status }),
+                ...(date && {
+                    date: {
+                        equals: new Date(date),
+                    },
+                }),
+            },
+            take: limit,
+            skip: page ? (page - 1) * limit : undefined,
+            orderBy: { [orderField]: orderBy },
+        });
+    } catch (error) {
+        throw new Error('Error in finding many products: ' + error.message);
+    }
+}
+
+const _findMany = async () => {
     try {
         return await prisma.order.findMany({});
     } catch (error) {
@@ -54,5 +76,6 @@ module.exports = {
     findMany,
     findUnique,
     updateOne,
-    findBy
+    findBy,
+    _findMany
 }

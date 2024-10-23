@@ -10,11 +10,37 @@ const createOne = async (data) => {
     }
 }
 
-const findMany = async () => {
+const findMany = async ({ page, limit, orderBy, orderField, name, surename }) => {
     try {
-        return await prisma.user.findMany({});
+        return await prisma.user.findMany({
+            where: {
+                ...(name && {
+                    name: {
+                      contains: name,
+                      mode: 'insensitive',
+                    },
+                  }),
+                  ...(surename && {
+                    surename: {
+                      contains: surename,
+                      mode: 'insensitive',
+                    },
+                  }),
+            },
+            take: limit,
+            skip: page ? (page - 1) * limit : undefined,
+            orderBy: { [orderField]: orderBy },
+        });
     } catch (error) {
         throw new Error('Error in finding many users: ' + error.message);
+    }
+}
+
+const _findMany = async() => {
+    try {
+        return await prisma.user.findMany({})
+    } catch (error) {
+        throw new Error('Error in finding many users: ' + error.message); 
     }
 }
 
@@ -54,5 +80,6 @@ module.exports = {
     findMany,
     findUnique,
     updateOne,
-    findBy
+    findBy,
+    _findMany
 }
