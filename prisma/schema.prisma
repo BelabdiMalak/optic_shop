@@ -32,6 +32,7 @@ model Type {
   updatedAt       DateTime   @updatedAt
 
   // relations
+  subTypes        SubType[]
   products        Product[]
 }
 
@@ -44,6 +45,8 @@ model SubType {
   updatedAt       DateTime   @updatedAt
   
   // relations
+  typeId          String    
+  type            Type      @relation(fields: [typeId], references: [id])
   products        Product[]
 }
 
