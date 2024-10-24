@@ -10,20 +10,18 @@ const createOne = async (data) => {
     }
 }
 
-const findMany = async ({ page, limit, orderBy, orderField, name, surename }) => {
+const findMany = async ({ page = 1, limit = 10, orderBy = 'desc', orderField = 'createdAt', name, surename }) => {
     try {
         return await prisma.user.findMany({
             where: {
                 ...(name && {
                     name: {
                       contains: name,
-                      mode: 'insensitive',
                     },
                   }),
                   ...(surename && {
                     surename: {
                       contains: surename,
-                      mode: 'insensitive',
                     },
                   }),
             },
