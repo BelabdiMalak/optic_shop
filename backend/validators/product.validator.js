@@ -22,7 +22,7 @@ const createSchema = Joi.object({
         }),
 
     subTypeId: Joi.string()
-        .uuid
+        .uuid()
         .required()
         .messages({
             'string.base': 'SubType ID must be a string',
@@ -52,7 +52,7 @@ const updateSchema = Joi.object({
         }),
 
     subTypeId: Joi.string()
-        .uuid
+        .uuid()
         .messages({
             'string.base': 'SubType ID must be a string',
             'string.pattern.base': 'SubType ID must be a valid UUID',
