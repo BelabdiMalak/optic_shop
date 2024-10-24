@@ -73,7 +73,6 @@ const findTypeById = async (id) => {
     }
 };
 
-// TODO:  add pagination
 const getTypes = async ({ 
     page = 1, 
     limit = 10, 
@@ -82,7 +81,7 @@ const getTypes = async ({
     name 
 }) => {
     try {
-        const types = await typeModel.findMany({
+        const { types, pagination } = await typeModel.findMany({
             page,
             limit,
             orderField,
@@ -93,7 +92,8 @@ const getTypes = async ({
         return {
             status: true,
             message: 'Types fetched successfully',
-            data: types
+            data: types,
+            pagination: pagination
         };
     } catch (error) {
         throw new Error(`Error in getting types (service): ${error}`);

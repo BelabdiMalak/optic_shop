@@ -81,7 +81,7 @@ const getSubTypes = async ({
     name 
 }) => {
     try {
-        const subTypes = await subTypeModel.findMany({
+        const { subTypes, pagination } = await subTypeModel.findMany({
             page,
             limit,
             orderField,
@@ -92,7 +92,8 @@ const getSubTypes = async ({
         return {
             status: true,
             message: 'SubTypes fetched successfully',
-            data: subTypes
+            data: subTypes,
+            pagination: pagination
         };
     } catch (error) {
         throw new Error(`Error in getting subtypes (service): ${error}`);

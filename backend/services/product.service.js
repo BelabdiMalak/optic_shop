@@ -82,7 +82,7 @@ const getProducts = async ({
     category 
 }) => {
     try {
-        const products = await productModel.findMany({
+        const { products, pagination } = await productModel.findMany({
             page,
             limit,
             orderField,
@@ -94,7 +94,8 @@ const getProducts = async ({
         return {
             status: true,
             message: 'Products fetched successfully',
-            data: products
+            data: products,
+            pagination: pagination
         };
     } catch (error) {
         throw new Error(`Error in getting products (service): ${error}`);

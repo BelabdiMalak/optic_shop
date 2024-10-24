@@ -12,7 +12,7 @@ const createOne = async (data) => {
 
 const findMany = async ({ page, limit, orderField, orderBy, name }) => {
     try {
-        return await prisma.type.findMany({
+        const types = await prisma.type.findMany({
             where: {
                 ...(name && {
                     name: {
@@ -25,6 +25,24 @@ const findMany = async ({ page, limit, orderField, orderBy, name }) => {
             skip: page ? (page - 1) * limit : undefined,
             orderBy: { [orderField]: orderBy },
         });
+        const totalElements = await prisma.type.count({
+            where: {
+                ...(name && {
+                    name: { contains: name },
+                  }),
+            },
+          })
+        const pagination = {
+            page: page,
+            limit: limit,
+            totalPages: Math.ceil(totalElements / limit),
+            totalElements: totalElements,
+            hasNext: page * limit < totalElements,
+        }
+        return {
+            types,
+            pagination
+        }
     } catch (error) {
         throw new Error('Error in finding many types: ' + error.message);
     }

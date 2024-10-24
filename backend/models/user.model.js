@@ -12,7 +12,7 @@ const createOne = async (data) => {
 
 const findMany = async ({ page = 1, limit = 10, orderBy = 'desc', orderField = 'createdAt', name, surename }) => {
     try {
-        return await prisma.user.findMany({
+        const users = await prisma.user.findMany({
             where: {
                 ...(name && {
                     name: {
@@ -29,6 +29,31 @@ const findMany = async ({ page = 1, limit = 10, orderBy = 'desc', orderField = '
             skip: page ? (page - 1) * limit : undefined,
             orderBy: { [orderField]: orderBy },
         });
+        const totalElements = await prisma.user.count({
+            where: {
+                ...(name && {
+                    name: {
+                      contains: name,
+                    },
+                  }),
+                  ...(surename && {
+                    surename: {
+                      contains: surename,
+                    },
+                  }),
+            },
+          })
+        const pagination = {
+            page: page,
+            limit: limit,
+            totalPages: Math.ceil(totalElements / limit),
+            totalElements: totalElements,
+            hasNext: page * limit < totalElements,
+        }
+        return {
+            users,
+            pagination
+        }
     } catch (error) {
         throw new Error('Error in finding many users: ' + error.message);
     }

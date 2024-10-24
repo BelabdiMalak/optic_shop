@@ -82,7 +82,7 @@ const getOrders = async ({
     customerId
 }) => {
     try {
-        const orders = await orderModel.findMany({
+        const { orders, pagination } = await orderModel.findMany({
             page,
             limit,
             orderField,
@@ -94,7 +94,8 @@ const getOrders = async ({
         return {
             status: true,
             message: 'Orders fetched successfully',
-            data: orders
+            data: orders,
+            pagination: pagination
         };
     } catch (error) {
         throw new Error(`Error in getting orders (service): ${error}`);

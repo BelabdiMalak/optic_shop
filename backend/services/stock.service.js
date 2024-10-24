@@ -82,7 +82,7 @@ const getStocks = async ({
     status
 }) => {
     try {
-        const stocks = await stockModel.findMany({
+        const { stocks, pagination } = await stockModel.findMany({
             page,
             limit,
             orderField,
@@ -94,7 +94,8 @@ const getStocks = async ({
         return {
             status: true,
             message: 'Stocks fetched successfully',
-            data: stocks
+            data: stocks,
+            pagination: pagination
         };
     } catch (error) {
         throw new Error(`Error in getting stocks (service): ${error}`);

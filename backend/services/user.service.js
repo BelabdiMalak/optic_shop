@@ -76,17 +76,19 @@ const getUsers = async ({
     surename
 }) => {
     try {
+        const { users, pagination } = await userModel.findMany({
+            page,
+            limit,
+            orderField,
+            orderBy,
+            name,
+            surename
+        })
         return {
             status: true,
             message: 'Users fetched successfully',
-            data: await userModel.findMany({
-                page,
-                limit,
-                orderField,
-                orderBy,
-                name,
-                surename
-            })
+            data: users,
+            pagination: pagination
         };
     } catch (error) {
         throw new Error(`Error in getting users (service): ${error}`);

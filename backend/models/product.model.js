@@ -12,7 +12,7 @@ const createOne = async (data) => {
 
 const findMany = async ({ page, limit, orderField, orderBy, typeId, subTypeId }) => {
     try {
-        return await prisma.product.findMany({
+        const products = await prisma.product.findMany({
             where: {
                 ...(typeId && { typeId }),
                 ...(subTypeId && { subTypeId }),
@@ -21,6 +21,23 @@ const findMany = async ({ page, limit, orderField, orderBy, typeId, subTypeId })
             skip: page ? (page - 1) * limit : undefined,
             orderBy: { [orderField]: orderBy },
         });
+        const totalElements = await prisma.product.count({
+            where: {
+                ...(typeId && { typeId }),
+                ...(subTypeId && { subTypeId }),
+            },
+          })
+        const pagination = {
+            page: page,
+            limit: limit,
+            totalPages: Math.ceil(totalElements / limit),
+            totalElements: totalElements,
+            hasNext: page * limit < totalElements,
+        }
+        return {
+            products,
+            pagination
+        }
     } catch (error) {
         throw new Error('Error in finding many products: ' + error.message);
     }

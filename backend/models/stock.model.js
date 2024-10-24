@@ -12,7 +12,7 @@ const createOne = async (data) => {
 
 const findMany = async ({ page, limit, orderField, orderBy, date, type, productId }) => {
     try {
-        return await prisma.stock.findMany({
+        const stocks = await prisma.stock.findMany({
             where: {
                 ...(type && {
                     type: {
@@ -31,6 +31,33 @@ const findMany = async ({ page, limit, orderField, orderBy, date, type, productI
             skip: page ? (page - 1) * limit : undefined,
             orderBy: { [orderField]: orderBy },
         });
+        const totalElements = await prisma.stock.count({
+            where: {
+                ...(type && {
+                    type: {
+                      equals: type,
+                      mode: 'insensitive',
+                    },
+                }),
+                ...(productId && { productId }),
+                ...(date && {
+                    date: {
+                        equals: new Date(date),
+                    },
+                }),
+            },
+          })
+        const pagination = {
+            page: page,
+            limit: limit,
+            totalPages: Math.ceil(totalElements / limit),
+            totalElements: totalElements,
+            hasNext: page * limit < totalElements,
+        }
+        return {
+            stocks,
+            pagination
+        }
     } catch (error) {
         throw new Error('Error in finding many stocks: ' + error.message);
     }

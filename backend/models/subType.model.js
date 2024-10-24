@@ -12,7 +12,7 @@ const createOne = async (data) => {
 
 const findMany = async ({ page, limit, orderField, orderBy, name }) => {
     try {
-        return await prisma.subType.findMany({
+        const subTypes = await prisma.subType.findMany({
             where: {
                 ...(name && {
                     name: {
@@ -25,6 +25,27 @@ const findMany = async ({ page, limit, orderField, orderBy, name }) => {
             skip: page ? (page - 1) * limit : undefined,
             orderBy: { [orderField]: orderBy },
         });
+        const totalElements = await prisma.subType.count({
+            where: {
+                ...(name && {
+                    name: {
+                      contains: name,
+                      mode: 'insensitive',
+                    },
+                  }),
+            },
+          })
+        const pagination = {
+            page: page,
+            limit: limit,
+            totalPages: Math.ceil(totalElements / limit),
+            totalElements: totalElements,
+            hasNext: page * limit < totalElements,
+        }
+        return {
+            subTypes,
+            pagination
+        }
     } catch (error) {
         throw new Error('Error in finding many sub types: ' + error.message);
     }
