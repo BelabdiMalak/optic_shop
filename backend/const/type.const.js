@@ -10,8 +10,6 @@ const PRODUCT_TYPES = [
     LENSES_TYPE,
     GLASS_CLEANER_TYPE,
     LENS_CLEANER_TYPE,
-    CONTACT_LENSES_TYPE,
-    OPTICAL_FRAME_TYPE
 ];
 
 module.exports = {
