@@ -43,21 +43,21 @@ const updateSchema = Joi.object({
             'number.min': 'Stock quantity cannot be negative',
         }),
 
-    typeId: Joi.string()
-        .uuid()
-        .messages({
-            'string.base': 'Type ID must be a string',
-            'string.pattern.base': 'Type ID must be a valid UUID',
-            'any.required': 'Type ID is required'
-        }),
+    // typeId: Joi.string()
+    //     .uuid()
+    //     .messages({
+    //         'string.base': 'Type ID must be a string',
+    //         'string.pattern.base': 'Type ID must be a valid UUID',
+    //         'any.required': 'Type ID is required'
+    //     }),
 
-    subTypeId: Joi.string()
-        .uuid()
-        .messages({
-            'string.base': 'SubType ID must be a string',
-            'string.pattern.base': 'SubType ID must be a valid UUID',
-            'any.required': 'SubType ID is required'
-        }),
+    // subTypeId: Joi.string()
+    //     .uuid()
+    //     .messages({
+    //         'string.base': 'SubType ID must be a string',
+    //         'string.pattern.base': 'SubType ID must be a valid UUID',
+    //         'any.required': 'SubType ID is required'
+    //     }),
 });
 
 module.exports = { 

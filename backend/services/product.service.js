@@ -1,5 +1,7 @@
 const productValidator = require('../validators/product.validator');
 const productModel = require('../models/product.model');
+const subTypeModel = require('../models/subType.model');
+const typeModel = require('../models/type.model');
 
 const createProduct = async (data) => {
     try {
@@ -11,6 +13,20 @@ const createProduct = async (data) => {
                 data: error.message
             };
         }
+
+        const type = await typeModel.findUnique(data.typeId);
+        if (!type)
+            return {
+                status: false,
+                message: 'Invalid type ID'
+            }
+
+        const subType = await subTypeModel.findUnique(data.subTypeId);
+        if (!subType || subType.typeId !== data.typeId)
+            return {
+                status: false,
+                message: 'Invalid subtype ID'
+            }
 
         const createdProduct = await productModel.createOne(data);
         return {
