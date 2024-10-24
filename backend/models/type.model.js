@@ -17,7 +17,6 @@ const findMany = async ({ page, limit, orderField, orderBy, name }) => {
                 ...(name && {
                     name: {
                       contains: name,
-                      mode: 'insensitive',
                     },
                   }),
             },

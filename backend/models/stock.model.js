@@ -17,7 +17,6 @@ const findMany = async ({ page, limit, orderField, orderBy, date, type, productI
                 ...(type && {
                     type: {
                       equals: type,
-                      mode: 'insensitive',
                     },
                 }),
                 ...(productId && { productId }),
@@ -36,7 +35,6 @@ const findMany = async ({ page, limit, orderField, orderBy, date, type, productI
                 ...(type && {
                     type: {
                       equals: type,
-                      mode: 'insensitive',
                     },
                 }),
                 ...(productId && { productId }),
