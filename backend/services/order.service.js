@@ -1,5 +1,7 @@
 const orderValidator = require('../validators/order.validator');
+const productModel = require('../models/product.model');
 const orderModel = require('../models/order.model');
+const userModel = require('../models/user.model');
 
 const createOrder = async (data) => {
     try {
@@ -12,7 +14,33 @@ const createOrder = async (data) => {
             };
         }
 
+        const user = await userModel.findUnique(data.userId);
+        if (!user)
+            return {
+                status: false,
+                message: 'Invalid user ID'
+            }
+        
+        const product = await productModel.findUnique(data.productId);
+        if (!product)
+            return {
+                status: false,
+                message: 'Invalid product ID'
+            }
+        
+        if (product.stockQuantity <1)
+            return {
+                status: false,
+                message: 'Insufficient stock'
+            }
+
         const createdOrder = await orderModel.createOne(data);
+
+        // update quantity of product in stock
+        await productModel.updateOne(
+            product.id,
+            { stockQuantity: product.stockQuantity - 1 }
+        )
         return {
             status: true,
             message: 'Order created successfully',

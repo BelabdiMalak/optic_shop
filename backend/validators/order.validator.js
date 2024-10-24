@@ -56,7 +56,7 @@ const createSchema = Joi.object({
         .required()
         .messages({
             'string.base': 'User ID must be a string',
-            'string.pattern.base': 'User ID must be a valid UUID',
+            'string.uuid': 'User ID must be a valid UUID',
             'any.required': 'User ID is required'
         }),
 
@@ -65,7 +65,7 @@ const createSchema = Joi.object({
         .required()
         .messages({
             'string.base': 'Product ID must be a string',
-            'string.pattern.base': 'Product ID must be a valid UUID',
+            'string.uuid': 'Product ID must be a valid UUID',
             'any.required': 'Product ID is required'
         }),
 });
@@ -107,19 +107,19 @@ const updateSchema = Joi.object({
             'any.only': 'Status must be one of: ' + ORDER_STATUS.join(', '),
         }),
 
-    userId: Joi.string()
-        .uuid()
-        .messages({
-            'string.base': 'User ID must be a string',
-            'string.pattern.base': 'User ID must be a valid UUID',
-        }),
+    // userId: Joi.string()
+    //     .uuid()
+    //     .messages({
+    //         'string.base': 'User ID must be a string',
+    //         'string.pattern.base': 'User ID must be a valid UUID',
+    //     }),
 
-    productId: Joi.string()
-        .uuid()
-        .messages({
-            'string.base': 'Product ID must be a string',
-            'string.pattern.base': 'Product ID must be a valid UUID',
-        }),
+    // productId: Joi.string()
+    //     .uuid()
+    //     .messages({
+    //         'string.base': 'Product ID must be a string',
+    //         'string.pattern.base': 'Product ID must be a valid UUID',
+    //     }),
 });
 
 module.exports = { 
