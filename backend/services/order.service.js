@@ -31,7 +31,7 @@ const createOrder = async (data) => {
         if (product.stockQuantity <1)
             return {
                 status: false,
-                message: 'Insufficient stock'
+                message: 'Insufficient stock quantity'
             }
 
         const createdOrder = await orderModel.createOne(data);

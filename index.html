@@ -11,7 +11,11 @@
     <script type="module" src="/frontend/main.ts"></script>
     <script>
       document.addEventListener('DOMContentLoaded', async () => {
-        const users = await window.electron.getUsers();
+        const users = await window.electron.createStock({
+          type: 'Out',
+          quantity: 10,
+          productId: 'fd471114-55c4-411d-9f02-15cad954a052'
+        });
         console.log('get users', users); 
       });
     </script>    

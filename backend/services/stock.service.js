@@ -1,4 +1,5 @@
 const stockValidator = require('../validators/stock.validator');
+const productModel = require('../models/product.model');
 const stockModel = require('../models/stock.model');
 
 const createStock = async (data) => {
@@ -11,6 +12,29 @@ const createStock = async (data) => {
                 data: error.message
             };
         }
+
+        const product = await productModel.findUnique(data.productId);
+        if (!product)
+            return {
+                status: false,
+                message: 'Invalid product ID'
+            }
+        
+        if (data.type === 'Out' && data.quantity > product.stockQuantity)
+            return {
+                status: false,
+                message: `Insufficient stock quantity, the available quantity is ${product.stockQuantity}`
+            }
+
+        data.type === 'In' && await productModel.updateOne(
+            product.id,
+            { stockQuantity: (product.stockQuantity + data.quantity)}
+        )
+
+        data.type === 'Out' && await productModel.updateOne(
+            product.id,
+            { stockQuantity: (product.stockQuantity - data.quantity)}
+        )
 
         const createdStock = await stockModel.createOne(data);
         return {
@@ -41,6 +65,13 @@ const updateStock = async (id, data) => {
                 data: error.message
             };
         }
+
+        const product = data.productId && productModel.findUnique(data.productId);
+        if (data.productId && !product)
+            return {
+                status: false,
+                message: 'Invalid product ID'
+            }
 
         const updatedStock = await stockModel.updateOne(id, data);
         return {
