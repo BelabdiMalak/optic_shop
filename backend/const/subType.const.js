@@ -20,6 +20,8 @@ const GP = 'gp';
 const AQUASOFT = 'aquasoft';
 const BIO = 'bio';
 
+const DEFAULT = 'Default';
+
 const GLASS_SUB_TYPE = [
     HC,
     HMC,
@@ -50,7 +52,12 @@ const LENS_CLEANER_SUB_TYPE = [
     BIO
 ];
 
+const GLASS_CLEANER_SUB_TYPE = [
+    DEFAULT
+];
+
 const PRODUCT_SUB_TYPES = [
+    DEFAULT,
     HC,
     HMC,
     TRHC,
@@ -72,6 +79,7 @@ const PRODUCT_SUB_TYPES = [
 ];
 
 module.exports = {
+    DEFAULT,
     HC,
     HMC,
     TRHC,
@@ -95,6 +103,7 @@ module.exports = {
     SUNGLASS_SUB_TYPE,
     LENS_SUB_TYPE,
     LENS_CLEANER_SUB_TYPE,
+    GLASS_CLEANER_SUB_TYPE,
     
     PRODUCT_SUB_TYPES
 };

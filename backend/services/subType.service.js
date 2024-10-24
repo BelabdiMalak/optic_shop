@@ -1,5 +1,13 @@
 const subTypeValidator = require('../validators/subType.validator');
 const subTypeModel = require('../models/subType.model');
+const typeModel = require('../models/type.model');
+const {
+    LENS_SUB_TYPE,
+    GLASS_SUB_TYPE,
+    SUNGLASS_SUB_TYPE,
+    LENS_CLEANER_SUB_TYPE,
+    GLASS_CLEANER_SUB_TYPE
+} = require('../const/subType.const');
 
 const createSubType = async (data) => {
     try {
@@ -12,6 +20,47 @@ const createSubType = async (data) => {
             };
         }
 
+        const type = await typeModel.findUnique(data.typeId);
+        if (!type) {
+            return {
+                status: false,
+                message: 'Invalid type ID'
+            };
+        }
+
+        // Validate subtype based on the group
+        let validSubType = false;
+        switch (type.name) { // 'Glass', 'Sunglass', 'Lens', 'LensCleaner', 'GlassCleaner'
+            case 'Glass':
+                validSubType = GLASS_SUB_TYPE.includes(data.name);
+                break;
+            case 'Sunglass':
+                validSubType = SUNGLASS_SUB_TYPE.includes(data.name);
+                break;
+            case 'Lens':
+                validSubType = LENS_SUB_TYPE.includes(data.name);
+                break;
+            case 'LensCleaner':
+                validSubType = LENS_CLEANER_SUB_TYPE.includes(data.name);
+                break;
+            case 'GlassCleaner': // TODO : does not have subtype
+                validSubType = GLASS_CLEANER_SUB_TYPE.includes(data.name);
+                break;
+            default:
+                return {
+                    status: false,
+                    message: 'Invalid type for the provided subtype'
+                };
+        }
+
+        if (!validSubType) {
+            return {
+                status: false,
+                message: `Invalid subtype '${data.name}' for type '${type.name}'`
+            };
+        }
+
+        // Create the subType
         const createdSubType = await subTypeModel.createOne(data);
         return {
             status: true,
