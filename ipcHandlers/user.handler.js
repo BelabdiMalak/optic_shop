@@ -1,20 +1,28 @@
-const userModel = require('../backend/models/user.model.js');
+const userService = require('../backend/services/user.service');
 
-// Handler to get users
 async function getUsers() {
   try {
-    const users = await userModel.findMany();
-    console.log('Fetched users:', users);
-    return users;
+    return await userService.getUsers();
   } catch (error) {
     console.error('Error fetching users:', error);
     throw error;
   }
 }
 
+async function createUser(event, data) {
+  try {
+    return await userService.createUser(data);
+  } catch (error) {
+    console.error('Error creating user (handler):', error);
+    throw error;
+  }
+}
+
+
 // Register the IPC handlers
 function registerUserHandlers(ipcMain) {
   ipcMain.handle('get-users', getUsers);
+  ipcMain.handle('create-user', createUser);
 }
 
 module.exports = {
