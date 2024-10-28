@@ -1,26 +1,26 @@
-const HC = 'hc';
-const HMC = 'hmc';
-const TRHC = 'trhc';
-const BB = 'bb';
-const TRB = 'trb';
+const HC = 'HC';
+const HMC = 'HMC';
+const TRHC = 'TRHC';
+const BB = 'BB';
+const TRB = 'TRB';
 
-const GREEN = 'green';
-const BLUE = 'blue';
-const BROWN = 'brown';
-const GRAY = 'gray';
+const GREEN = 'GREEN';
+const BLUE = 'BLUE';
+const BROWN = 'BROWN';
+const GRAY = 'GRAY';
 
-const SPICE = 'spice';
-const JADE = 'jade';
-const BLEU = 'bleu';
-const PERLA = 'perla';
-const GIALLO = 'giallo';
+const SPICE = 'SPICE';
+const JADE = 'JADE';
+const BLEU = 'BLEU';
+const PERLA = 'PERLA';
+const GIALLO = 'GIALLO';
 
-const JAZZ = 'jazz';
-const GP = 'gp';
-const AQUASOFT = 'aquasoft';
-const BIO = 'bio';
+const JAZZ = 'JAZZ';
+const GP = 'GP';
+const AQUASOFT = 'AQUASOFT';
+const BIO = 'BIO';
 
-const DEFAULT = 'Default';
+const DEFAULT = 'DEFAULT';
 
 const GLASS_SUB_TYPE = [
     HC,

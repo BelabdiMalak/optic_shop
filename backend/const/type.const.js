@@ -1,8 +1,8 @@
-const GLASS_TYPE = 'Glass';
-const SUNGLASS_TYPE = 'Sunglass';
-const LENSES_TYPE = 'Lenses';
-const GLASS_CLEANER_TYPE = 'GlassCleaner';
-const LENS_CLEANER_TYPE = 'LensCleaner';
+const GLASS_TYPE = 'GLASS';
+const SUNGLASS_TYPE = 'SUNGLASS';
+const LENSES_TYPE = 'LENSES';
+const GLASS_CLEANER_TYPE = 'GLASS_CLEANER';
+const LENS_CLEANER_TYPE = 'LENS_CLEANER';
 
 const PRODUCT_TYPES = [
     GLASS_TYPE,
