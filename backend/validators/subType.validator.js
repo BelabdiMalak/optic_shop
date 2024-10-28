@@ -1,8 +1,8 @@
-const { PRODUCT_SUB_TYPES } = require('../const/subType.const');
+const { PRODUCT_SUBTYPES } = require('../const/subType.const');
 const Joi = require('joi');
 
 const createSchema = Joi.object({
-    name: Joi.string().valid(...PRODUCT_SUB_TYPES).required()
+    name: Joi.string().valid(...Object.values(PRODUCT_SUBTYPES)).required()
         .messages({
             'string.base': 'Name must be a string',
             'any.only': 'Invalid name',

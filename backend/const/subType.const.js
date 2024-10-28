@@ -22,41 +22,41 @@ const BIO = 'BIO';
 
 const DEFAULT = 'DEFAULT';
 
-const GLASS_SUB_TYPE = [
+const GLASS_SUBTYPES = {
     HC,
     HMC,
     TRHC,
     BB,
     TRB
-];
+};
 
-const SUNGLASS_SUB_TYPE = [
+const SUNGLASS_SUBTYPES = {
     GREEN,
     BLUE,
     BROWN,
     GRAY
-];
+};
 
-const LENS_SUB_TYPE = [
+const LENS_SUBTYPES = {
     SPICE,
     JADE,
     PERLA,
     BLEU,
     GIALLO
-];
+};
 
-const LENS_CLEANER_SUB_TYPE = [
+const LENS_CLEANER_SUBTYPES = {
     JAZZ,
     GP,
     AQUASOFT,
     BIO
-];
+};
 
-const GLASS_CLEANER_SUB_TYPE = [
+const GLASS_CLEANER_SUBTYPES = {
     DEFAULT
-];
+};
 
-const PRODUCT_SUB_TYPES = [
+const PRODUCT_SUBTYPES = {
     DEFAULT,
     HC,
     HMC,
@@ -76,7 +76,7 @@ const PRODUCT_SUB_TYPES = [
     GP,
     AQUASOFT,
     BIO
-];
+};
 
 module.exports = {
     DEFAULT,
@@ -99,11 +99,11 @@ module.exports = {
     AQUASOFT,
     BIO,
 
-    GLASS_SUB_TYPE,
-    SUNGLASS_SUB_TYPE,
-    LENS_SUB_TYPE,
-    LENS_CLEANER_SUB_TYPE,
-    GLASS_CLEANER_SUB_TYPE,
+    GLASS_SUBTYPES,
+    SUNGLASS_SUBTYPES,
+    LENS_SUBTYPES,
+    LENS_CLEANER_SUBTYPES,
+    GLASS_CLEANER_SUBTYPES,
     
-    PRODUCT_SUB_TYPES
+    PRODUCT_SUBTYPES
 };

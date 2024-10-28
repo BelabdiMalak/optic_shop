@@ -1,12 +1,13 @@
 const subTypeValidator = require('../validators/subType.validator');
 const subTypeModel = require('../models/subType.model');
+const { PRODUCT_TYPES } = require('../const/type.const');
 const typeModel = require('../models/type.model');
 const {
-    LENS_SUB_TYPE,
-    GLASS_SUB_TYPE,
-    SUNGLASS_SUB_TYPE,
-    LENS_CLEANER_SUB_TYPE,
-    GLASS_CLEANER_SUB_TYPE
+    LENS_SUBTYPES,
+    GLASS_SUBTYPES,
+    SUNGLASS_SUBTYPES,
+    LENS_CLEANER_SUBTYPES,
+    GLASS_CLEANER_SUBTYPES,
 } = require('../const/subType.const');
 
 const createSubType = async (data) => {
@@ -30,21 +31,21 @@ const createSubType = async (data) => {
 
         // Validate subtype based on the group
         let validSubType = false;
-        switch (type.name) { // 'Glass', 'Sunglass', 'Lens', 'LensCleaner', 'GlassCleaner'
-            case 'Glass':
-                validSubType = GLASS_SUB_TYPE.includes(data.name);
+        switch (type.name) { 
+            case PRODUCT_TYPES.GLASS:
+                validSubType = Object.values(GLASS_SUBTYPES).includes(data.name);
                 break;
-            case 'Sunglass':
-                validSubType = SUNGLASS_SUB_TYPE.includes(data.name);
+            case PRODUCT_TYPES.SUNGLASS:
+                validSubType = Object.values(SUNGLASS_SUBTYPES).includes(data.name);
                 break;
-            case 'Lens':
-                validSubType = LENS_SUB_TYPE.includes(data.name);
+            case PRODUCT_TYPES.LENSES:
+                validSubType = Object.values(LENS_SUBTYPES).includes(data.name);
                 break;
-            case 'LensCleaner':
-                validSubType = LENS_CLEANER_SUB_TYPE.includes(data.name);
+            case PRODUCT_TYPES.LENS_CLEANER:
+                validSubType = Object.values(LENS_CLEANER_SUBTYPES).includes(data.name);
                 break;
-            case 'GlassCleaner': // TODO : does not have subtype
-                validSubType = GLASS_CLEANER_SUB_TYPE.includes(data.name);
+            case PRODUCT_TYPES.GLASS_CLEANER:
+                validSubType = Object.values(GLASS_CLEANER_SUBTYPES).includes(data.name);
                 break;
             default:
                 return {
