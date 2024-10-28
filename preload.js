@@ -37,4 +37,10 @@ contextBridge.exposeInMainWorld('electron', {
   createOrder: (data) => ipcRenderer.invoke('create-order', data),
   getOrders: (filter) => ipcRenderer.invoke('get-orders', filter),
   updateOrder: (id, data) => ipcRenderer.invoke('update-order', id, data),
+
+  // Order Item
+  getOrderItem: (id) => ipcRenderer.invoke('get-orderItem', id),
+  createOrderItem: (data) => ipcRenderer.invoke('create-orderItem', data),
+  getOrderItems: (filter) => ipcRenderer.invoke('get-orderItems', filter),
+  updateOrderItem: (id, data) => ipcRenderer.invoke('update-orderItem', id, data),
 });

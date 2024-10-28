@@ -10,12 +10,11 @@ const createOne = async (data) => {
     }
 }
 
-const findMany = async ({ page, limit, orderField, orderBy, userId, productId, status, date }) => {
+const findMany = async ({ page, limit, orderField, orderBy, userId, status, date }) => {
     try {
         const orders = await prisma.order.findMany({
             where: {
                 ...(userId && { userId }),
-                ...(productId && { productId }),
                 ...(status && { status }),
                 ...(date && {
                     date: {
@@ -30,7 +29,6 @@ const findMany = async ({ page, limit, orderField, orderBy, userId, productId, s
         const totalElements = await prisma.order.count({
             where: {
               ...(userId && { userId }),
-              ...(productId && { productId }),
               ...(status && { status }),
               ...(date && { date: { equals: new Date(date) } }),
             },
