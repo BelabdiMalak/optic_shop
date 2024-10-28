@@ -18,7 +18,7 @@ const createSchema = Joi.object({
     productId: Joi.string().uuid().required()
         .messages({
             'string.base': 'Product ID must be a string',
-            'string.uuid': 'Product ID must be a valid UUID',
+            'string.guid': 'Product ID must be a valid UUID',
             'any.required': 'Product ID is required'
         }),
 });
@@ -38,7 +38,7 @@ const updateSchema = Joi.object({
     productId: Joi.string().uuid()
         .messages({
             'string.base': 'Product ID must be a string',
-            'string.uuid': 'Product ID must be a valid UUID',
+            'string.guid': 'Product ID must be a valid UUID',
         }),
 })
 

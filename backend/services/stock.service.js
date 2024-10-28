@@ -24,7 +24,10 @@ const createStock = async (data) => {
         if (data.type === STOCK_TYPE.OUT && data.quantity > product.stockQuantity)
             return {
                 status: false,
-                message: `Insufficient stock quantity, the available quantity is ${product.stockQuantity}`
+                message: `Insufficient stock quantity`,
+                data: {
+                    quantity: product.stockQuantity
+                }
             }
 
         data.type === STOCK_TYPE.IN && await productModel.updateOne(

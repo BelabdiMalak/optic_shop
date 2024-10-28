@@ -1,6 +1,6 @@
 const subTypeValidator = require('../validators/subType.validator');
-const subTypeModel = require('../models/subType.model');
 const { PRODUCT_TYPES } = require('../const/type.const');
+const subTypeModel = require('../models/subType.model');
 const typeModel = require('../models/type.model');
 const {
     LENS_SUBTYPES,
@@ -54,13 +54,6 @@ const createSubType = async (data) => {
                 };
         }
 
-        if (!validSubType) {
-            return {
-                status: false,
-                message: `Invalid subtype '${data.name}' for type '${type.name}'`
-            };
-        }
-
         // Create the subType
         const createdSubType = await subTypeModel.createOne(data);
         return {
@@ -83,14 +76,14 @@ const updateSubType = async (id, data) => {
             };
         }
 
-        const { error } = subTypeValidator.updateSchema.validate(data);
-        if (error) {
-            return {
-                status: false,
-                message: 'Validation error',
-                data: error.message
-            };
-        }
+        // const { error } = subTypeValidator.updateSchema.validate(data);
+        // if (error) {
+        //     return {
+        //         status: false,
+        //         message: 'Validation error',
+        //         data: error.message
+        //     };
+        // }
 
         const updatedSubType = await subTypeModel.updateOne(id, data);
         return {

@@ -17,7 +17,7 @@ const createSchema = Joi.object({
         .required()
         .messages({
             'string.base': 'Type ID must be a string',
-            'string.pattern.base': 'Type ID must be a valid UUID',
+            'string.guid': 'Type ID must be a valid UUID',
             'any.required': 'Type ID is required'
         }),
 
@@ -26,7 +26,7 @@ const createSchema = Joi.object({
         .required()
         .messages({
             'string.base': 'SubType ID must be a string',
-            'string.pattern.base': 'SubType ID must be a valid UUID',
+            'string.guid': 'SubType ID must be a valid UUID',
             'any.required': 'SubType ID is required'
         }),
 });
@@ -47,7 +47,7 @@ const updateSchema = Joi.object({
     //     .uuid()
     //     .messages({
     //         'string.base': 'Type ID must be a string',
-    //         'string.pattern.base': 'Type ID must be a valid UUID',
+    //         'string.guid': 'Type ID must be a valid UUID',
     //         'any.required': 'Type ID is required'
     //     }),
 
@@ -55,7 +55,7 @@ const updateSchema = Joi.object({
     //     .uuid()
     //     .messages({
     //         'string.base': 'SubType ID must be a string',
-    //         'string.pattern.base': 'SubType ID must be a valid UUID',
+    //         'string.guid': 'SubType ID must be a valid UUID',
     //         'any.required': 'SubType ID is required'
     //     }),
 });

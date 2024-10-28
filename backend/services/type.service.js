@@ -33,14 +33,14 @@ const updateType = async (id, data) => {
             };
         }
 
-        const { error } = typeValidator.updateSchema.validate(data);
-        if (error) {
-            return {
-                status: false,
-                message: 'Validation error',
-                data: error.message
-            };
-        }
+        // const { error } = typeValidator.updateSchema.validate(data);
+        // if (error) {
+        //     return {
+        //         status: false,
+        //         message: 'Validation error',
+        //         data: error.message
+        //     };
+        // }
 
         const updatedType = await typeModel.updateOne(id, data);
         return {

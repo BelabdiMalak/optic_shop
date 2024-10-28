@@ -1,10 +1,10 @@
 const IN = 'IN';
 const OUT = 'OUT';
 
-const STOCK_TYPE = [
+const STOCK_TYPE = {
     IN,
     OUT
-];
+};
 
 module.exports = {
     IN,
