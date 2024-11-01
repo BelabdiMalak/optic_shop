@@ -10,7 +10,14 @@
     <div id="app"></div>
     <script type="module" src="/frontend/main.ts"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', async () => {});
+      document.addEventListener('DOMContentLoaded', async () => {
+        const u = await window.electron.createProduct({
+          stockQuantity: 1,
+          typeId: '40ef89f3-3f92-43e8-9bd3-9a8d6df51ead',
+          subTypeId: '0eaeb436-7e3e-445c-91ea-a12809b13584'
+        })
+        console.log(u)
+      });
     </script>    
   </body>
 </html>

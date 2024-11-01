@@ -8,7 +8,7 @@ const createType = async (data) => {
             return {
                 status: false,
                 message: 'Validation error',
-                data: error.message
+                data: error.details.map((err) => err.message)
             };
         }
 
@@ -38,7 +38,7 @@ const updateType = async (id, data) => {
         //     return {
         //         status: false,
         //         message: 'Validation error',
-        //         data: error.message
+        //         data: error.details.map((err) => err.message)
         //     };
         // }
 

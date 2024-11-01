@@ -2,7 +2,7 @@ const { STOCK_TYPE } = require('../const/stock.const');
 const Joi = require('joi');
 
 const createSchema = Joi.object({
-    type: Joi.string().valid(...STOCK_TYPE).required()
+    type: Joi.string().valid(...Object.values(STOCK_TYPE)).required()
         .messages({
             'string.base': 'Type must be a string',
             'any.only': 'Type must be one of the following: in, out',
@@ -24,7 +24,7 @@ const createSchema = Joi.object({
 });
 
 const updateSchema = Joi.object({
-    type: Joi.string().valid(...STOCK_TYPE)
+    type: Joi.string().valid(...Object.values(STOCK_TYPE))
         .messages({
             'string.base': 'Type must be a string',
             'any.only': 'Type must be one of the following: in, out',
