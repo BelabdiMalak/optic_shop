@@ -21,7 +21,7 @@ const createSchema = Joi.object({
         }),
 
     status: Joi.string()
-        .valid(...ORDER_STATUS)
+        .valid(...Object.values(ORDER_STATUS))
         .required()
         .messages({
             'string.base': 'Status must be a string',
@@ -37,6 +37,26 @@ const createSchema = Joi.object({
             'string.guid': 'User ID must be a valid UUID',
             'any.required': 'User ID is required'
         }),
+    
+    products: Joi.array().items(
+        Joi.object({
+            productId: Joi.string()
+                .uuid()
+                .required(),
+            framePrice: Joi.number()
+                .integer()
+                .positive()
+                .required(),
+            productPrice: Joi.number()
+                .integer()
+                .positive()
+                .required(),
+            quantity: Joi.number()
+                .integer()
+                .positive()
+                .default(1),
+          })
+      ).required()
 });
 
 const updateSchema = Joi.object({
@@ -52,7 +72,7 @@ const updateSchema = Joi.object({
         }),
 
     status: Joi.string()
-        .valid(...ORDER_STATUS)
+        .valid(...Object.values(ORDER_STATUS))
         .messages({
             'string.base': 'Status must be a string',
             'any.only': 'Status must be one of: ' + ORDER_STATUS.join(', '),

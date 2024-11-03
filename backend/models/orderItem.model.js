@@ -10,6 +10,16 @@ const createOne = async (data) => {
     }
 }
 
+const createMany = async (data) => {
+    try {
+        return await prisma.orderItem.createMany({
+            data
+        })
+    } catch (error) {
+        throw new Error('Error in creating many order items: ' + error.message);
+    }
+}
+
 const findMany = async ({ page, limit, orderField, orderBy, orderId, productId }) => {
     try {
         const orderItems = await prisma.orderItem.findMany({
@@ -88,5 +98,6 @@ module.exports = {
     findUnique,
     updateOne,
     findBy,
-    _findMany
+    _findMany,
+    createMany
 };

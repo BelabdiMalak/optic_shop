@@ -1,4 +1,5 @@
 const prisma = require('../../config/prisma.config.js');
+const log = require('electron-log')
 
 const createOne = async (data) => {
     try {
@@ -59,9 +60,31 @@ const _findMany = async () => {
 
 const findUnique = async (id) => {
     try {
-        return await prisma.order.findUnique({
-            where: { id }
+        const order = await prisma.order.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                deposit: true,
+                status: true,
+                createdAt: true, 
+                updatedAt: true,
+                date: true,
+                orderItems: true,
+            }
         });
+
+        let orderTotalPrice = 0;
+        order.orderItems = order.orderItems.map(item => {
+            const itemTotalPrice =  item.quantity * (item.productPrice + item.framePrice)
+            orderTotalPrice = orderTotalPrice + itemTotalPrice
+            return {
+                ...item,
+                totalPrice: itemTotalPrice
+            }
+        })
+        
+        order.totalPrice = orderTotalPrice
+        return order;        
     } catch (error) {
         throw new Error('Error in finding an order: ' + error.message);
     }

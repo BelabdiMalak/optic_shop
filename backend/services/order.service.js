@@ -1,6 +1,9 @@
 const orderValidator = require('../validators/order.validator');
+const orderItemModel = require('../models/orderItem.model');
+const productModel = require('../models/product.model');
 const orderModel = require('../models/order.model');
 const userModel = require('../models/user.model');
+var log = require('electron-log');
 
 const createOrder = async (data) => {
     try {
@@ -14,18 +17,60 @@ const createOrder = async (data) => {
         }
 
         const user = await userModel.findUnique(data.userId);
-        if (!user)
+        if (!user) {
             return {
                 status: false,
                 message: 'Invalid user ID'
-            }
-        
-        const createdOrder = await orderModel.createOne(data);
+            };
+        }
+
+        // Check products list
+        const productIds = data.products.map(product => product.productId);
+        const productsData = await productModel._findMany({ where: { id: { in: productIds } } });
+        for (const product of data.products) {
+            const productFromDB = productsData.find(pd => pd.id === product.productId);
+            if (!productFromDB) 
+                return {
+                    status: false,
+                    message: `Product ${product.productId} not found`
+                };
+
+            if (productFromDB.stockQuantity < product.quantity) 
+                return {
+                    status: false,
+                    message: `Insufficient quantity for product ${product.productId}`,
+                    data: {
+                        quantity: productFromDB.stockQuantity
+                    }
+                };
+        }
+
+        const createdOrder = await orderModel.createOne({
+            ...(data.date && { date: data.date }),
+            ...(data.deposit && { deposit: data.deposit }),
+            ...(data.status && { status: data.status }),
+            ...(data.userId && { userId: data.userId })
+        });
+        const items = data.products.map(product => ({
+            ...product,
+            orderId: createdOrder.id
+        }));
+        await orderItemModel.createMany(items);
+
+        // update product quantity
+        data.products.forEach(async(product) => {
+            await productModel.updateOne(
+                product.productId,
+                { stockQuantity: { decrement: product.quantity } }
+            )
+        })
+
+        const order = await orderModel.findUnique(createdOrder.id);
 
         return {
             status: true,
             message: 'Order created successfully',
-            data: createdOrder
+            data: order
         };
     } catch (error) {
         throw new Error(`Error in creating order (service): ${error}`);

@@ -34,6 +34,7 @@
   "dependencies": {
     "@prisma/client": "^5.21.1",
     "electron-is-dev": "^3.0.1",
+    "electron-log": "^5.2.0",
     "ipc": "^0.0.1",
     "joi": "^17.13.3",
     "path": "^0.12.7",

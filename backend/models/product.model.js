@@ -43,9 +43,11 @@ const findMany = async ({ page, limit, orderField, orderBy, typeId, subTypeId })
     }
 }
 
-const _findMany = async () => {
+const _findMany = async ({where}) => {
     try {
-        return await prisma.product.findMany({});
+        return await prisma.product.findMany({
+            where
+        });
     } catch (error) {
         throw new Error('Error in finding many products: ' + error.message);
     }
