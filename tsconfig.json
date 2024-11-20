@@ -14,10 +14,14 @@
     "noEmit": true,
 
     /* Linting */
+    "jsx": "react-jsx",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
+
   },
-  "include": ["src", "frontend/counter.ts", "frontend/main.ts"]
+  "include": ["src/**/*", "frontend/**/*"]
 }
