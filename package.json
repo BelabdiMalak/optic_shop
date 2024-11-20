@@ -23,24 +23,32 @@
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.2",
+    "autoprefixer": "^10.4.20",
     "concurrently": "^9.0.1",
     "electron": "^32.1.2",
     "electron-builder": "^25.1.7",
     "electronmon": "^2.0.3",
+    "postcss": "^8.4.49",
     "prisma": "^5.21.1",
+    "tailwindcss": "^3.4.15",
     "typescript": "^5.5.3",
     "vite": "^5.4.8"
   },
   "dependencies": {
     "@prisma/client": "^5.21.1",
+    "@radix-ui/react-dropdown-menu": "^2.1.2",
+    "@shadcn/ui": "^0.0.4",
     "electron-is-dev": "^3.0.1",
     "electron-log": "^5.2.0",
     "ipc": "^0.0.1",
     "joi": "^17.13.3",
+    "lucide-react": "^0.460.0",
     "path": "^0.12.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "sqlite3": "^5.1.7"
+    "react-icons": "^5.3.0",
+    "sqlite3": "^5.1.7",
+    "tailwind": "^4.0.0"
   },
   "build": {
     "appId": "com.optical.shop",
