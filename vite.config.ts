@@ -1,10 +1,12 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import path from "path"
+import react from "@vitejs/plugin-react"
+import { defineConfig } from "vite"
 
 export default defineConfig({
-  base: './',  //  to ensure relative paths work in the Electron environment.
-  build: {
-    outDir: 'dist', // Specifies the output directory 
-  },
   plugins: [react()],
-});
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './frontend'),
+    },
+  },  
+})

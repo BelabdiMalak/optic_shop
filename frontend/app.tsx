@@ -1,4 +1,4 @@
-import UserDashboard from './pages/userDashboard';
+import UserDashboard from '@/pages/userDashboard';
 
 const App = () => {
   return (

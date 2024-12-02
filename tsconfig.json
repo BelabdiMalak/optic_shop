@@ -1,31 +1,20 @@
 {
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
   "compilerOptions": {
-    "baseUrl": "./frontend",
+    "baseUrl": "./",
     "paths": {
-      "@/*": ["./frontend/components/ui/*"]
-    },
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "node",
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-
-    /* Linting */
-    "jsx": "react-jsx",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
-
+      "@/*": ["frontend/*"]
+    }
   },
-  "include": ["src/**/*", "frontend/**/*"]
+  "include": [
+    "frontend/**/*",
+    "vite.config.ts"
+  ],
+  "exclude": [
+    "frontend/components/ui/dropdown-menu.tsx"
+  ]  
 }
