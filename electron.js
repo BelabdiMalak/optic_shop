@@ -1,11 +1,10 @@
-const { registerAllHandlers } = require('./ipcHandlers/index.js');
-const { app, BrowserWindow } = require('electron');
 const { join } = require('path');
+const preloadPath = join(__dirname, 'preload.js');
+const { app, BrowserWindow } = require('electron');
+const handlersPath = join(__dirname, 'ipcHandlers/index.js')
+const { registerAllHandlers } = require(handlersPath);
 
 try {
-  const __dirname = process.cwd();
-  const preloadPath = join(__dirname, 'preload.js');
-
   let mainWindow;
 
   async function createWindow() {
