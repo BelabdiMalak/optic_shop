@@ -37,26 +37,37 @@ const createSchema = Joi.object({
             'string.guid': 'User ID must be a valid UUID',
             'any.required': 'User ID is required'
         }),
-    
-    products: Joi.array().items(
-        Joi.object({
-            productId: Joi.string()
-                .uuid()
-                .required(),
-            framePrice: Joi.number()
-                .integer()
-                .positive()
-                .required(),
-            productPrice: Joi.number()
-                .integer()
-                .positive()
-                .required(),
-            quantity: Joi.number()
-                .integer()
-                .positive()
-                .default(1),
-          })
-      ).required()
+
+    framePrice: Joi.number()
+        .integer()
+        .min(0)
+        .required()
+        .messages({
+            'number.base': 'Frame price must be a number.',
+            'number.integer': 'Frame price must be an integer.',
+            'number.min': 'Frame price cannot be less than 0.',
+            'any.required': 'Frame price is required.'
+        }),
+
+    productPrice: Joi.number()
+        .integer()
+        .min(0)
+        .required()
+        .messages({
+            'number.base': 'Product price must be a number.',
+            'number.integer': 'Product price must be an integer.',
+            'number.min': 'Product price cannot be less than 0.',
+            'any.required': 'Product price is required.'
+        }),
+
+    productId: Joi.string()
+        .uuid()
+        .required()
+        .messages({
+            'string.base': 'Product ID must be a string.',
+            'string.guid': 'Product ID must be a valid UUID.',
+            'any.required': 'Product ID is required.'
+        })
 });
 
 const updateSchema = Joi.object({
@@ -77,6 +88,28 @@ const updateSchema = Joi.object({
             'string.base': 'Status must be a string',
             'any.only': 'Status must be one of: ' + ORDER_STATUS.join(', '),
         }),
+    framePrice: Joi.number()
+        .integer()
+        .min(0)
+        .messages({
+            'number.base': 'Frame price must be a number.',
+            'number.integer': 'Frame price must be an integer.',
+            'number.min': 'Frame price cannot be less than 0.',
+        }),
+    productPrice: Joi.number()
+        .integer()
+        .min(0)
+        .messages({
+            'number.base': 'Product price must be a number.',
+            'number.integer': 'Product price must be an integer.',
+            'number.min': 'Product price cannot be less than 0.',
+        }),
+    productId: Joi.string()
+        .uuid()
+        .messages({
+            'string.base': 'Product ID must be a string.',
+            'string.guid': 'Product ID must be a valid UUID.',
+        })
 });
 
 module.exports = { 

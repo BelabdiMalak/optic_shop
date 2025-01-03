@@ -25,45 +25,37 @@ const createOrder = async (data) => {
         }
 
         // Check products list
-        const productIds = data.products.map(product => product.productId);
-        const productsData = await productModel._findMany({ where: { id: { in: productIds } } });
-        for (const product of data.products) {
-            const productFromDB = productsData.find(pd => pd.id === product.productId);
-            if (!productFromDB) 
-                return {
-                    status: false,
-                    message: `Product ${product.productId} not found`
-                };
+        const productData = await productModel.findUnique(data.productId);
+        if (!productData) 
+            return {
+                status: false,
+                message: `Product ${data.productId} not found`
+            };
 
-            if (productFromDB.stockQuantity < product.quantity) 
-                return {
-                    status: false,
-                    message: `Insufficient quantity for product ${product.productId}`,
-                    data: {
-                        quantity: productFromDB.stockQuantity
-                    }
-                };
-        }
+        if (productData.stockQuantity < 1) 
+            return {
+                status: false,
+                message: `Insufficient quantity for product ${data.productId}`,
+                data: {
+                    quantity: productData.stockQuantity
+                }
+            };
 
         const createdOrder = await orderModel.createOne({
             ...(data.date && { date: data.date }),
             ...(data.deposit && { deposit: data.deposit }),
             ...(data.status && { status: data.status }),
-            ...(data.userId && { userId: data.userId })
+            ...(data.userId && { userId: data.userId }),
+            ...(data.framePrice && { framePrice: data.framePrice }),
+            ...(data.productPrice && { productPrice: data.productPrice }),
+            ...(data.productId && { productId: data.productId })
         });
-        const items = data.products.map(product => ({
-            ...product,
-            orderId: createdOrder.id
-        }));
-        await orderItemModel.createMany(items);
 
         // update product quantity
-        data.products.forEach(async(product) => {
-            await productModel.updateOne(
-                product.productId,
-                { stockQuantity: { decrement: product.quantity } }
-            )
-        })
+        await productModel.updateOne(
+            data.productId,
+            { stockQuantity: { decrement: 1 } }
+        )
 
         const order = await orderModel.findUnique(createdOrder.id);
 

@@ -1,5 +1,5 @@
-const IN = 'IN';
-const OUT = 'OUT';
+const IN = 'in';
+const OUT = 'out';
 
 const STOCK_TYPE = {
     IN,

@@ -21,15 +21,6 @@ const createSchema = Joi.object({
             'number.min': 'Product price cannot be less than 0.',
             'any.required': 'Product price is required.'
         }),
-    quantity: Joi.number()
-        .integer()
-        .min(1)
-        .default(1)
-        .messages({
-            'number.base': 'Quantity must be a number.',
-            'number.integer': 'Quantity must be an integer.',
-            'number.min': 'Quantity must be at least 1.'
-        }),
     productId: Joi.string()
         .uuid()
         .required()
@@ -37,14 +28,6 @@ const createSchema = Joi.object({
             'string.base': 'Product ID must be a string.',
             'string.guid': 'Product ID must be a valid UUID.',
             'any.required': 'Product ID is required.'
-        }),
-    orderId: Joi.string()
-        .uuid()
-        .required()
-        .messages({
-            'string.base': 'Order ID must be a string.',
-            'string.guid': 'Order ID must be a valid UUID.',
-            'any.required': 'Order ID is required.'
         })
 });
 

@@ -21,6 +21,12 @@ const createSchema = Joi.object({
             'string.guid': 'Product ID must be a valid UUID',
             'any.required': 'Product ID is required'
         }),
+    date: Joi.date()
+            .default(() => new Date())
+            .messages({
+                'date.base': 'Date must be a valid date',
+                'any.default': 'Date defaults to now if not provided'
+            }),
 });
 
 const updateSchema = Joi.object({

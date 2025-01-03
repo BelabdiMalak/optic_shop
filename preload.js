@@ -9,13 +9,13 @@ contextBridge.exposeInMainWorld('electron', {
   updateUser: (id, data) => ipcRenderer.invoke('update-user', id, data),
 
   // Type
-  getType: (id) => ipcRenderer.invoke('get-type', id),
+  getType: (where) => ipcRenderer.invoke('get-type', where),
   createType: (data) => ipcRenderer.invoke('create-type', data),
   getTypes: (filter) => ipcRenderer.invoke('get-types', filter),
   updateType: (id, data) => ipcRenderer.invoke('update-type', id, data),
 
   // SubType
-  getSubType: (id) => ipcRenderer.invoke('get-subtype', id),
+  getSubType: (where) => ipcRenderer.invoke('get-subtype', where),
   createSubType: (data) => ipcRenderer.invoke('create-subtype', data),
   getSubTypes: (filter) => ipcRenderer.invoke('get-subtypes', filter),
   updateSubType: (id, data) => ipcRenderer.invoke('update-subtype', id, data),

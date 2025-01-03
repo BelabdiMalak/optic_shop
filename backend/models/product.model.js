@@ -3,7 +3,17 @@ const prisma = require('../../config/prisma.config.js');
 const createOne = async (data) => {
     try {
         return await prisma.product.create({
-            data
+            data,
+            select: {
+                id: true,
+                stockQuantity: true,
+                typeId: true,
+                type: true,
+                subType: true,
+                subTypeId: true,
+                createdAt: true,
+                updatedAt: true
+            }
         });
     } catch (error) {
         throw new Error('Error in creating a product: ' + error.message);
@@ -17,10 +27,21 @@ const findMany = async ({ page, limit, orderField, orderBy, typeId, subTypeId })
                 ...(typeId && { typeId }),
                 ...(subTypeId && { subTypeId }),
             },
+            select: {
+                id: true,
+                stockQuantity: true,
+                typeId: true,
+                type: true,
+                subType: true,
+                subTypeId: true,
+                createdAt: true,
+                updatedAt: true
+            },
             take: limit,
             skip: page ? (page - 1) * limit : undefined,
             orderBy: { [orderField]: orderBy },
         });
+        
         const totalElements = await prisma.product.count({
             where: {
                 ...(typeId && { typeId }),

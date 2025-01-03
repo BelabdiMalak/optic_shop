@@ -18,14 +18,18 @@ const createProduct = async (data) => {
         if (!type)
             return {
                 status: false,
-                message: 'Invalid type ID'
+                message: 'Invalid type ID',
+                type
             }
 
         const subType = await subTypeModel.findUnique(data.subTypeId);
         if (!subType || subType.typeId !== data.typeId)
             return {
                 status: false,
-                message: 'Invalid subtype ID'
+                message: 'Invalid subtype ID',
+                subTypeTypeId:subType.typeId ,
+                dataTyeId: data.typeId
+
             }
 
         const createdProduct = await productModel.createOne(data);
@@ -94,8 +98,8 @@ const getProducts = async ({
     limit = 10, 
     orderField = 'createdAt', 
     orderBy = 'desc',
-    name,
-    category 
+    typeId,
+    subTypeId
 }) => {
     try {
         const { products, pagination } = await productModel.findMany({
@@ -103,8 +107,8 @@ const getProducts = async ({
             limit,
             orderField,
             orderBy,
-            name,
-            category
+            typeId,
+            subTypeId
         });
 
         return {

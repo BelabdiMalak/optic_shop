@@ -40,7 +40,11 @@ const createStock = async (data) => {
             { stockQuantity: (product.stockQuantity - data.quantity)}
         )
 
-        const createdStock = await stockModel.createOne(data);
+        const createdStock = await stockModel.createOne({
+            ...data,
+            date: new Date(data.date)
+        });
+
         return {
             status: true,
             message: 'Stock created successfully',

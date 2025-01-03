@@ -18,9 +18,9 @@ async function createSubType(event, data) {
     }
 }
 
-async function getSubType(event, id) {
+async function getSubType(event, where) {
     try {
-        return await subTypeService.findSubTypeById(id);
+        return await subTypeService.findSubTypeBy(where);
     } catch (error) {
         console.error('Error fetching subtype (handler):', error);
         throw error;

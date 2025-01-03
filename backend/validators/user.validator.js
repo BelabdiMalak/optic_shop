@@ -15,22 +15,17 @@ const createSchema = Joi.object({
             'string.max': 'Surname cannot exceed 255 characters',
             'any.required': 'Surname is required'
         }),
-    sphere: Joi.string().required()
-        .messages({
-            'string.base': 'Sphere value must be a string',
-            'any.required': 'Sphere is required',
-        }),
-    cylinder: Joi.string().required()
-        .messages({
-            'string.base': 'Cylinder value must be a string',
-            'any.required': 'Cylinder is required',
-        }),
-    axis: Joi.string().required()
-        .messages({
-            'string.base': 'Axis value must be a string',
-            'any.required': 'Axis is required',
-        }),
+    sphere: Joi.string().allow('').messages({
+        'string.base': 'Sphere value must be a string',
+    }),
+    cylinder: Joi.string().allow('').messages({
+        'string.base': 'Cylinder value must be a string',
+    }),
+    axis: Joi.string().allow('').messages({
+        'string.base': 'Axis value must be a string',
+    }),
 });
+
 
 const updateSchema = Joi.object({
     name: Joi.string().min(1).max(255)
@@ -45,15 +40,15 @@ const updateSchema = Joi.object({
             'string.empty': 'Surname cannot be empty',
             'string.max': 'Surname cannot exceed 255 characters',
         }),
-    sphere: Joi.string()
+    sphere: Joi.string().allow('')
         .messages({
             'string.base': 'Sphere value must be a string',
         }),
-    cylinder: Joi.string()
+    cylinder: Joi.string().allow('')
         .messages({
             'string.base': 'Cylinder value must be a string',
         }),
-    axis: Joi.string()
+    axis: Joi.string().allow('')
         .messages({
             'string.base': 'Axis value must be a string',
         }),

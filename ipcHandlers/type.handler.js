@@ -18,9 +18,9 @@ async function createType(event, data) {
   }
 }
 
-async function getType(event, id) {
+async function getType(event, where) {
   try {
-    return await typeService.findTypeById(id);
+    return await typeService.findTypeBy(where);
   } catch (error) {
     console.error('Error fetching type (handler):', error);
     throw error;

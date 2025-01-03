@@ -3,7 +3,15 @@ const prisma = require('../../config/prisma.config.js');
 const createOne = async (data) => {
     try {
         return await prisma.subType.create({
-            data
+            data,
+            select: {
+                id: true,
+                name: true,
+                createdAt: true,
+                updatedAt: true,
+                type: true,
+                typeId: true
+            }
         });
     } catch (error) {
         throw new Error('Error in creating a subType: ' + error.message);
@@ -81,7 +89,15 @@ const updateOne = async (id, data) => {
 const findBy = async (where) => {
     try {
         return await prisma.subType.findMany({
-            where: where
+            where: where,
+            select: {
+                id: true,
+                name: true,
+                createdAt: true,
+                updatedAt: true,
+                type: true,
+                typeId: true
+            }
         });
     } catch (error) {
         throw new Error('Error in finding subTypes by filter: ' + error.message);

@@ -116,6 +116,26 @@ const findSubTypeById = async (id) => {
     }
 };
 
+const findSubTypeBy = async (where) => {
+    try {
+        const subType = await subTypeModel.findBy(where);
+        if (!subType) {
+            return {
+                status: false,
+                message: 'SubType not found'
+            };
+        }
+
+        return {
+            status: true,
+            message: 'SubType fetched successfully',
+            data: subType
+        };
+    } catch (error) {
+        throw new Error(`Error in finding subtype by ID (service): ${error}`);
+    }
+};
+
 const getSubTypes = async ({ 
     page = 1, 
     limit = 10, 
@@ -147,5 +167,6 @@ module.exports = {
     createSubType,
     updateSubType,
     findSubTypeById,
-    getSubTypes
+    getSubTypes,
+    findSubTypeBy
 };

@@ -3,7 +3,14 @@ const prisma = require('../../config/prisma.config.js');
 const createOne = async (data) => {
     try {
         return await prisma.stock.create({
-            data
+            data,
+            select: {
+                id: true,
+                type: true,
+                date: true,
+                quantity: true,
+                product: true
+            }
         });
     } catch (error) {
         throw new Error('Error in creating a stock: ' + error.message);
@@ -25,6 +32,13 @@ const findMany = async ({ page, limit, orderField, orderBy, date, type, productI
                         equals: new Date(date),
                     },
                 }),
+            },
+            select: {
+                id: true,
+                type: true,
+                date: true,
+                quantity: true,
+                product: true
             },
             take: limit,
             skip: page ? (page - 1) * limit : undefined,

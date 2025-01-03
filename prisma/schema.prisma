@@ -11,9 +11,9 @@ model User {
   id              String     @id @default(uuid())
   name            String
   surename        String
-  sphere          String
-  cylinder        String
-  axis            String
+  sphere          String?
+  cylinder        String?
+  axis            String?
 
   // metadata
   createdAt       DateTime   @default(now())
@@ -80,7 +80,7 @@ model Product {
   subTypeId       String
   subType         SubType    @relation(fields: [subTypeId], references: [id])
 
-  orderItems      OrderItem[]
+  order           Order[]
   stocks          Stock[]
   
   @@unique([typeId, subTypeId])
@@ -91,6 +91,8 @@ model Order {
   date            DateTime   @default(now())
   deposit         Int        @default(0)
   status          String
+  framePrice      Int
+  productPrice    Int
 
   // metadata
   createdAt       DateTime   @default(now())
@@ -100,23 +102,6 @@ model Order {
   userId          String
   user            User        @relation(fields: [userId], references: [id])
 
-  orderItems           OrderItem[]
-}
-
-model OrderItem {
-  id              String     @id @default(uuid())
-  framePrice      Int
-  productPrice    Int
-  quantity        Int        @default(1)
-
-  // metadata
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-
-  // relations
   productId       String
   product         Product     @relation(fields: [productId], references: [id])
-
-  orderId         String
-  order           Order      @relation(fields: [orderId], references: [id])
 }

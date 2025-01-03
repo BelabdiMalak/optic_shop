@@ -73,6 +73,27 @@ const findTypeById = async (id) => {
     }
 };
 
+const findTypeBy = async (where) => {
+    try {
+        const type = await typeModel.findBy(where);
+        if (!type) {
+            return {
+                status: false,
+                message: 'Type not found'
+            };
+        }
+
+        return {
+            status: true,
+            message: 'Type fetched successfully',
+            data: type
+        };
+    } catch (error) {
+        throw new Error(`Error in finding type by ID (service): ${error}`);
+    }
+};
+
+
 const getTypes = async ({ 
     page = 1, 
     limit = 10, 
@@ -104,5 +125,6 @@ module.exports = {
     createType,
     updateType,
     findTypeById,
-    getTypes
+    getTypes,
+    findTypeBy
 };

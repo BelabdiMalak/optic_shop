@@ -1,9 +1,9 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
-import { Clients } from '@pages/layouts'
-import Products from '@src/pages/layouts/Products'
-import Orders from '@src/pages/layouts/Orders'
-import Stock from '@src/pages/layouts/Stock'
+import { Clients } from '@src/pages'
+import Products from '@src/pages/Products'
+import Orders from '@src/pages/Orders'
+import Stock from '@src/pages/Stock'
 
 const router = createBrowserRouter([
     {

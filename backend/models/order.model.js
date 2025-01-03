@@ -4,24 +4,49 @@ const log = require('electron-log')
 const createOne = async (data) => {
     try {
         return await prisma.order.create({
-            data
+            data,
+            select: {
+                id: true,
+                deposit: true,
+                status: true,
+                createdAt: true, 
+                updatedAt: true,
+                date: true,
+                framePrice: true,
+                productPrice: true,
+                user: true,
+                product: true
+            }
         });
     } catch (error) {
         throw new Error('Error in creating an order: ' + error.message);
     }
 }
 
-const findMany = async ({ page, limit, orderField, orderBy, userId, status, date }) => {
+const findMany = async ({ page, limit, orderField, orderBy, userId, productId, status, date }) => {
     try {
         const orders = await prisma.order.findMany({
             where: {
                 ...(userId && { userId }),
                 ...(status && { status }),
+                ...(productId && { productId }),
                 ...(date && {
                     date: {
                         equals: new Date(date),
                     },
                 }),
+            },
+            select: {
+                id: true,
+                deposit: true,
+                status: true,
+                createdAt: true, 
+                updatedAt: true,
+                date: true,
+                framePrice: true,
+                productPrice: true,
+                user: true,
+                product: true
             },
             take: limit,
             skip: page ? (page - 1) * limit : undefined,
@@ -31,6 +56,7 @@ const findMany = async ({ page, limit, orderField, orderBy, userId, status, date
             where: {
               ...(userId && { userId }),
               ...(status && { status }),
+              ...(productId && { productId }),
               ...(date && { date: { equals: new Date(date) } }),
             },
           })
@@ -69,7 +95,10 @@ const findUnique = async (id) => {
                 createdAt: true, 
                 updatedAt: true,
                 date: true,
-                orderItems: true,
+                framePrice: true,
+                productPrice: true,
+                user: true,
+                product: true
             }
         });
 
