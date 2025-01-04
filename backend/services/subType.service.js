@@ -137,8 +137,8 @@ const findSubTypeBy = async (where) => {
 };
 
 const getSubTypes = async ({ 
-    page = 1, 
-    limit = 10, 
+    page, 
+    limit, 
     orderField = 'createdAt', 
     orderBy = 'desc',
     name 

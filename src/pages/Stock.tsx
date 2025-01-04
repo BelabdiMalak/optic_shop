@@ -41,6 +41,7 @@ import { BrandName } from '@src/constants';
 import { Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { StockType } from 'types/stock.type';
+import { Type, SubType, Product } from 'types/product.type';
 
 type ListItemType = {
   text?: string;
@@ -57,7 +58,7 @@ const listItems: ListItemType[] = [
 export default function Stock() {
   const { isOpen, onClose, getButtonProps } = useDisclosure();
   const [stock, setStock] = useState<StockType[]>([]);
-  const [newStock, setNewStock] = useState<Omit<StockType, 'id' | 'product'| 'createdAt' | 'updatedAt'>>({
+  const [newStock, setNewStock] = useState<Omit<StockType, 'id' | 'product' | 'createdAt' | 'updatedAt'>>({
     date: '',
     type: 'in',
     quantity: 0,
@@ -65,14 +66,39 @@ export default function Stock() {
   });
   const [isAddStockOpen, setIsAddStockOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState('');
-  const [productFilter, setProductFilter] = useState('');
+  const [subtypeFilter, setSubtypeFilter] = useState('');
+  const [stockTypeFilter, setStockTypeFilter] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [types, setTypes] = useState<Type[]>([]); // List of types
+  const [subtypes, setSubtypes] = useState<SubType[]>([]); // List of subtypes
+  const [filteredSubtypes, setFilteredSubtypes] = useState<SubType[]>([]);
+  const [products, setProducts] = useState<Product[]>([]); // List of products
+  const [selectedType, setSelectedType] = useState('');
+  const [selectedSubtype, setSelectedSubtype] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+
   const toast = useToast();
 
   useEffect(() => {
     fetchStock();
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const typesResponse = await window.electron.getTypes({});
+      const subtypesResponse = await window.electron.getSubTypes({});
+      const productsResponse = await window.electron.getProducts({});
+
+      setTypes(typesResponse.data || []);
+      setSubtypes(subtypesResponse.data || []);
+      setProducts(productsResponse.data || []);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+    }
+  };
 
   const fetchStock = async () => {
     try {
@@ -100,6 +126,26 @@ export default function Stock() {
     }
   };
 
+  const handleTypeChange = (typeId: string) => {
+    setSelectedType(typeId); // Set the selected type
+    const filtered = subtypes.filter((subtype) => subtype.typeId === typeId); // Filter subtypes based on selected type
+    setFilteredSubtypes(filtered); // Update the filtered subtypes list
+    setSelectedSubtype(''); // Reset selected subtype
+    setSubtypeFilter(''); // Reset subtype filter
+  };
+  
+  
+  const handleSubtypeChange = (subtypeId: string) => {
+    setSelectedSubtype(subtypeId);  // Set the selected subtype
+    const product = products.find(
+      (product) => product.typeId === selectedType && product.subTypeId === subtypeId
+    );
+    if (product) {
+      setNewStock({ ...newStock, productId: product.id });
+    }
+  };
+  
+
   const handleAddStock = async () => {
     if (!newStock.date || newStock.quantity <= 0 || !newStock.productId) {
       toast({
@@ -114,7 +160,7 @@ export default function Stock() {
 
     try {
       const response = await window.electron.createStock(newStock);
-      if (response && response.data) {
+      if (response && response.data && response.status === true) {
         setStock((prevStock) => [...prevStock, response.data]);
         setNewStock({ date: '', type: 'in', quantity: 0, productId: '' });
         setIsAddStockOpen(false);
@@ -132,7 +178,7 @@ export default function Stock() {
       console.error('Error adding stock:', error);
       toast({
         title: 'Error adding stock',
-        description: 'There was an error adding the new stock. Please try again.',
+        description: 'Insufficient quantity for product.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -142,9 +188,19 @@ export default function Stock() {
 
   const filteredStock = stock.filter(
     (item) =>
-      item.type.toLowerCase().includes(typeFilter.toLowerCase()) &&
-      item.product.id.toLowerCase().includes(productFilter.toLowerCase())
+      item.type.toLowerCase().includes(stockTypeFilter.toLowerCase()) &&
+      item.product.type.name.toLowerCase().includes(typeFilter.toLowerCase()) &&
+      item.product.subType.name.toLowerCase().includes(subtypeFilter.toLowerCase()) &&
+      (!newStock.date || new Date(item.date).toISOString().slice(0, 10) === newStock.date)
   );
+  
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredStock.length / itemsPerPage);
+    const currentStocks = filteredStock.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
 
   return (
     <>
@@ -180,20 +236,57 @@ export default function Stock() {
         </Drawer>
 
         <Box p={4} w="full">
-          <VStack spacing={4} align="stretch" mb={4}>
-            <HStack>
-              <Input
-                placeholder="Filter by type"
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-              />
-              <Input
-                placeholder="Filter by product"
-                value={productFilter}
-                onChange={(e) => setProductFilter(e.target.value)}
-              />
-            </HStack>
-          </VStack>
+        <VStack spacing={4} align="stretch" mb={4}>
+  <HStack>
+    <FormControl>
+      <Select
+        placeholder="Select Type"
+        value={typeFilter}
+        onChange={(e) => setTypeFilter(e.target.value)}
+      >
+        {types.map((type) => (
+          <option key={type.id} value={type.name}>
+            {type.name}
+          </option>
+        ))}
+      </Select>
+    </FormControl>
+
+    <FormControl>
+      <Select
+        placeholder="Select Subtype"
+        value={subtypeFilter}
+        onChange={(e) => setSubtypeFilter(e.target.value)}
+      >
+        {subtypes.map((subtype) => (
+          <option key={subtype.id} value={subtype.name}>
+            {subtype.name}
+          </option>
+        ))}
+      </Select>
+    </FormControl>
+
+    <FormControl>
+      <Select
+        placeholder="Select Stock Type"
+        value={stockTypeFilter}
+        onChange={(e) => setStockTypeFilter(e.target.value)}
+      >
+        <option value="in">In</option>
+        <option value="out">Out</option>
+      </Select>
+    </FormControl>
+
+    <FormControl>
+      <Input
+        type="date"
+        value={newStock.date}
+        onChange={(e) => setNewStock({ ...newStock, date: e.target.value })}
+      />
+    </FormControl>
+  </HStack>
+</VStack>
+
           <Box overflowX="auto">
             {isLoading ? (
               <Flex justify="center" align="center" height="200px">
@@ -202,32 +295,79 @@ export default function Stock() {
             ) : error ? (
               <Text color="red.500" textAlign="center">{error}</Text>
             ) : (
+              <>
               <Table variant="simple">
                 <Thead>
                   <Tr>
                     <Th>Date</Th>
-                    <Th>Type</Th>
+                    <Th>Product Type</Th>
+                    <Th>Product Subtype</Th>
+                    <Th>Stock Type</Th>
                     <Th>Quantity</Th>
-                    <Th>Product</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {filteredStock.length === 0 ? (
+                  {currentStocks.length === 0 ? (
                     <Tr>
-                      <Td colSpan={4} textAlign="center">No stock found</Td>
+                      <Td colSpan={5} textAlign="center">No stock found</Td>
                     </Tr>
                   ) : (
-                    filteredStock.map((item) => (
+                    currentStocks.map((item) => (
                       <Tr key={item.id}>
                         <Td>{new Date(item.date).toLocaleDateString()}</Td>
+                        <Td>{item.product.type.name}</Td>
+                        <Td>{item.product.subType.name}</Td>
                         <Td>{item.type}</Td>
                         <Td>{item.quantity}</Td>
-                        <Td>{item.product.id}</Td>
                       </Tr>
                     ))
                   )}
                 </Tbody>
               </Table>
+                {/* Pagination */}
+                <Flex mt={4} justifyContent="space-between" alignItems="center">
+                  <HStack spacing={2}>
+                    <Button
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      isDisabled={currentPage === 1}
+                    >
+                      &lt;
+                    </Button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <Button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        colorScheme={page === currentPage ? 'blue' : 'gray'}
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                    <Button
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      isDisabled={currentPage === totalPages}
+                    >
+                      &gt;
+                    </Button>
+                  </HStack>
+
+                  <HStack>
+                    <Text>Items per page:</Text>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                    >
+                      {[5, 10, 20, 50].map((size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </select>
+                  </HStack>
+                </Flex>
+              </>
             )}
           </Box>
         </Box>
@@ -270,19 +410,40 @@ export default function Stock() {
                   value={newStock.type}
                   onChange={(e) => setNewStock({ ...newStock, type: e.target.value })}
                 >
-                  <option value="in">Incoming</option>
-                  <option value="out">Outgoing</option>
+                  <option value="in">In</option>
+                  <option value="out">Out</option>
                 </Select>
               </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Product Type</FormLabel>
+                  <Select
+                    placeholder="Select Type"
+                    value={selectedType}
+                    onChange={(e) => handleTypeChange(e.target.value)}
+                  >
+                    {types.map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
 
-              <FormControl isRequired>
-                <FormLabel>Product ID</FormLabel>
-                <Input
-                  value={newStock.productId}
-                  onChange={(e) => setNewStock({ ...newStock, productId: e.target.value })}
-                />
-              </FormControl>
-
+                <FormControl isRequired>
+              <FormLabel>Product Subtype</FormLabel>
+              <Select
+                placeholder="Select Subtype"
+                value={selectedSubtype}
+                onChange={(e) => handleSubtypeChange(e.target.value)}
+                isDisabled={!selectedType}
+              >
+                {filteredSubtypes.map((subtype) => (
+                  <option key={subtype.id} value={subtype.id}>
+                    {subtype.name}
+                  </option>
+                ))}
+              </Select>
+                </FormControl>
               <HStack spacing={4} mt={4}>
                 <Button onClick={() => setIsAddStockOpen(false)} variant="outline">
                   Cancel

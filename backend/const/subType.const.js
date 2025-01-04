@@ -4,14 +4,14 @@ const TRHC = 'TRHC';
 const BB = 'BB';
 const TRB = 'TRB';
 
-const GREEN = 'GREEN';
-const BLUE = 'BLUE';
-const BROWN = 'BROWN';
-const GRAY = 'GRAY';
+const GREEN = 'VERT';
+const BLEU = 'BLEU';
+const BROWN = 'MARRON';
+const GRAY = 'GRIS';
 
 const SPICE = 'SPICE';
 const JADE = 'JADE';
-const BLEU = 'BLEU';
+const BLUE = 'BLUE';
 const PERLA = 'PERLA';
 const GIALLO = 'GIALLO';
 
@@ -32,7 +32,7 @@ const GLASS_SUBTYPES = {
 
 const SUNGLASS_SUBTYPES = {
     GREEN,
-    BLUE,
+    BLEU,
     BROWN,
     GRAY
 };
@@ -41,7 +41,7 @@ const LENS_SUBTYPES = {
     SPICE,
     JADE,
     PERLA,
-    BLEU,
+    BLUE,
     GIALLO
 };
 

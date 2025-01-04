@@ -11,6 +11,8 @@ export interface ElectronAPI {
     createProduct: (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'type' | 'subType'>) => Promise<{ status: boolean; message: string; data: Product }>;
     getType: (filter: any) => Promise<ResponseType>
     getSubType: (filter: any) => Promise<ResponseType>
+    getTypes: (filter: any) => Promise<ResponseType>
+    getSubTypes: (filter: any) => Promise<ResponseType>
     getStocks: (filter: any) => Promise<ResponseType>
     createStock: (data: Omit<StockType, 'id' | 'product' | 'createdAt' | 'updatedAt'>) => Promise<ResponseType>
     getOrders: (filter: any) => Promise<ResponseType>

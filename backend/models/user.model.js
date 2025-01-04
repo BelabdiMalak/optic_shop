@@ -10,7 +10,7 @@ const createOne = async (data) => {
     }
 }
 
-const findMany = async ({ page = 1, limit = 10, orderBy = 'desc', orderField = 'createdAt', name, surename }) => {
+const findMany = async ({ page, limit, orderBy = 'desc', orderField = 'createdAt', name, surename }) => {
     try {
         const users = await prisma.user.findMany({
             where: {

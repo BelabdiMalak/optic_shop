@@ -54,9 +54,9 @@ export default function Clients() {
   const [newClient, setNewClient] = useState<Omit<Client, 'id' | 'createdAt' | 'updatedAt'>>({
     name: '',
     surename: '',
-    sphere: '', // Changed to null
-    cylinder: '', // Changed to null
-    axis: '', // Changed to null
+    sphere: '', 
+    cylinder: '', 
+    axis: '', 
   });
   
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
@@ -100,7 +100,6 @@ export default function Clients() {
 
   const filteredClients = clients.filter(
     (client) =>{
-      console.log(client)
       return client.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
       client.surename.toLowerCase().includes(surnameFilter.toLowerCase())
   });
@@ -126,7 +125,6 @@ export default function Clients() {
 
     try {
       const response = await window.electron.createUser(newClient);
-      console.log(response)
       if (response && response.data) {
         setClients((prevClients) => [...prevClients, response.data]);
         setNewClient({ name: '', surename: '', sphere: '', cylinder: '', axis: '' });

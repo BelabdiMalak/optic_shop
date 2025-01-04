@@ -1,9 +1,7 @@
 const orderValidator = require('../validators/order.validator');
-const orderItemModel = require('../models/orderItem.model');
 const productModel = require('../models/product.model');
 const orderModel = require('../models/order.model');
 const userModel = require('../models/user.model');
-var log = require('electron-log');
 
 const createOrder = async (data) => {
     try {
@@ -12,7 +10,7 @@ const createOrder = async (data) => {
             return {
                 status: false,
                 message: 'Validation error',
-                data: error.details.map((err) => err.message)
+                data: error
             };
         }
 
@@ -120,8 +118,8 @@ const findOrderById = async (id) => {
 };
 
 const getOrders = async ({ 
-    page = 1, 
-    limit = 10, 
+    page, 
+    limit, 
     orderField = 'createdAt', 
     orderBy = 'desc',
     status,

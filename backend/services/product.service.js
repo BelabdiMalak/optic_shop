@@ -94,8 +94,8 @@ const findProductById = async (id) => {
 };
 
 const getProducts = async ({ 
-    page = 1, 
-    limit = 10, 
+    page, 
+    limit, 
     orderField = 'createdAt', 
     orderBy = 'desc',
     typeId,

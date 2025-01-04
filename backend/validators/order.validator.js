@@ -41,7 +41,7 @@ const createSchema = Joi.object({
     framePrice: Joi.number()
         .integer()
         .min(0)
-        .required()
+        .default(0)
         .messages({
             'number.base': 'Frame price must be a number.',
             'number.integer': 'Frame price must be an integer.',
@@ -52,7 +52,7 @@ const createSchema = Joi.object({
     productPrice: Joi.number()
         .integer()
         .min(0)
-        .required()
+        .default(0)
         .messages({
             'number.base': 'Product price must be a number.',
             'number.integer': 'Product price must be an integer.',

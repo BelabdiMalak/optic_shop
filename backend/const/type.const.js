@@ -1,8 +1,8 @@
-const GLASS = 'GLASS';
-const SUNGLASS = 'SUNGLASS';
-const LENSES = 'LENSES';
-const GLASS_CLEANER = 'GLASS_CLEANER';
-const LENS_CLEANER = 'LENS_CLEANER';
+const GLASS = 'Verre Correcteur';
+const SUNGLASS = 'Verre Solaire';
+const LENSES = 'Lentille';
+const GLASS_CLEANER = 'Nettoyant';
+const LENS_CLEANER = 'Produit';
 
 const PRODUCT_TYPES = {
     GLASS,

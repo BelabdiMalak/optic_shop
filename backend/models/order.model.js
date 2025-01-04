@@ -15,7 +15,25 @@ const createOne = async (data) => {
                 framePrice: true,
                 productPrice: true,
                 user: true,
-                product: true
+                productId:true,
+                userId: true,
+                product: {
+                    select: {
+                        id: true,
+                        typeId: true,
+                        subTypeId: true,
+                        type: {
+                            select: {
+                                name: true
+                            }
+                        },
+                        subType: {
+                            select: {
+                                name: true
+                            }
+                       }
+                    },
+                }
             }
         });
     } catch (error) {
@@ -46,7 +64,25 @@ const findMany = async ({ page, limit, orderField, orderBy, userId, productId, s
                 framePrice: true,
                 productPrice: true,
                 user: true,
-                product: true
+                userId: true,
+                productId: true,
+                product: {
+                    select: {
+                        id: true,
+                        typeId: true,
+                        subTypeId: true,
+                        type: {
+                            select: {
+                                name: true
+                            }
+                        },
+                        subType: {
+                            select: {
+                                name: true
+                            }
+                       }
+                    },
+                }
             },
             take: limit,
             skip: page ? (page - 1) * limit : undefined,
@@ -103,14 +139,6 @@ const findUnique = async (id) => {
         });
 
         let orderTotalPrice = 0;
-        order.orderItems = order.orderItems.map(item => {
-            const itemTotalPrice =  item.quantity * (item.productPrice + item.framePrice)
-            orderTotalPrice = orderTotalPrice + itemTotalPrice
-            return {
-                ...item,
-                totalPrice: itemTotalPrice
-            }
-        })
         
         order.totalPrice = orderTotalPrice
         return order;        

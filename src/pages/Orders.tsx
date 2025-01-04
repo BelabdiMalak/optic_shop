@@ -42,6 +42,8 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useUsers } from '../hooks/useUsers';
 import { useProducts } from '../hooks/useProducts';
+import { SubType, Type } from 'types/product.type';
+import { Product } from '@prisma/client';
 
 interface Order {
   id: string;
@@ -76,11 +78,22 @@ export default function OrderManagement() {
     deposit: 0,
     status: 'Pending',
   });
+  const [types, setTypes] = useState<Type[]>([]); // List of types
+  const [subtypes, setSubtypes] = useState<SubType[]>([]); // List of subtypes
   const [isAddOrderOpen, setIsAddOrderOpen] = useState(false);
   const [userFilter, setUserFilter] = useState('');
-  const [productFilter, setProductFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [selectedType, setSelectedType] = useState('');
+  const [selectedSubtype, setSelectedSubtype] = useState('');
+  const [filteredSubtypes, setFilteredSubtypes] = useState<SubType[]>([]);
+  const [subtypeFilter, setSubtypeFilter] = useState('');
+  const [allProducts, setAllProducts] = useState<Product[]>([]); // List of products
+
+
   const toast = useToast();
 
   const { users, isLoading: isLoadingUsers } = useUsers();
@@ -88,7 +101,23 @@ export default function OrderManagement() {
 
   useEffect(() => {
     fetchOrders();
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const typesResponse = await window.electron.getTypes({});
+      console.log(typesResponse)
+      const subtypesResponse = await window.electron.getSubTypes({});
+      const productsResponse = await window.electron.getProducts({});
+
+      setTypes(typesResponse.data || []);
+      setSubtypes(subtypesResponse.data || []);
+      setAllProducts(productsResponse.data || []);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -119,82 +148,120 @@ export default function OrderManagement() {
   const filteredOrders = orders.filter((order) => {
     const user = users.find((u) => u.id === order.userId);
     const product = products.find((p) => p.id === order.productId);
-  
+
     const userMatches = userFilter
-      ? user?.name.toLowerCase().includes(userFilter.toLowerCase())
-      : true; // No filter means include all
-  
-    const productMatches = productFilter
-      ? product?.typeId.toLowerCase().includes(productFilter.toLowerCase())
-      : true; // No filter means include all
-  
-    return userMatches && productMatches;
+      ? (user?.name.toLowerCase().includes(userFilter.toLowerCase()) ||
+         user?.surename.toLowerCase().includes(userFilter.toLowerCase()))
+      : true;
+
+    const statusMatches = statusFilter
+      ? order.status.toLowerCase() === statusFilter.toLowerCase()
+      : true; // Filter by status
+
+    return userMatches && statusMatches;
   });
 
-  const handleAddOrder = async () => {
-    if (!newOrder.userId || !newOrder.productId) {
-      toast({
-        title: 'Invalid input',
-        description: 'Please select a user and a product.',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-      });
-      return;
+  const handleTypeChange = (typeId: string) => {
+    setSelectedType(typeId); // Set the selected type
+    const filtered = subtypes.filter((subtype) => subtype.typeId === typeId); // Filter subtypes based on selected type
+    setFilteredSubtypes(filtered); // Update the filtered subtypes list
+    setSelectedSubtype(''); // Reset selected subtype
+    setSubtypeFilter(''); // Reset subtype filter
+  };
+  
+  
+  const handleSubtypeChange = (subtypeId: string) => {
+    setSelectedSubtype(subtypeId);  // Set the selected subtype
+    const product = allProducts.find(
+      (product) => product.typeId === selectedType && product.subTypeId === subtypeId
+    );
+    if (product) {
+      setNewOrder({ ...newOrder, productId: product.id });
     }
-  
-    try {
-      console.log('Sending order data:', newOrder);
-      const response = await window.electron.createOrder(newOrder);
-      console.log('Received response:', response);
-  
-      if (response?.status === false && response.message === 'Not enough quantity in stock') {
-        // Handle insufficient stock
+  };
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+    const currentClients = filteredOrders.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+
+    const handleAddOrder = async () => {
+      if (!newOrder.userId || !newOrder.productId) {
         toast({
-          title: 'Insufficient Stock',
-          description: `Only ${response.data.quantity} items available in stock.`,
+          title: 'Invalid input',
+          description: 'Please select a user and a product.',
+          status: 'warning',
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
+    
+      // Calculate the total price and the rest value
+      const total = newOrder.framePrice + newOrder.productPrice;
+      const rest = total - newOrder.deposit;
+    
+      // Set the status based on the rest value
+      const status = rest === 0 ? 'completed' : 'pending';
+    
+      // Update the new order with the calculated status
+      const updatedOrder = { ...newOrder, status };
+    
+      try {
+        console.log('Sending order data:', updatedOrder);
+        const response = await window.electron.createOrder(updatedOrder);
+        console.log('Received response:', response);
+    
+        if (response?.status === false) {
+          // Handle insufficient stock
+          toast({
+            title: 'Insufficient Stock',
+            description: `Only ${response.data.quantity} items available in stock.`,
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          });
+          return; // Exit the function to prevent further processing
+        }
+    
+        if (response && response.data) {
+          // Order created successfully
+          setOrders((prevOrders) => [...prevOrders, response.data]);
+          setNewOrder({
+            userId: '',
+            productId: '',
+            framePrice: 0,
+            productPrice: 0,
+            deposit: 0,
+            status: 'pending',
+          });
+          setIsAddOrderOpen(false);
+          toast({
+            title: 'Order added',
+            description: `Order #${response.data.id} has been successfully added.`,
+            status: 'success',
+            duration: 5000,
+            isClosable: true,
+          });
+          await fetchOrders(); // Refresh the order list
+        } else {
+          // Handle unexpected response
+          throw new Error('Invalid response structure');
+        }
+      } catch (error) {
+        console.error('Error adding order:', error);
+        toast({
+          title: 'Error adding order',
+          description: 'There was an error adding the new order. Please check the console for more details.',
           status: 'error',
           duration: 5000,
           isClosable: true,
         });
-        return; // Exit the function to prevent further processing
       }
-  
-      if (response && response.data) {
-        // Order created successfully
-        setOrders((prevOrders) => [...prevOrders, response.data]);
-        setNewOrder({
-          userId: '',
-          productId: '',
-          framePrice: 0,
-          productPrice: 0,
-          deposit: 0,
-          status: 'pending',
-        });
-        setIsAddOrderOpen(false);
-        toast({
-          title: 'Order added',
-          description: `Order #${response.data.id} has been successfully added.`,
-          status: 'success',
-          duration: 5000,
-          isClosable: true,
-        });
-        await fetchOrders(); // Refresh the order list
-      } else {
-        // Handle unexpected response
-        throw new Error('Invalid response structure');
-      }
-    } catch (error) {
-      console.error('Error adding order:', error);
-      toast({
-        title: 'Error adding order',
-        description: 'There was an error adding the new order. Please check the console for more details.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  };
+    };
+    
   
 
   return (
@@ -238,11 +305,15 @@ export default function OrderManagement() {
                 value={userFilter}
                 onChange={(e) => setUserFilter(e.target.value)}
               />
-              <Input
-                placeholder="Filter by product"
-                value={productFilter}
-                onChange={(e) => setProductFilter(e.target.value)}
-              />
+              <Select
+                placeholder="Filter by status"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="completed">Completed</option>
+                <option value="canceled">Canceled</option>
+                <option value="pending">Pending</option>
+              </Select>
             </HStack>
           </VStack>
 
@@ -254,38 +325,96 @@ export default function OrderManagement() {
             ) : error ? (
               <Text color="red.500" textAlign="center">{error}</Text>
             ) : (
-              <Table variant="simple">
-                <Thead>
+            <>
+              <Table>
+              <Thead>
+                <Tr>
+                  <Th>Nom</Th>
+                  <Th>Prénom</Th>
+                  <Th>Type</Th>
+                  <Th>Sous Type</Th>
+                  <Th>Prix Monture</Th>
+                  <Th>Prix Produit</Th>
+                  <Th>Versement</Th>
+                  <Th>Total</Th>
+                  <Th>Reste</Th>
+                  <Th>Status</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {currentClients.length === 0 ? (
                   <Tr>
-                    <Th>Order ID</Th>
-                    <Th>User</Th>
-                    <Th>Product</Th>
-                    <Th>Frame Price</Th>
-                    <Th>Product Price</Th>
-                    <Th>Deposit</Th>
-                    <Th>Status</Th>
+                    <Td colSpan={10} textAlign="center">No orders found</Td>
                   </Tr>
-                </Thead>
-                <Tbody>
-                  {filteredOrders.length === 0 ? (
-                    <Tr>
-                      <Td colSpan={7} textAlign="center">No orders found</Td>
-                    </Tr>
-                  ) : (
-                    filteredOrders.map((order) => (
+                ) : (
+                  currentClients.map((order) => {
+                    const user = users.find(u => u.id === order.userId);
+                    const product = products.find(p => p.id === order.productId);
+                    const total = order.framePrice + order.productPrice;
+                    const rest = total - order.deposit;
+                    return (
                       <Tr key={order.id}>
-                        <Td>{order.id}</Td>
-                        <Td>{users.find(u => u.id === order.userId)?.name}</Td>
-                        <Td>{products.find(p => p.id === order.productId)?.typeId}</Td>
+                        <Td>{user?.name}</Td>
+                        <Td>{user?.surename}</Td>
+                        <Td>{product?.type?.name}</Td>
+                        <Td>{product?.subType?.name}</Td>
                         <Td>{order.framePrice}</Td>
                         <Td>{order.productPrice}</Td>
                         <Td>{order.deposit}</Td>
+                        <Td>{total}</Td>
+                        <Td>{rest}</Td>
                         <Td>{order.status}</Td>
                       </Tr>
-                    ))
-                  )}
-                </Tbody>
-              </Table>
+                    );
+                  })
+                )}
+              </Tbody>
+            </Table>
+                {/* Pagination */}
+                <Flex mt={4} justifyContent="space-between" alignItems="center">
+
+                  <HStack spacing={2}>
+                    <Button
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      isDisabled={currentPage === 1}
+                    >
+                      &lt;
+                    </Button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <Button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        colorScheme={page === currentPage ? 'blue' : 'gray'}
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                    <Button
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      isDisabled={currentPage === totalPages}
+                    >
+                      &gt;
+                    </Button>
+                  </HStack>
+
+                  <HStack>
+                    <Text>Items per page:</Text>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                    >
+                      {[5, 10, 20, 50].map((size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </select>
+                  </HStack>
+                </Flex>
+            </>
             )}
           </Box>
         </Box>
@@ -314,21 +443,36 @@ export default function OrderManagement() {
                 </Select>
               </FormControl>
 
-              <FormControl isRequired>
-                <FormLabel>Product</FormLabel>
-                <Select
-                  placeholder="Select product"
-                  value={newOrder.productId}
-                  onChange={(e) => setNewOrder({ ...newOrder, productId: e.target.value })}
-                >
-                  {products.map((product) => (
-                    <option key={product.id} value={product.id}>
-                      {`${product.typeId} - ${product.subTypeId}`}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Product Type</FormLabel>
+                  <Select
+                    placeholder="Select Type"
+                    value={selectedType}
+                    onChange={(e) => handleTypeChange(e.target.value)}
+                  >
+                    {types.map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
 
+                <FormControl isRequired>
+              <FormLabel>Product Subtype</FormLabel>
+              <Select
+                placeholder="Select Subtype"
+                value={selectedSubtype}
+                onChange={(e) => handleSubtypeChange(e.target.value)}
+                isDisabled={!selectedType}
+              >
+                {filteredSubtypes.map((subtype) => (
+                  <option key={subtype.id} value={subtype.id}>
+                    {subtype.name}
+                  </option>
+                ))}
+              </Select>
+                </FormControl>
               <FormControl>
                 <FormLabel>Frame Price</FormLabel>
                 <NumberInput

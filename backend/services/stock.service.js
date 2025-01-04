@@ -113,8 +113,8 @@ const findStockById = async (id) => {
 };
 
 const getStocks = async ({ 
-    page = 1, 
-    limit = 10, 
+    page, 
+    limit, 
     orderField = 'createdAt', 
     orderBy = 'desc',
     productId,

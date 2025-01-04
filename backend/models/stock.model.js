@@ -9,7 +9,20 @@ const createOne = async (data) => {
                 type: true,
                 date: true,
                 quantity: true,
-                product: true
+                product: {
+                    select: {
+                        type: {
+                            select: {
+                                name: true
+                            }
+                        },
+                        subType: {
+                            select: {
+                                name: true
+                            }
+                       }
+                    },
+                }
             }
         });
     } catch (error) {
@@ -38,7 +51,20 @@ const findMany = async ({ page, limit, orderField, orderBy, date, type, productI
                 type: true,
                 date: true,
                 quantity: true,
-                product: true
+                product: {
+                    select: {
+                        type: {
+                            select: {
+                                name: true
+                            }
+                        },
+                        subType: {
+                            select: {
+                                name: true
+                            }
+                       }
+                    },
+                }
             },
             take: limit,
             skip: page ? (page - 1) * limit : undefined,

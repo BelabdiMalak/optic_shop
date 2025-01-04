@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Product } from '@prisma/client'
+import { Product } from 'types/product.type'
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([])
