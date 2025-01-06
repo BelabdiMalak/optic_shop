@@ -44,16 +44,7 @@ import { useUsers } from '../hooks/useUsers';
 import { useProducts } from '../hooks/useProducts';
 import { SubType, Type } from 'types/product.type';
 import { Product } from '@prisma/client';
-
-interface Order {
-  id: string;
-  userId: string;
-  productId: string;
-  framePrice: number;
-  productPrice: number;
-  deposit: number;
-  status: string;
-}
+import { Order } from 'types/order.type';
 
 type ListItemType = {
   text?: string;
@@ -77,6 +68,7 @@ export default function OrderManagement() {
     productPrice: 0,
     deposit: 0,
     status: 'Pending',
+    date: ''
   });
   const [types, setTypes] = useState<Type[]>([]); // List of types
   const [subtypes, setSubtypes] = useState<SubType[]>([]); // List of subtypes
@@ -91,6 +83,7 @@ export default function OrderManagement() {
   const [selectedSubtype, setSelectedSubtype] = useState('');
   const [filteredSubtypes, setFilteredSubtypes] = useState<SubType[]>([]);
   const [subtypeFilter, setSubtypeFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
   const [allProducts, setAllProducts] = useState<Product[]>([]); // List of products
 
 
@@ -147,7 +140,9 @@ export default function OrderManagement() {
 
   const filteredOrders = orders.filter((order) => {
     const user = users.find((u) => u.id === order.userId);
-    const product = products.find((p) => p.id === order.productId);
+    const orderDate = new Date(order.date).toLocaleDateString();
+    const selectedDate = dateFilter ? new Date(dateFilter).toLocaleDateString() : null;
+    const dateMatches = selectedDate ? orderDate === selectedDate : true;
 
     const userMatches = userFilter
       ? (user?.name.toLowerCase().includes(userFilter.toLowerCase()) ||
@@ -158,7 +153,7 @@ export default function OrderManagement() {
       ? order.status.toLowerCase() === statusFilter.toLowerCase()
       : true; // Filter by status
 
-    return userMatches && statusMatches;
+    return dateMatches && userMatches && statusMatches;
   });
 
   const handleTypeChange = (typeId: string) => {
@@ -236,6 +231,7 @@ export default function OrderManagement() {
             productPrice: 0,
             deposit: 0,
             status: 'pending',
+            date: ''
           });
           setIsAddOrderOpen(false);
           toast({
@@ -305,6 +301,12 @@ export default function OrderManagement() {
                 value={userFilter}
                 onChange={(e) => setUserFilter(e.target.value)}
               />
+              <Input
+                  type="date"
+                  placeholder="Filter by date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                />
               <Select
                 placeholder="Filter by status"
                 value={statusFilter}
@@ -329,6 +331,7 @@ export default function OrderManagement() {
               <Table>
               <Thead>
                 <Tr>
+                  <Th>Date</Th>
                   <Th>Nom</Th>
                   <Th>Prénom</Th>
                   <Th>Type</Th>
@@ -354,6 +357,7 @@ export default function OrderManagement() {
                     const rest = total - order.deposit;
                     return (
                       <Tr key={order.id}>
+                        <Td>{new Date(order.date).toLocaleDateString()}</Td>
                         <Td>{user?.name}</Td>
                         <Td>{user?.surename}</Td>
                         <Td>{product?.type?.name}</Td>

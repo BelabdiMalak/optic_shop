@@ -127,25 +127,21 @@ export default function Stock() {
   };
 
   const handleTypeChange = (typeId: string) => {
-    setSelectedType(typeId); // Set the selected type
-    const filtered = subtypes.filter((subtype) => subtype.typeId === typeId); // Filter subtypes based on selected type
-    setFilteredSubtypes(filtered); // Update the filtered subtypes list
-    setSelectedSubtype(''); // Reset selected subtype
+    setSelectedType(typeId);
+    const filtered = subtypes.filter((subtype) => subtype.typeId === typeId);
+    setFilteredSubtypes(filtered);
+    setSelectedSubtype('');
     setSubtypeFilter(''); // Reset subtype filter
+    const selectedTypeName = types.find((type) => type.id === typeId)?.name || '';
+    setTypeFilter(selectedTypeName.toLowerCase()); // Update type filter
   };
-  
   
   const handleSubtypeChange = (subtypeId: string) => {
-    setSelectedSubtype(subtypeId);  // Set the selected subtype
-    const product = products.find(
-      (product) => product.typeId === selectedType && product.subTypeId === subtypeId
-    );
-    if (product) {
-      setNewStock({ ...newStock, productId: product.id });
-    }
-  };
+    setSelectedSubtype(subtypeId);
+    const selectedSubtypeName = subtypes.find((subtype) => subtype.id === subtypeId)?.name || '';
+    setSubtypeFilter(selectedSubtypeName.toLowerCase()); // Update subtype filter
+  };  
   
-
   const handleAddStock = async () => {
     if (!newStock.date || newStock.quantity <= 0 || !newStock.productId) {
       toast({
@@ -186,21 +182,21 @@ export default function Stock() {
     }
   };
 
-  const filteredStock = stock.filter(
-    (item) =>
-      item.type.toLowerCase().includes(stockTypeFilter.toLowerCase()) &&
-      item.product.type.name.toLowerCase().includes(typeFilter.toLowerCase()) &&
-      item.product.subType.name.toLowerCase().includes(subtypeFilter.toLowerCase()) &&
-      (!newStock.date || new Date(item.date).toISOString().slice(0, 10) === newStock.date)
-  );
+  const filteredStock = stock.filter((item) => {
+    const typeMatch = typeFilter ? item.product.type.name.toLowerCase() === typeFilter : true;
+    const subtypeMatch = subtypeFilter ? item.product.subType.name.toLowerCase() === subtypeFilter : true;
+    const stockTypeMatch = stockTypeFilter ? item.type.toLowerCase() === stockTypeFilter.toLowerCase() : true;
+    const dateMatch = newStock.date ? new Date(item.date).toISOString().slice(0, 10) === newStock.date : true;
   
+    return typeMatch && subtypeMatch && stockTypeMatch && dateMatch;
+  });  
 
-    // Pagination Logic
-    const totalPages = Math.ceil(filteredStock.length / itemsPerPage);
-    const currentStocks = filteredStock.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    );
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredStock.length / itemsPerPage);
+  const currentStocks = filteredStock.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <>
@@ -239,27 +235,28 @@ export default function Stock() {
         <VStack spacing={4} align="stretch" mb={4}>
   <HStack>
     <FormControl>
-      <Select
-        placeholder="Select Type"
-        value={typeFilter}
-        onChange={(e) => setTypeFilter(e.target.value)}
-      >
-        {types.map((type) => (
-          <option key={type.id} value={type.name}>
-            {type.name}
-          </option>
-        ))}
-      </Select>
+    <Select
+          placeholder="Select Type"
+          value={selectedType}
+          onChange={(e) => handleTypeChange(e.target.value)}
+        >
+          {types.map((type) => (
+            <option key={type.id} value={type.id}>
+              {type.name}
+            </option>
+          ))}
+        </Select>
     </FormControl>
 
     <FormControl>
-      <Select
+    <Select
         placeholder="Select Subtype"
-        value={subtypeFilter}
-        onChange={(e) => setSubtypeFilter(e.target.value)}
+        value={selectedSubtype}
+        onChange={(e) => handleSubtypeChange(e.target.value)}
+        isDisabled={!selectedType}
       >
-        {subtypes.map((subtype) => (
-          <option key={subtype.id} value={subtype.name}>
+        {filteredSubtypes.map((subtype) => (
+          <option key={subtype.id} value={subtype.id}>
             {subtype.name}
           </option>
         ))}
@@ -277,15 +274,15 @@ export default function Stock() {
       </Select>
     </FormControl>
 
-    <FormControl>
-      <Input
-        type="date"
-        value={newStock.date}
-        onChange={(e) => setNewStock({ ...newStock, date: e.target.value })}
-      />
-    </FormControl>
-  </HStack>
-</VStack>
+      <FormControl>
+        <Input
+          type="date"
+          value={newStock.date}
+          onChange={(e) => setNewStock({ ...newStock, date: e.target.value })}
+        />
+      </FormControl>
+    </HStack>
+  </VStack>
 
           <Box overflowX="auto">
             {isLoading ? (
