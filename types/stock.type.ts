@@ -6,5 +6,5 @@ export interface StockType {
     type: string;
     quantity: number;
     productId: string;
-    product: Product
+    product?: Product
   }

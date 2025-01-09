@@ -146,9 +146,30 @@ const getOrders = async ({
     }
 };
 
+const deleteOrder = async (id) => {
+    try {
+        const order = await orderModel.findUnique(id);
+        if (!order) {
+            return {
+                status: false,
+                message: 'Order not found'
+            };
+        }
+
+        await orderModel.deleteById(id);
+        return {
+            status: true,
+            message: 'Order deleted successfully',
+        };
+    } catch (error) {
+        throw new Error(`Error in deleting order (service): ${error}`);
+    }
+};
+
 module.exports = {
     createOrder,
     updateOrder,
     findOrderById,
-    getOrders
+    getOrders,
+    deleteOrder
 };

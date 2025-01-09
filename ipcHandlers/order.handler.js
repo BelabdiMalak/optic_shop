@@ -27,6 +27,15 @@ async function getOrder(event, id) {
     }
 }
 
+async function deleteOrder(event, id) {
+    try {
+        return await orderService.deleteOrder(id);
+    } catch (error) {
+        console.error('Error deleting order (handler):', error);
+        throw error;
+    }
+}
+
 async function updateOrder(event, id, data) {
     try {
         return await orderService.updateOrder(id, data);
@@ -42,6 +51,7 @@ function registerOrderHandlers(ipcMain) {
     ipcMain.handle('get-orders', getOrders);
     ipcMain.handle('create-order', createOrder);
     ipcMain.handle('update-order', updateOrder);
+    ipcMain.handle('delete-order', deleteOrder);
 }
 
 module.exports = {

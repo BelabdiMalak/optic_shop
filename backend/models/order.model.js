@@ -168,11 +168,23 @@ const findBy = async (where) => {
     }
 }
 
+const deleteById = async (id) => {
+    try {
+        return await prisma.order.delete({
+            where: { id },
+        });
+       
+    } catch (error) {
+        throw new Error('Error in deleting an order: ' + error.message);
+    }
+}
+
 module.exports = {
     createOne,
     findMany,
     findUnique,
     updateOne,
     findBy,
-    _findMany
+    _findMany,
+    deleteById
 }

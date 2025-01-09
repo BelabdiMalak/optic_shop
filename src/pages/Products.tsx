@@ -52,9 +52,9 @@ interface GroupedProduct {
 }
 
 const listItems = [
-    { text: 'Orders', icon: FaClipboardList },
+    { text: 'Commandes', icon: FaClipboardList },
     { text: 'Clients', icon: AiOutlineUsergroupAdd },
-    { text: 'Products', icon: AiOutlineShoppingCart },
+    { text: 'Produits', icon: AiOutlineShoppingCart },
     { text: 'Stock', icon: MdOutlineInventory2 },
 ];
 
@@ -124,7 +124,7 @@ const Products: React.FC = () => {
     return (
         <>
             <Head>
-                <title>Products Page | {BrandName}</title>
+                <title>Produits</title>
             </Head>
             <PreviewOptionsNavbar />
             <Flex as="nav" alignItems="center" h="16" py="2.5" px="2.5">
@@ -137,7 +137,7 @@ const Products: React.FC = () => {
                         aria-label="open menu"
                         onClick={onSidebarOpen}
                     />
-                    <Heading as="h1" size="md">Products</Heading>
+                    <Heading as="h1" size="md">Produits</Heading>
                 </HStack>
             </Flex>
             <HStack align="start" spacing={0}>

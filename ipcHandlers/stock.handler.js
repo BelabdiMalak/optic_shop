@@ -27,6 +27,15 @@ async function getStock(event, id) {
     }
 }
 
+async function deleteStock(event, id) {
+    try {
+        return await stockService.deleteStock(id);
+    } catch (error) {
+        console.error('Error deleting stock (handler):', error);
+        throw error;
+    }
+}
+
 async function updateStock(event, id, data) {
     try {
         return await stockService.updateStock(id, data);
@@ -42,6 +51,7 @@ function registerStockHandlers(ipcMain) {
     ipcMain.handle('get-stocks', getStocks);
     ipcMain.handle('create-stock', createStock);
     ipcMain.handle('update-stock', updateStock);
+    ipcMain.handle('delete-stock', deleteStock);
 }
 
 module.exports = {

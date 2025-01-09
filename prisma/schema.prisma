@@ -18,6 +18,7 @@ model User {
   // metadata
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
+  isDeleted       Boolean?   @default(false)
   
   // relations
   orders          Order[]

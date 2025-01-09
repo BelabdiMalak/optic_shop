@@ -95,9 +95,30 @@ const getUsers = async ({
     }
 }
 
+const deleteUser = async (id) => {
+    try {
+        const user = await userModel.findUnique(id);
+        if (!user)
+            return {
+                status: false,
+                message: 'User not found'
+            }
+
+        await userModel.deleteOne(id)
+
+        return {
+            status: true,
+            message: 'User deleted successfully',
+        }
+    } catch (error) {
+        throw new Error(`Error in deleting user (service): ${error}`);
+    }
+}
+
 module.exports = {
     createUser,
     updateUser,
     findUserById,
-    getUsers
+    getUsers,
+    deleteUser
 }

@@ -1,1 +1,1 @@
-export const BrandName = 'Optical Shop'
+export const BrandName = 'Mondial Optic'

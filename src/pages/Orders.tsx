@@ -35,7 +35,7 @@ import {
 import { BiMenu, BiPlus } from 'react-icons/bi';
 import { AiOutlineClose, AiOutlineShoppingCart, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { FaClipboardList } from 'react-icons/fa';
-import { MdOutlineInventory2 } from 'react-icons/md';
+import { MdOutlineInventory2, MdModeEditOutline, MdDelete } from 'react-icons/md';
 import { Head, PreviewOptionsNavbar } from '@src/components';
 import { BrandName } from '@src/constants';
 import { Link } from 'react-router-dom';
@@ -45,6 +45,8 @@ import { useProducts } from '../hooks/useProducts';
 import { SubType, Type } from 'types/product.type';
 import { Product } from '@prisma/client';
 import { Order } from 'types/order.type';
+import ThemeToggle from "@src/components/ThemeToggle";
+import { LuFilterX } from "react-icons/lu";
 
 type ListItemType = {
   text?: string;
@@ -52,13 +54,16 @@ type ListItemType = {
 };
 
 const listItems: ListItemType[] = [
-  { text: 'Orders', icon: FaClipboardList },
+  { text: 'Commandes', icon: FaClipboardList },
   { text: 'Clients', icon: AiOutlineUsergroupAdd },
-  { text: 'Products', icon: AiOutlineShoppingCart },
+  { text: 'Produits', icon: AiOutlineShoppingCart },
   { text: 'Stock', icon: MdOutlineInventory2 },
 ];
 
 export default function OrderManagement() {
+  // State for the order being edited
+  const [isEditOrderOpen, setIsEditOrderOpen] = useState(false);
+  const [orderToEdit, setOrderToEdit] = useState<Order | null>(null);
   const { isOpen, onClose, getButtonProps } = useDisclosure();
   const [orders, setOrders] = useState<Order[]>([]);
   const [newOrder, setNewOrder] = useState<Omit<Order, 'id'>>({
@@ -67,7 +72,7 @@ export default function OrderManagement() {
     framePrice: 0,
     productPrice: 0,
     deposit: 0,
-    status: 'Pending',
+    status: 'En attente',
     date: ''
   });
   const [types, setTypes] = useState<Type[]>([]); // List of types
@@ -96,6 +101,12 @@ export default function OrderManagement() {
     fetchOrders();
     fetchData();
   }, []);
+
+  // Open edit order drawer
+  const handleEditOrder = (order: Order) => {
+    setOrderToEdit(order);
+    setIsEditOrderOpen(true);
+  };
 
   const fetchData = async () => {
     try {
@@ -128,7 +139,7 @@ export default function OrderManagement() {
       setOrders([]);
       toast({
         title: 'Error fetching orders',
-        description: 'There was an error loading the order list. Please try again.',
+        description: 'Une erreur s\'est produite',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -164,7 +175,16 @@ export default function OrderManagement() {
     setSubtypeFilter(''); // Reset subtype filter
   };
   
-  
+  const handleClearFilters = () => {
+    setUserFilter('');
+    setStatusFilter('');
+    setDateFilter('');
+    setSelectedType('');
+    setSelectedSubtype('');
+    setSubtypeFilter('');
+    setFilteredSubtypes([]);
+  };
+
   const handleSubtypeChange = (subtypeId: string) => {
     setSelectedSubtype(subtypeId);  // Set the selected subtype
     const product = allProducts.find(
@@ -175,107 +195,182 @@ export default function OrderManagement() {
     }
   };
 
-    // Pagination Logic
-    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-    const currentClients = filteredOrders.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    );
-
-    const handleAddOrder = async () => {
-      if (!newOrder.userId || !newOrder.productId) {
+  const handleUpdateOrder = async (updatedOrder: Order) => {
+    try {
+      delete updatedOrder.createdAt;
+      delete updatedOrder.updatedAt;
+      delete updatedOrder.user;
+      delete updatedOrder.product;
+  
+      const {id, ...data} = updatedOrder
+      const response = await window.electron.updateOrder(id, data);
+      console.log(response)
+      if (response?.status) {
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === updatedOrder.id ? updatedOrder : order
+          )
+        );
         toast({
-          title: 'Invalid input',
-          description: 'Please select a user and a product.',
-          status: 'warning',
+          title: 'Commande mise à jour',
+          description: 'Commande mise à jour avec succès.',
+          status: 'success',
           duration: 5000,
           isClosable: true,
         });
-        return;
+        setIsEditOrderOpen(false); // Fermer le tiroir
+      } else {
+        throw new Error('Échec de la mise à jour de la commande');
       }
-    
-      // Calculate the total price and the rest value
-      const total = newOrder.framePrice + newOrder.productPrice;
-      const rest = total - newOrder.deposit;
-    
-      // Set the status based on the rest value
-      const status = rest === 0 ? 'completed' : 'pending';
-    
-      // Update the new order with the calculated status
-      const updatedOrder = { ...newOrder, status };
-    
-      try {
-        console.log('Sending order data:', updatedOrder);
-        const response = await window.electron.createOrder(updatedOrder);
-        console.log('Received response:', response);
-    
-        if (response?.status === false) {
-          // Handle insufficient stock
-          toast({
-            title: 'Insufficient Stock',
-            description: `Only ${response.data.quantity} items available in stock.`,
-            status: 'error',
-            duration: 5000,
-            isClosable: true,
-          });
-          return; // Exit the function to prevent further processing
-        }
-    
-        if (response && response.data) {
-          // Order created successfully
-          setOrders((prevOrders) => [...prevOrders, response.data]);
-          setNewOrder({
-            userId: '',
-            productId: '',
-            framePrice: 0,
-            productPrice: 0,
-            deposit: 0,
-            status: 'pending',
-            date: ''
-          });
-          setIsAddOrderOpen(false);
-          toast({
-            title: 'Order added',
-            description: `Order #${response.data.id} has been successfully added.`,
-            status: 'success',
-            duration: 5000,
-            isClosable: true,
-          });
-          await fetchOrders(); // Refresh the order list
-        } else {
-          // Handle unexpected response
-          throw new Error('Invalid response structure');
-        }
-      } catch (error) {
-        console.error('Error adding order:', error);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de la commande :', error);
+      toast({
+        title: 'Erreur lors de la mise à jour de la commande',
+        description: 'Une erreur s\'est produite',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+  
+  const handleDeleteOrder = async (orderId: string) => {
+    try {
+      const confirmation = window.confirm(
+        "Êtes-vous sûr de vouloir supprimer cette commande ?"
+      );
+      if (!confirmation) return;
+  
+      const de = await window.electron.deleteOrder(orderId);
+      console.log('suppression : ', de)
+      setOrders((prevOrders) => prevOrders.filter((order) => order.id !== orderId));
+  
+      toast({
+        title: "Commande supprimée",
+        description: "La commande a été supprimée avec succès.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Erreur lors de la suppression de la commande :", error);
+      toast({
+        title: "Erreur lors de la suppression de la commande",
+        description: "Une erreur est survenue lors de la suppression de la commande.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+  
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const currentClients = filteredOrders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handleAddOrder = async () => {
+    if (!newOrder.userId || !newOrder.productId) {
+      toast({
+        title: 'Invalid input',
+        description: 'Veuillez sélectionner un utilisateur et un produit..',
+        status: 'warning',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+  
+    // Calculate the total price and the rest value
+    const total = newOrder.framePrice + newOrder.productPrice;
+    const rest = total - newOrder.deposit;
+  
+    // Set the status based on the rest value
+    const status = rest === 0 ? 'Complétée' : 'En attente';
+    const date = new Date();
+  
+    // Update the new order with the calculated status
+    const updatedOrder = { ...newOrder, status, date };
+  
+    try {
+      console.log('Sending order data:', updatedOrder);
+      const response = await window.electron.createOrder(updatedOrder);
+      console.log('Received response:', response);
+  
+      if (response?.status === false) {
+        // Handle insufficient stock
         toast({
-          title: 'Error adding order',
-          description: 'There was an error adding the new order. Please check the console for more details.',
+          title: 'Insufficient Stock',
+          description: `Seulement ${response.data.quantity} articles disponibles en stock.`,
           status: 'error',
           duration: 5000,
           isClosable: true,
         });
+        return; // Exit the function to prevent further processing
       }
-    };
-    
   
-
+      if (response && response.data) {
+        // Order created successfully
+        setOrders((prevOrders) => [...prevOrders, response.data]);
+        setNewOrder({
+          userId: '',
+          productId: '',
+          framePrice: 0,
+          productPrice: 0,
+          deposit: 0,
+          status: 'En attente',
+          date: ''
+        });
+        setIsAddOrderOpen(false);
+        toast({
+          title: 'Order added',
+          description: `Commande ajoutée avec success.`,
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+        await fetchOrders(); // Refresh the order list
+      } else {
+        // Handle unexpected response
+        throw new Error('Invalid response structure');
+      }
+    } catch (error) {
+      console.error('Error adding order:', error);
+      toast({
+        title: 'Error adding order',
+        description: 'Une erreur s\'est produite',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+    
   return (
     <>
       <Head>
-        <title>Order Management | {BrandName}</title>
+        <title>Gestion des Commandes</title>
       </Head>
       <PreviewOptionsNavbar />
       <Flex as="nav" alignItems="center" justifyContent="space-between" h="16" py="2.5" pr="2.5">
         <HStack spacing={2}>
           <IconButton {...getButtonProps()} fontSize="18px" variant="ghost" icon={<BiMenu />} aria-label="open menu" />
           <Heading as="h1" size="md">
-            Order Management
+            Gestion des Commandes
           </Heading>
         </HStack>
-        <Button leftIcon={<BiPlus />} colorScheme="blue" onClick={() => setIsAddOrderOpen(true)}>
-          Add Order
-        </Button>
+        <Flex justifyContent="flex-end" gap={2}>
+            <ThemeToggle />
+            <Button
+                leftIcon={<BiPlus />}
+                colorScheme="green"
+                onClick={() => setIsAddOrderOpen(true)}
+            >
+                Ajouter
+            </Button>
+        </Flex>
       </Flex>
 
       <HStack align="start" spacing={0}>
@@ -297,25 +392,32 @@ export default function OrderManagement() {
           <VStack spacing={4} align="stretch" mb={4}>
             <HStack>
               <Input
-                placeholder="Filter by user"
+                placeholder="Filtrer par utilisateur"
                 value={userFilter}
                 onChange={(e) => setUserFilter(e.target.value)}
               />
               <Input
                   type="date"
-                  placeholder="Filter by date"
+                  placeholder="Filter par date"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
                 />
               <Select
-                placeholder="Filter by status"
+                placeholder="Filter par statut"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <option value="completed">Completed</option>
-                <option value="canceled">Canceled</option>
-                <option value="pending">Pending</option>
+                <option value="Complétée">Complétée</option>
+                <option value="Annulée">Annulée</option>
+                <option value="En attente">En attente</option>
               </Select>
+              <Button
+              onClick={handleClearFilters}
+              aria-label="Clear all filters"
+            >
+              <LuFilterX style={{ fontSize: '53px' }} />
+
+            </Button>
             </HStack>
           </VStack>
 
@@ -328,7 +430,7 @@ export default function OrderManagement() {
               <Text color="red.500" textAlign="center">{error}</Text>
             ) : (
             <>
-              <Table>
+              <Table fontSize={'sm'}>
               <Thead>
                 <Tr>
                   <Th>Date</Th>
@@ -341,18 +443,18 @@ export default function OrderManagement() {
                   <Th>Versement</Th>
                   <Th>Total</Th>
                   <Th>Reste</Th>
-                  <Th>Status</Th>
+                  <Th>Statut</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {currentClients.length === 0 ? (
                   <Tr>
-                    <Td colSpan={10} textAlign="center">No orders found</Td>
+                    <Td colSpan={12} textAlign="center">Aucune commande trouvée</Td>
                   </Tr>
                 ) : (
                   currentClients.map((order) => {
-                    const user = users.find(u => u.id === order.userId);
-                    const product = products.find(p => p.id === order.productId);
+                    const user = users.find((u) => u.id === order.userId);
+                    const product = products.find((p) => p.id === order.productId);
                     const total = order.framePrice + order.productPrice;
                     const rest = total - order.deposit;
                     return (
@@ -368,6 +470,38 @@ export default function OrderManagement() {
                         <Td>{total}</Td>
                         <Td>{rest}</Td>
                         <Td>{order.status}</Td>
+                        <Td>
+                          <HStack spacing={2}>
+                          <IconButton
+                            aria-label="Edit Order"
+                            icon={<MdModeEditOutline />}
+                            variant="ghost"
+                            color="blue.400" // Subtle blue for inactive state
+                            border="1px" // Adds a border
+                            borderColor="blue.200" // Border matches the subtle icon color
+                            _hover={{
+                              bg: "blue.50",
+                              color: "blue.500", // Stronger blue on hover
+                              borderColor: "blue.500", // Border color matches hover icon
+                            }}
+                            onClick={() => handleEditOrder(order)}
+                          />
+                          <IconButton
+                            aria-label="Delete Order"
+                            icon={<MdDelete />}
+                            variant="ghost"
+                            color="red.400" // Subtle red for inactive state
+                            border="1px" // Adds a border
+                            borderColor="red.200" // Border matches the subtle icon color
+                            _hover={{
+                              bg: "red.50",
+                              color: "red.500", // Stronger red on hover
+                              borderColor: "red.500", // Border color matches hover icon
+                            }}
+                            onClick={() => handleDeleteOrder(order.id)}
+                          />
+                          </HStack>
+                        </Td>
                       </Tr>
                     );
                   })
@@ -388,7 +522,7 @@ export default function OrderManagement() {
                       <Button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        colorScheme={page === currentPage ? 'blue' : 'gray'}
+                        colorScheme={page === currentPage ? 'green' : 'gray'}
                       >
                         {page}
                       </Button>
@@ -402,7 +536,7 @@ export default function OrderManagement() {
                   </HStack>
 
                   <HStack>
-                    <Text>Items per page:</Text>
+                    <Text>Article par page:</Text>
                     <select
                       value={itemsPerPage}
                       onChange={(e) => {
@@ -429,11 +563,11 @@ export default function OrderManagement() {
         <DrawerContent>
           <Box p="4">
             <Heading as="h3" size="md">
-              Add New Order
+              Ajouter une commande
             </Heading>
             <VStack spacing={4} align="stretch">
               <FormControl isRequired>
-                <FormLabel>User</FormLabel>
+                <FormLabel>Utilisateur</FormLabel>
                 <Select
                   placeholder="Select user"
                   value={newOrder.userId}
@@ -448,7 +582,7 @@ export default function OrderManagement() {
               </FormControl>
 
                 <FormControl isRequired>
-                  <FormLabel>Product Type</FormLabel>
+                  <FormLabel>Type produit</FormLabel>
                   <Select
                     placeholder="Select Type"
                     value={selectedType}
@@ -463,7 +597,7 @@ export default function OrderManagement() {
                 </FormControl>
 
                 <FormControl isRequired>
-              <FormLabel>Product Subtype</FormLabel>
+              <FormLabel>Sous Type Produit</FormLabel>
               <Select
                 placeholder="Select Subtype"
                 value={selectedSubtype}
@@ -478,7 +612,7 @@ export default function OrderManagement() {
               </Select>
                 </FormControl>
               <FormControl>
-                <FormLabel>Frame Price</FormLabel>
+                <FormLabel>Prix monture</FormLabel>
                 <NumberInput
                   value={newOrder.framePrice}
                   onChange={(valueString) => setNewOrder({ ...newOrder, framePrice: Number(valueString) })}
@@ -493,7 +627,7 @@ export default function OrderManagement() {
               </FormControl>
 
               <FormControl>
-                <FormLabel>Product Price</FormLabel>
+                <FormLabel>Prix produit</FormLabel>
                 <NumberInput
                   value={newOrder.productPrice}
                   onChange={(valueString) => setNewOrder({ ...newOrder, productPrice: Number(valueString) })}
@@ -508,7 +642,7 @@ export default function OrderManagement() {
               </FormControl>
 
               <FormControl>
-                <FormLabel>Deposit</FormLabel>
+                <FormLabel>Versement</FormLabel>
                 <NumberInput
                   value={newOrder.deposit}
                   onChange={(valueString) => setNewOrder({ ...newOrder, deposit: Number(valueString) })}
@@ -524,12 +658,128 @@ export default function OrderManagement() {
 
               <HStack spacing={4} mt={4}>
                 <Button onClick={() => setIsAddOrderOpen(false)} variant="outline">
-                  Cancel
+                  Annuler
                 </Button>
-                <Button colorScheme="blue" onClick={handleAddOrder}>
-                  Add Order
+                <Button colorScheme="green" onClick={handleAddOrder}>
+                  Ajouter
                 </Button>
               </HStack>
+            </VStack>
+          </Box>
+        </DrawerContent>
+      </Drawer>
+
+      {/*update order*/}
+      <Drawer isOpen={isEditOrderOpen} onClose={() => setIsEditOrderOpen(false)}>
+        <DrawerContent>
+          <Box p="4">
+            <Heading as="h3" size="md">
+              Modifier une commande
+            </Heading>
+            <VStack spacing={4} align="stretch">
+              {orderToEdit && (
+                <>
+                  <FormControl isRequired>
+                    <FormLabel>Utilisateur</FormLabel>
+                    <Select
+                      placeholder="Select user"
+                      value={orderToEdit.userId}
+                      onChange={(e) =>
+                        setOrderToEdit({ ...orderToEdit, userId: e.target.value })
+                      }
+                    >
+                      {users.map((user) => (
+                        <option key={user.id} value={user.id}>
+                          {`${user.name} ${user.surename}`}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl isRequired>
+                    <FormLabel>Prix Monture</FormLabel>
+                    <NumberInput
+                      value={orderToEdit.framePrice}
+                      onChange={(valueString) =>
+                        setOrderToEdit({
+                          ...orderToEdit,
+                          framePrice: parseFloat(valueString),
+                        })
+                      }
+                    >
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                  </FormControl>
+
+                  <FormControl isRequired>
+                    <FormLabel>Prix Produit</FormLabel>
+                    <NumberInput
+                      value={orderToEdit.productPrice}
+                      onChange={(valueString) =>
+                        setOrderToEdit({
+                          ...orderToEdit,
+                          productPrice: parseFloat(valueString),
+                        })
+                      }
+                    >
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Versement</FormLabel>
+                    <NumberInput
+                      value={orderToEdit.deposit}
+                      onChange={(valueString) =>
+                        setOrderToEdit({
+                          ...orderToEdit,
+                          deposit: parseFloat(valueString),
+                        })
+                      }
+                    >
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Statut</FormLabel>
+                    <Select
+                      value={orderToEdit.status}
+                      onChange={(e) =>
+                        setOrderToEdit({ ...orderToEdit, status: e.target.value })
+                      }
+                    >
+                      <option value="Complétée">Complétée</option>
+                      <option value="En attente">En attente</option>
+                      <option value="Annulée">Annulée</option>
+                    </Select>
+                  </FormControl>
+
+                <HStack spacing={4} mt={4}>
+                  <Button onClick={() => setIsEditOrderOpen(false)} variant="outline">
+                    Annuler
+                  </Button>
+                  <Button
+                    colorScheme="green"
+                    onClick={() => handleUpdateOrder(orderToEdit)}
+                  >
+                    Mettre à jour
+                  </Button>
+                </HStack>
+                </>
+              )}
             </VStack>
           </Box>
         </DrawerContent>

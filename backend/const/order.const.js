@@ -1,6 +1,6 @@
-const PENDING = 'pending';
-const COMPLETED = 'completed';
-const CANCELED = 'canceled';
+const PENDING = 'En attente';
+const COMPLETED = 'Complétée';
+const CANCELED = 'Annulée';
 
 const ORDER_STATUS = [
     PENDING,

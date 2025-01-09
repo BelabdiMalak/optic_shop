@@ -1,3 +1,5 @@
+import { Product, User } from "@prisma/client";
+
 export interface Order {
     id: string;
     date: string;
@@ -7,4 +9,8 @@ export interface Order {
     framePrice: number;
     productPrice: number;
     productId: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    user?: User;
+    product?: Product;
   };

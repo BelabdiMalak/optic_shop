@@ -17,7 +17,7 @@ export default function AddProductForm({ onSubmit, onCancel }: AddProductFormPro
     onSubmit({ name, type, subtype, stockQuantity });
   };
 
-  const buttonColorScheme = useColorModeValue('blue', 'teal');
+  const buttonColorScheme = useColorModeValue('green', 'teal');
 
   return (
     <Box as="form" onSubmit={handleSubmit} width="100%" maxWidth="500px" margin="auto">

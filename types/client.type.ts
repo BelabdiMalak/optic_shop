@@ -5,6 +5,7 @@ export interface Client {
     sphere?: string ;
     cylinder?: string ;
     axis?: string ;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
+    isDeleted?: boolean;
 }

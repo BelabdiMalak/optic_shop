@@ -98,11 +98,25 @@ const findBy = async (where) => {
     }
 }
 
+const deleteOne = async (id) => {
+    try {
+        return await prisma.user.update({
+            where: { id },
+            data: {
+                isDeleted: true
+            }
+        });
+    } catch (error) {
+        throw new Error('Error in deleting users by filter: ' + error.message);
+    }
+}
+
 module.exports = {
     createOne,
     findMany,
     findUnique,
     updateOne,
     findBy,
-    _findMany
+    _findMany,
+    deleteOne
 }

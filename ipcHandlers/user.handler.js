@@ -36,12 +36,22 @@ async function updateUser(event, id, data) {
   }
 }
 
+async function deleteUser (event, id) {
+  try {
+    return await userService.deleteUser(id);
+  } catch (error) {
+    console.error('Error deleting user (handler):', error);
+    throw error
+  }
+}
+
 // Register the IPC handlers
 function registerUserHandlers(ipcMain) {
   ipcMain.handle('get-user', getUser);
   ipcMain.handle('get-users', getUsers);
   ipcMain.handle('create-user', createUser);
   ipcMain.handle('update-user', updateUser);
+  ipcMain.handle('delete-user', deleteUser);
 }
 
 module.exports = {

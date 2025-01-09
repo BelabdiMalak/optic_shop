@@ -92,6 +92,26 @@ const updateStock = async (id, data) => {
     }
 };
 
+const deleteStock = async (id) => {
+    try {
+        const stock = await stockModel.findUnique(id);
+        if (!stock) {
+            return {
+                status: false,
+                message: 'Stock not found'
+            };
+        }
+
+        await stockModel.deleteOne(id);
+        return {
+            status: true,
+            message: 'Stock deleted successfully'
+        };
+    } catch (error) {
+        throw new Error(`Error in deleting stock (service): ${error}`);
+    }
+};
+
 const findStockById = async (id) => {
     try {
         const stock = await stockModel.findUnique(id);
@@ -145,5 +165,6 @@ module.exports = {
     createStock,
     updateStock,
     findStockById,
-    getStocks
+    getStocks,
+    deleteStock
 };

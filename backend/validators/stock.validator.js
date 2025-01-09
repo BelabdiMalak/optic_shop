@@ -46,6 +46,11 @@ const updateSchema = Joi.object({
             'string.base': 'Product ID must be a string',
             'string.guid': 'Product ID must be a valid UUID',
         }),
+    date: Joi.date()
+        .messages({
+            'date.base': 'Date must be a valid date',
+            'any.default': 'Date defaults to now if not provided'
+        }),
 })
 
 module.exports = {

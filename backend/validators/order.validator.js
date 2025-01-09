@@ -109,6 +109,13 @@ const updateSchema = Joi.object({
         .messages({
             'string.base': 'Product ID must be a string.',
             'string.guid': 'Product ID must be a valid UUID.',
+        }),
+
+    userId: Joi.string()
+        .uuid()
+        .messages({
+            'string.base': 'User ID must be a string.',
+            'string.guid': 'User ID must be a valid UUID.',
         })
 });
 

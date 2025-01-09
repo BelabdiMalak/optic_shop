@@ -55,11 +55,13 @@ const findMany = async ({ page, limit, orderField, orderBy, date, type, productI
                     select: {
                         type: {
                             select: {
+                                id: true,
                                 name: true
                             }
                         },
                         subType: {
                             select: {
+                                id: true,
                                 name: true
                             }
                        }
@@ -140,11 +142,22 @@ const findBy = async (where) => {
     }
 }
 
+const deleteOne = async (id) => {
+    try {
+        return await prisma.stock.delete({
+            where: { id }
+        });
+    } catch (error) {
+        throw new Error('Error in deleting stocks by filter: ' + error.message);
+    }
+}
+
 module.exports = {
     createOne,
     findMany,
     findUnique,
     updateOne,
     findBy,
-    _findMany
+    _findMany,
+    deleteOne
 }

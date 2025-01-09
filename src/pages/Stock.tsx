@@ -35,13 +35,14 @@ import {
 import { BiMenu, BiPlus } from 'react-icons/bi';
 import { AiOutlineClose, AiOutlineShoppingCart, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { FaClipboardList } from 'react-icons/fa';
-import { MdOutlineInventory2 } from 'react-icons/md';
-import { Head, PreviewOptionsNavbar } from '@src/components';
+import { MdDelete, MdModeEditOutline, MdOutlineInventory2 } from 'react-icons/md';
+import { Head, PreviewOptionsNavbar, ThemeToggle } from '@src/components';
 import { BrandName } from '@src/constants';
 import { Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { StockType } from 'types/stock.type';
 import { Type, SubType, Product } from 'types/product.type';
+import { LuFilterX } from "react-icons/lu";
 
 type ListItemType = {
   text?: string;
@@ -49,9 +50,9 @@ type ListItemType = {
 };
 
 const listItems: ListItemType[] = [
-  { text: 'Orders', icon: FaClipboardList },
+  { text: 'Commandes', icon: FaClipboardList },
   { text: 'Clients', icon: AiOutlineUsergroupAdd },
-  { text: 'Products', icon: AiOutlineShoppingCart },
+  { text: 'Produits', icon: AiOutlineShoppingCart },
   { text: 'Stock', icon: MdOutlineInventory2 },
 ];
 
@@ -67,17 +68,34 @@ export default function Stock() {
   const [isAddStockOpen, setIsAddStockOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState('');
   const [subtypeFilter, setSubtypeFilter] = useState('');
+  const [typeFilterV2, setTypeFilterV2] = useState('');
+  const [subtypeFilterV2, setSubtypeFilterV2] = useState('');
+  const [typeFilterV3, setTypeFilterV3] = useState('');
+  const [subtypeFilterV3, setSubtypeFilterV3] = useState('');
   const [stockTypeFilter, setStockTypeFilter] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [types, setTypes] = useState<Type[]>([]); // List of types
   const [subtypes, setSubtypes] = useState<SubType[]>([]); // List of subtypes
+  // for creation
   const [filteredSubtypes, setFilteredSubtypes] = useState<SubType[]>([]);
+  // for filtering
+  const [filteredSubtypesV2, setFilteredSubtypesV2] = useState<SubType[]>([]);
+  // for edition
+  const [filteredSubtypesV3, setFilteredSubtypesV3] = useState<SubType[]>([]);
   const [products, setProducts] = useState<Product[]>([]); // List of products
   const [selectedType, setSelectedType] = useState('');
   const [selectedSubtype, setSelectedSubtype] = useState('');
+  const [selectedTypeV2, setSelectedTypeV2] = useState('');
+  const [selectedSubtypeV2, setSelectedSubtypeV2] = useState('');
+  const [selectedTypeV3, setSelectedTypeV3] = useState('');
+  const [selectedSubtypeV3, setSelectedSubtypeV3] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [dateFilter, setDateFilter] = useState('');
+  // State for the stock being edited
+  const [isEditStockOpen, setIsEditStockOpen] = useState(false);
+  const [stockToEdit, setStockToEdit] = useState<StockType | null>(null);
 
   const toast = useToast();
 
@@ -85,6 +103,95 @@ export default function Stock() {
     fetchStock();
     fetchData();
   }, []);
+
+  const handleEditStock = (stock: StockType) => {
+    // Définir les valeurs initiales pour le type et le sous-type
+    setSelectedTypeV3(stock.product?.type.id || ''); // Utiliser l'ID du type
+    setSelectedSubtypeV3(stock.product?.subType.id || ''); // Utiliser l'ID du sous-type
+  
+    // Filtrer les sous-types correspondant au type sélectionné
+    const filtered = subtypes.filter((subtype) => subtype.typeId === stock.product?.type.id);
+    setFilteredSubtypesV3(filtered);
+  
+    setStockToEdit(stock); // Stock en cours d'édition
+    setIsEditStockOpen(true); // Ouvrir le formulaire
+  };
+  
+
+  const handleUpdateStock = async () => {
+    try {
+      if (!stockToEdit) return;
+
+      const product = products.find(
+        (product) => product.typeId === selectedTypeV3 && product.subTypeId === selectedSubtypeV3
+      ) || null
+      const updatedStock = {
+        ...stockToEdit,
+        productId: product?.id || ''
+      }
+
+      delete updatedStock.product
+
+      const {id, ...data} = updatedStock
+      const response = await window.electron.updateStock(id, data);
+
+      if (response?.status) {
+        setStock((prevStocks) =>
+          prevStocks.map((stock) =>
+            stock.id === updatedStock.id ? updatedStock : stock
+          )
+        );
+        toast({
+          title: 'Stock mise à jour',
+          description: 'Stock mise à jour avec succès.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+        setIsEditStockOpen(false); // Fermer le tiroir
+      } else {
+        throw new Error('Échec de la mise à jour du stock');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du stock :', error);
+      toast({
+        title: 'Erreur lors de la mise à jour du stock',
+        description: 'Une erreur s\'est produite',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleDeleteStock = async (stockId: string) => {
+    try {
+      const confirmation = window.confirm(
+        "Êtes-vous sûr de vouloir supprimer ce stock ?"
+      );
+      if (!confirmation) return;
+  
+      await window.electron.deleteStock(stockId);
+      setStock((prevStocks) => prevStocks.filter((stock) => stock.id !== stockId));
+  
+      toast({
+        title: "Stock supprimée",
+        description: "Le Sotck a été supprimée avec succès.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Erreur lors de la suppression de la stock :", error);
+      toast({
+        title: "Erreur lors de la suppression de la stock",
+        description: "Une erreur est survenue lors de la suppression de la stock.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -126,6 +233,23 @@ export default function Stock() {
     }
   };
 
+  const handleClearFilters = () => {
+    // Reset all filter states
+    setTypeFilter('');
+    setSubtypeFilter('');
+    setTypeFilterV2('');
+    setSubtypeFilterV2('');
+    setStockTypeFilter('');
+    setDateFilter('');
+    setSelectedType('');
+    setSelectedSubtype('');
+    setSelectedTypeV2('');
+    setSelectedSubtypeV2('');
+  
+    // You may also want to reset the pagination to the first page
+    setCurrentPage(1);
+  };
+
   const handleTypeChange = (typeId: string) => {
     setSelectedType(typeId);
     const filtered = subtypes.filter((subtype) => subtype.typeId === typeId);
@@ -138,10 +262,47 @@ export default function Stock() {
   
   const handleSubtypeChange = (subtypeId: string) => {
     setSelectedSubtype(subtypeId);
+    const product = products.find(
+      (product) => product.typeId === selectedType && product.subTypeId === subtypeId
+    )
+    if (product) {
+      setNewStock({ ...newStock, productId: product.id });
+    }
     const selectedSubtypeName = subtypes.find((subtype) => subtype.id === subtypeId)?.name || '';
     setSubtypeFilter(selectedSubtypeName.toLowerCase()); // Update subtype filter
   };  
+
+  const handleTypeChangeV2 = (typeId: string) => {
+    setSelectedTypeV2(typeId);
+    const filtered = subtypes.filter((subtype) => subtype.typeId === typeId);
+    setFilteredSubtypesV2(filtered);
+    setSelectedSubtypeV2('');
+    setSubtypeFilter(''); // Reset subtype filter
+    const selectedTypeName = types.find((type) => type.id === typeId)?.name || '';
+    setTypeFilterV2(selectedTypeName.toLowerCase()); // Update type filter
+  };
   
+  const handleSubtypeChangeV2 = (subtypeId: string) => {
+    setSelectedSubtypeV2(subtypeId);
+    const selectedSubtypeName = subtypes.find((subtype) => subtype.id === subtypeId)?.name || '';
+    setSubtypeFilterV2(selectedSubtypeName.toLowerCase()); // Update subtype filter
+  };  
+  
+  const handleTypeChangeV3 = (typeId: string) => {
+    setSelectedTypeV3(typeId);
+  
+    const filtered = subtypes.filter((subtype) => subtype.typeId === typeId);
+    setFilteredSubtypesV3(filtered); // Mise à jour correcte des sous-types
+  
+    setSelectedSubtypeV3(''); // Réinitialiser le sous-type sélectionné
+  };
+  
+  
+  const handleSubtypeChangeV3 = (subtypeId: string) => {
+    setSelectedSubtypeV3(subtypeId);
+    const selectedSubtypeName = subtypes.find((subtype) => subtype.id === subtypeId)?.name || '';
+    setSubtypeFilterV3(selectedSubtypeName.toLowerCase()); // Update subtype filter
+  };  
   const handleAddStock = async () => {
     if (!newStock.date || newStock.quantity <= 0 || !newStock.productId) {
       toast({
@@ -183,11 +344,11 @@ export default function Stock() {
   };
 
   const filteredStock = stock.filter((item) => {
-    const typeMatch = typeFilter ? item.product.type.name.toLowerCase() === typeFilter : true;
-    const subtypeMatch = subtypeFilter ? item.product.subType.name.toLowerCase() === subtypeFilter : true;
+    const typeMatch = typeFilterV2 ? item.product?.type.name.toLowerCase() === typeFilterV2 : true;
+    const subtypeMatch = subtypeFilterV2 ? item.product?.subType.name.toLowerCase() === subtypeFilterV2 : true;
     const stockTypeMatch = stockTypeFilter ? item.type.toLowerCase() === stockTypeFilter.toLowerCase() : true;
-    const dateMatch = newStock.date ? new Date(item.date).toISOString().slice(0, 10) === newStock.date : true;
-  
+    const dateMatch = dateFilter ? new Date(item.date).toISOString().slice(0, 10) === dateFilter : true;
+
     return typeMatch && subtypeMatch && stockTypeMatch && dateMatch;
   });  
 
@@ -201,19 +362,26 @@ export default function Stock() {
   return (
     <>
       <Head>
-        <title>Stock Page | {BrandName}</title>
+        <title>Page de Stock | {BrandName}</title>
       </Head>
       <PreviewOptionsNavbar />
       <Flex as="nav" alignItems="center" justifyContent="space-between" h="16" py="2.5" px="2.5">
         <HStack spacing={2}>
-          <IconButton {...getButtonProps()} fontSize="18px" variant="ghost" icon={<BiMenu />} aria-label="open menu" />
+          <IconButton {...getButtonProps()} fontSize="18px" variant="ghost" icon={<BiMenu />} aria-label="ouvrir le menu" />
           <Heading as="h1" size="md">
             Stock
           </Heading>
         </HStack>
-        <Button leftIcon={<BiPlus />} colorScheme="blue" onClick={() => setIsAddStockOpen(true)}>
-          Add Stock
-        </Button>
+        <Flex justifyContent="flex-end" gap={2}>
+            <ThemeToggle />
+            <Button
+                leftIcon={<BiPlus />}
+                colorScheme="green"
+                onClick={() => setIsAddStockOpen(true)}
+            >
+                Ajouter
+            </Button>
+        </Flex>
       </Flex>
 
       <HStack align="start" spacing={0}>
@@ -232,57 +400,64 @@ export default function Stock() {
         </Drawer>
 
         <Box p={4} w="full">
-        <VStack spacing={4} align="stretch" mb={4}>
-  <HStack>
-    <FormControl>
-    <Select
-          placeholder="Select Type"
-          value={selectedType}
-          onChange={(e) => handleTypeChange(e.target.value)}
-        >
-          {types.map((type) => (
-            <option key={type.id} value={type.id}>
-              {type.name}
-            </option>
-          ))}
-        </Select>
-    </FormControl>
+          <VStack spacing={4} align="stretch" mb={4}>
+            <HStack>
+              <FormControl>
+                <Select
+                  placeholder="Sélectionner le Type"
+                  value={selectedTypeV2}
+                  onChange={(e) => handleTypeChangeV2(e.target.value)}
+                >
+                  {types.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
 
-    <FormControl>
-    <Select
-        placeholder="Select Subtype"
-        value={selectedSubtype}
-        onChange={(e) => handleSubtypeChange(e.target.value)}
-        isDisabled={!selectedType}
-      >
-        {filteredSubtypes.map((subtype) => (
-          <option key={subtype.id} value={subtype.id}>
-            {subtype.name}
-          </option>
-        ))}
-      </Select>
-    </FormControl>
+              <FormControl>
+                <Select
+                  placeholder="Sélectionner le Sous-Type"
+                  value={selectedSubtypeV2}
+                  onChange={(e) => handleSubtypeChangeV2(e.target.value)}
+                  isDisabled={!selectedTypeV2}
+                >
+                  {filteredSubtypesV2.map((subtype) => (
+                    <option key={subtype.id} value={subtype.id}>
+                      {subtype.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
 
-    <FormControl>
-      <Select
-        placeholder="Select Stock Type"
-        value={stockTypeFilter}
-        onChange={(e) => setStockTypeFilter(e.target.value)}
-      >
-        <option value="in">In</option>
-        <option value="out">Out</option>
-      </Select>
-    </FormControl>
+              <FormControl>
+                <Select
+                  placeholder="Sélectionner le Type de Stock"
+                  value={stockTypeFilter}
+                  onChange={(e) => setStockTypeFilter(e.target.value)}
+                >
+                  <option value="in">Entrée</option>
+                  <option value="out">Sortie</option>
+                </Select>
+              </FormControl>
 
-      <FormControl>
-        <Input
-          type="date"
-          value={newStock.date}
-          onChange={(e) => setNewStock({ ...newStock, date: e.target.value })}
-        />
-      </FormControl>
-    </HStack>
-  </VStack>
+              <FormControl>
+                <Input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value )}
+                />
+              </FormControl>
+              <Button
+              onClick={handleClearFilters}
+              aria-label="Clear all filters"
+            >
+              <LuFilterX style={{ fontSize: '69px' }} />
+
+            </Button>
+            </HStack>
+          </VStack>
 
           <Box overflowX="auto">
             {isLoading ? (
@@ -293,34 +468,67 @@ export default function Stock() {
               <Text color="red.500" textAlign="center">{error}</Text>
             ) : (
               <>
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>Date</Th>
-                    <Th>Product Type</Th>
-                    <Th>Product Subtype</Th>
-                    <Th>Stock Type</Th>
-                    <Th>Quantity</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {currentStocks.length === 0 ? (
+                <Table fontSize={"sm"}>
+                  <Thead>
                     <Tr>
-                      <Td colSpan={5} textAlign="center">No stock found</Td>
+                      <Th>Date</Th>
+                      <Th>Type de Produit</Th>
+                      <Th>Sous-Type de Produit</Th>
+                      <Th>Type de Stock</Th>
+                      <Th>Quantité</Th>
                     </Tr>
-                  ) : (
-                    currentStocks.map((item) => (
-                      <Tr key={item.id}>
-                        <Td>{new Date(item.date).toLocaleDateString()}</Td>
-                        <Td>{item.product.type.name}</Td>
-                        <Td>{item.product.subType.name}</Td>
-                        <Td>{item.type}</Td>
-                        <Td>{item.quantity}</Td>
+                  </Thead>
+                  <Tbody>
+                    {currentStocks.length === 0 ? (
+                      <Tr>
+                        <Td colSpan={5} textAlign="center">Aucun stock trouvé</Td>
                       </Tr>
-                    ))
-                  )}
-                </Tbody>
-              </Table>
+                    ) : (
+                      currentStocks.map((item) => (
+                        <Tr key={item.id}>
+                          <Td>{new Date(item.date).toLocaleDateString()}</Td>
+                          <Td>{item.product ? item.product.type.name: '-'}</Td>
+                          <Td>{item.product ? item.product.subType.name: '-'}</Td>
+                          <Td>{item.type}</Td>
+                          <Td>{item.quantity}</Td>
+                        <Td>
+                          <HStack spacing={2}>
+                          <IconButton
+                            aria-label="Edit Order"
+                            icon={<MdModeEditOutline />}
+                            variant="ghost"
+                            color="blue.400" // Subtle blue for inactive state
+                            border="1px" // Adds a border
+                            borderColor="blue.200" // Border matches the subtle icon color
+                            _hover={{
+                              bg: "blue.50",
+                              color: "blue.500", // Stronger blue on hover
+                              borderColor: "blue.500", // Border color matches hover icon
+                            }}
+                            onClick={() => handleEditStock(item)}
+                          />
+                          <IconButton
+                            aria-label="Delete Order"
+                            icon={<MdDelete />}
+                            variant="ghost"
+                            color="red.400" // Subtle red for inactive state
+                            border="1px" // Adds a border
+                            borderColor="red.200" // Border matches the subtle icon color
+                            _hover={{
+                              bg: "red.50",
+                              color: "red.500", // Stronger red on hover
+                              borderColor: "red.500", // Border color matches hover icon
+                            }}
+                            onClick={() => handleDeleteStock(item.id)}
+                          />
+                          </HStack>
+                        </Td>
+                        </Tr>
+                      ))
+                    )}
+                  </Tbody>
+                </Table>
+
                 {/* Pagination */}
                 <Flex mt={4} justifyContent="space-between" alignItems="center">
                   <HStack spacing={2}>
@@ -334,7 +542,7 @@ export default function Stock() {
                       <Button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        colorScheme={page === currentPage ? 'blue' : 'gray'}
+                        colorScheme={page === currentPage ? 'green' : 'gray'}
                       >
                         {page}
                       </Button>
@@ -348,7 +556,7 @@ export default function Stock() {
                   </HStack>
 
                   <HStack>
-                    <Text>Items per page:</Text>
+                    <Text>Articles par page :</Text>
                     <select
                       value={itemsPerPage}
                       onChange={(e) => {
@@ -370,12 +578,12 @@ export default function Stock() {
         </Box>
       </HStack>
 
-      {/* Add Stock Drawer */}
+      {/* Ajouter un Stock */}
       <Drawer isOpen={isAddStockOpen} onClose={() => setIsAddStockOpen(false)}>
         <DrawerContent>
           <Box p="4">
             <Heading as="h3" size="md">
-              Add New Stock
+              Ajouter un Nouveau Stock
             </Heading>
             <VStack spacing={4} align="stretch">
               <FormControl isRequired>
@@ -388,7 +596,7 @@ export default function Stock() {
               </FormControl>
 
               <FormControl isRequired>
-                <FormLabel>Quantity</FormLabel>
+                <FormLabel>Quantité</FormLabel>
                 <NumberInput
                   value={newStock.quantity}
                   onChange={(valueString) => setNewStock({ ...newStock, quantity: parseInt(valueString, 10) || 0 })}
@@ -407,52 +615,150 @@ export default function Stock() {
                   value={newStock.type}
                   onChange={(e) => setNewStock({ ...newStock, type: e.target.value })}
                 >
-                  <option value="in">In</option>
-                  <option value="out">Out</option>
+                  <option value="in">Entrée</option>
+                  <option value="out">Sortie</option>
                 </Select>
               </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Product Type</FormLabel>
-                  <Select
-                    placeholder="Select Type"
-                    value={selectedType}
-                    onChange={(e) => handleTypeChange(e.target.value)}
-                  >
-                    {types.map((type) => (
-                      <option key={type.id} value={type.id}>
-                        {type.name}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
 
-                <FormControl isRequired>
-              <FormLabel>Product Subtype</FormLabel>
-              <Select
-                placeholder="Select Subtype"
-                value={selectedSubtype}
-                onChange={(e) => handleSubtypeChange(e.target.value)}
-                isDisabled={!selectedType}
-              >
-                {filteredSubtypes.map((subtype) => (
-                  <option key={subtype.id} value={subtype.id}>
-                    {subtype.name}
-                  </option>
-                ))}
-              </Select>
-                </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Type de Produit</FormLabel>
+                <Select
+                  placeholder="Sélectionner le Type"
+                  value={selectedType}
+                  onChange={(e) => handleTypeChange(e.target.value)}
+                >
+                  {
+                  
+                  types.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Sous-Type de Produit</FormLabel>
+                <Select
+                  placeholder="Sélectionner le Sous-Type"
+                  value={selectedSubtype}
+                  onChange={(e) => handleSubtypeChange(e.target.value)}
+                  isDisabled={!selectedType}
+                >
+                  {filteredSubtypes.map((subtype) => (
+                    <option key={subtype.id} value={subtype.id}>
+                      {subtype.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
               <HStack spacing={4} mt={4}>
                 <Button onClick={() => setIsAddStockOpen(false)} variant="outline">
-                  Cancel
+                  Annuler
                 </Button>
-                <Button colorScheme="blue" onClick={handleAddStock}>
-                  Add Stock
+                <Button colorScheme="green" onClick={handleAddStock}>
+                  Ajouter le Stock
                 </Button>
               </HStack>
             </VStack>
           </Box>
         </DrawerContent>
       </Drawer>
+      {/* Edit Stock Drawer */}
+      <Drawer isOpen={isEditStockOpen} onClose={() => setIsEditStockOpen(false)}>
+        <DrawerContent>
+          <Box p="4">
+            <Heading as="h3" size="md">
+              Modifier le Stock
+            </Heading>
+            <VStack spacing={4} align="stretch">
+              {
+                stockToEdit && (
+                  <>
+                    <FormControl isRequired>
+                      <FormLabel>Date</FormLabel>
+                      <Input
+                        type="date"
+                        value={new Date(stockToEdit.date).toISOString().split('T')[0]}
+                        onChange={(e) => setStockToEdit({ ...stockToEdit, date: e.target.value })}
+                      />
+                    </FormControl>
+
+                    <FormControl isRequired>
+                      <FormLabel>Quantité</FormLabel>
+                      <NumberInput
+                        value={stockToEdit.quantity}
+                        onChange={(valueString) => setStockToEdit({ ...stockToEdit, quantity: parseInt(valueString, 10) || 0 })}
+                      >
+                        <NumberInputField />
+                        <NumberInputStepper>
+                          <NumberIncrementStepper />
+                          <NumberDecrementStepper />
+                        </NumberInputStepper>
+                      </NumberInput>
+                    </FormControl>
+
+                    <FormControl isRequired>
+                      <FormLabel>Type</FormLabel>
+                      <Select
+                        value={stockToEdit.type}
+                        onChange={(e) => setStockToEdit({ ...stockToEdit, type: e.target.value })}
+                      >
+                        <option value="in">Entrée</option>
+                        <option value="out">Sortie</option>
+                      </Select>
+                    </FormControl>
+
+                    <FormControl isRequired>
+                      <FormLabel>Type de Produit</FormLabel>
+                      <Select
+                          placeholder="Sélectionner le Type"
+                          value={selectedTypeV3}
+                          onChange={(e) => {
+                            handleTypeChangeV3(e.target.value);
+                          }}
+                        >
+                        {types.map((type) => (
+                          <option key={type.id} value={type.id}>
+                            {type.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl isRequired>
+                      <FormLabel>Sous-Type de Produit</FormLabel>
+                      <Select
+                        placeholder="Sélectionner le Sous-Type"
+                        value={selectedSubtypeV3}
+                        onChange={(e) => handleSubtypeChangeV3(e.target.value)}
+                        isDisabled={!selectedTypeV3}
+                      >
+                        {filteredSubtypesV3.map((subtype) => (
+                          <option key={subtype.id} value={subtype.id}>
+                            {subtype.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <HStack spacing={4} mt={4}>
+                      <Button onClick={() => setIsEditStockOpen(false)} variant="outline">
+                        Annuler
+                      </Button>
+                      <Button colorScheme="green" onClick={() => handleUpdateStock()}>
+                        Mettre à jour
+                      </Button>
+                    </HStack>
+                  </>
+                )
+              }
+            </VStack>
+          </Box>
+        </DrawerContent>
+      </Drawer>
+
     </>
   );
 }
