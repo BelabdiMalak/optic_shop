@@ -45,6 +45,24 @@ async function updateOrder(event, id, data) {
     }
 }
 
+async function getTurnOver(event) {
+    try {
+        return await orderService.getTurnOver();
+    } catch (error) {
+        console.error('Error turnover order (handler):', error);
+        throw error;
+    }
+}
+
+async function getProductsSold(event) {
+    try {
+        return await orderService.getProductsSold();
+    } catch (error) {
+        console.error('Error getProductsSold (handler):', error);
+        throw error;
+    }
+}
+
 // Register the IPC handlers
 function registerOrderHandlers(ipcMain) {
     ipcMain.handle('get-order', getOrder);
@@ -52,6 +70,8 @@ function registerOrderHandlers(ipcMain) {
     ipcMain.handle('create-order', createOrder);
     ipcMain.handle('update-order', updateOrder);
     ipcMain.handle('delete-order', deleteOrder);
+    ipcMain.handle('turnover-order', getTurnOver);
+    ipcMain.handle('productsSold-order', getProductsSold);
 }
 
 module.exports = {

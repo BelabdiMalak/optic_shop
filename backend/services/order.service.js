@@ -2,6 +2,7 @@ const orderValidator = require('../validators/order.validator');
 const productModel = require('../models/product.model');
 const orderModel = require('../models/order.model');
 const userModel = require('../models/user.model');
+const { ORDER_STATUS } = require('../const/order.const');
 
 const createOrder = async (data) => {
     try {
@@ -86,6 +87,13 @@ const updateOrder = async (id, data) => {
             };
         }
 
+        if (data.status && data.status === 'Annulée') {
+            await productModel.updateOne(
+                order.product.id,
+                { stockQuantity: { increment: 1 } }
+            )
+        }
+        
         const updatedOrder = await orderModel.updateOne(id, data);
         return {
             status: true,
@@ -156,6 +164,18 @@ const deleteOrder = async (id) => {
             };
         }
 
+        if (order.status === 'Complétée') {
+            return {
+                status: false,
+                message: 'Cannot delete a completed order'
+            };
+        }
+
+        await productModel.updateOne(
+            order.product.id,
+            { stockQuantity: { increment: 1 } }
+        )
+
         await orderModel.deleteById(id);
         return {
             status: true,
@@ -166,10 +186,38 @@ const deleteOrder = async (id) => {
     }
 };
 
+const getTurnOver = async () => {
+    try {
+        const turnOver = await orderModel.getTurnOver();
+        return {
+            status: true,
+            message: 'Turn over fetched successfully',
+            data: turnOver
+        };
+    } catch (error) {
+        throw new Error(`Error in getting turnover (service): ${error}`);
+    }
+}
+
+const getProductsSold = async () => {
+    try {
+        const products = await orderModel.getProductsSold();
+        return {
+            status: true,
+            message: 'Get Products sold fetched successfully',
+            data: products
+        };
+    } catch (error) {
+        throw new Error(`Error in getting products sold (service): ${error}`);
+    }
+}
+
 module.exports = {
     createOrder,
     updateOrder,
     findOrderById,
     getOrders,
-    deleteOrder
+    deleteOrder,
+    getTurnOver,
+    getProductsSold
 };

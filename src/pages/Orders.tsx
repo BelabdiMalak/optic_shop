@@ -33,9 +33,9 @@ import {
   Select,
 } from '@chakra-ui/react';
 import { BiMenu, BiPlus } from 'react-icons/bi';
-import { AiOutlineClose, AiOutlineShoppingCart, AiOutlineUsergroupAdd } from 'react-icons/ai';
-import { FaClipboardList } from 'react-icons/fa';
-import { MdOutlineInventory2, MdModeEditOutline, MdDelete } from 'react-icons/md';
+import { AiOutlineClose } from 'react-icons/ai';
+import { FaBoxOpen, FaClipboardList } from 'react-icons/fa';
+import { MdModeEditOutline, MdDelete } from 'react-icons/md';
 import { Head, PreviewOptionsNavbar } from '@src/components';
 import { BrandName } from '@src/constants';
 import { Link } from 'react-router-dom';
@@ -47,17 +47,19 @@ import { Product } from '@prisma/client';
 import { Order } from 'types/order.type';
 import ThemeToggle from "@src/components/ThemeToggle";
 import { LuFilterX } from "react-icons/lu";
+import { IoMdHome } from 'react-icons/io';
+import { HiUsers } from 'react-icons/hi2';
 
 type ListItemType = {
   text?: string;
   icon: React.ElementType;
 };
 
-const listItems: ListItemType[] = [
-  { text: 'Commandes', icon: FaClipboardList },
-  { text: 'Clients', icon: AiOutlineUsergroupAdd },
-  { text: 'Produits', icon: AiOutlineShoppingCart },
-  { text: 'Stock', icon: MdOutlineInventory2 },
+const listItems = [
+    { text: 'Général', icon: IoMdHome },
+    { text: 'Commandes', icon: FaClipboardList },
+    { text: 'Clients', icon: HiUsers },
+    { text: 'Stock', icon: FaBoxOpen },
 ];
 
 export default function OrderManagement() {
@@ -241,8 +243,21 @@ export default function OrderManagement() {
       );
       if (!confirmation) return;
   
-      const de = await window.electron.deleteOrder(orderId);
-      console.log('suppression : ', de)
+      const response = await window.electron.deleteOrder(orderId);
+  
+      if (response.status === false) {
+        // Gérer le cas où la suppression échoue
+        toast({
+          title: "Erreur de suppression",
+          description: "Impossible de supprimer une commande complétée.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
+  
+      // Si la suppression réussit, mettre à jour l'état
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== orderId));
   
       toast({
@@ -255,7 +270,7 @@ export default function OrderManagement() {
     } catch (error) {
       console.error("Erreur lors de la suppression de la commande :", error);
       toast({
-        title: "Erreur lors de la suppression de la commande",
+        title: "Erreur lors de la suppression",
         description: "Une erreur est survenue lors de la suppression de la commande.",
         status: "error",
         duration: 5000,
@@ -263,6 +278,8 @@ export default function OrderManagement() {
       });
     }
   };
+  
+  
   
   // Pagination Logic
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
@@ -457,6 +474,8 @@ export default function OrderManagement() {
                     const product = products.find((p) => p.id === order.productId);
                     const total = order.framePrice + order.productPrice;
                     const rest = total - order.deposit;
+                    const isCompleted = order.status === "Complétée";
+
                     return (
                       <Tr key={order.id}>
                         <Td>{new Date(order.date).toLocaleDateString()}</Td>
@@ -485,6 +504,7 @@ export default function OrderManagement() {
                               borderColor: "blue.500", // Border color matches hover icon
                             }}
                             onClick={() => handleEditOrder(order)}
+                            isDisabled={isCompleted}
                           />
                           <IconButton
                             aria-label="Delete Order"
@@ -499,6 +519,7 @@ export default function OrderManagement() {
                               borderColor: "red.500", // Border color matches hover icon
                             }}
                             onClick={() => handleDeleteOrder(order.id)}
+                            isDisabled={isCompleted}
                           />
                           </HStack>
                         </Td>

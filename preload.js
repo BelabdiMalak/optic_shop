@@ -40,6 +40,8 @@ contextBridge.exposeInMainWorld('electron', {
   createOrder: (data) => ipcRenderer.invoke('create-order', data),
   getOrders: (filter) => ipcRenderer.invoke('get-orders', filter),
   updateOrder: (id, data) => ipcRenderer.invoke('update-order', id, data),
+  getTurnOver: () => ipcRenderer.invoke('turnover-order'),
+  getProductsSold: () => ipcRenderer.invoke('productsSold-order'),
 
   // Order Item
   getOrderItem: (id) => ipcRenderer.invoke('get-orderItem', id),

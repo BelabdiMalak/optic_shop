@@ -34,7 +34,7 @@ import {
 } from '@chakra-ui/react';
 import { BiMenu, BiPlus } from 'react-icons/bi';
 import { AiOutlineClose, AiOutlineShoppingCart, AiOutlineUsergroupAdd } from 'react-icons/ai';
-import { FaClipboardList } from 'react-icons/fa';
+import { FaBoxOpen, FaClipboardList } from 'react-icons/fa';
 import { MdDelete, MdModeEditOutline, MdOutlineInventory2 } from 'react-icons/md';
 import { Head, PreviewOptionsNavbar, ThemeToggle } from '@src/components';
 import { BrandName } from '@src/constants';
@@ -43,17 +43,19 @@ import React, { useState, useEffect } from 'react';
 import { StockType } from 'types/stock.type';
 import { Type, SubType, Product } from 'types/product.type';
 import { LuFilterX } from "react-icons/lu";
+import { IoMdHome } from 'react-icons/io';
+import { HiUsers } from 'react-icons/hi2';
 
 type ListItemType = {
   text?: string;
   icon: React.ElementType;
 };
 
-const listItems: ListItemType[] = [
-  { text: 'Commandes', icon: FaClipboardList },
-  { text: 'Clients', icon: AiOutlineUsergroupAdd },
-  { text: 'Produits', icon: AiOutlineShoppingCart },
-  { text: 'Stock', icon: MdOutlineInventory2 },
+const listItems = [
+    { text: 'Général', icon: IoMdHome },
+    { text: 'Commandes', icon: FaClipboardList },
+    { text: 'Clients', icon: HiUsers },
+    { text: 'Stock', icon: FaBoxOpen },
 ];
 
 export default function Stock() {
@@ -506,9 +508,10 @@ export default function Stock() {
                               borderColor: "blue.500", // Border color matches hover icon
                             }}
                             onClick={() => handleEditStock(item)}
+                            isDisabled={true}
                           />
                           <IconButton
-                            aria-label="Delete Order"
+                            aria-label="Delete Stock"
                             icon={<MdDelete />}
                             variant="ghost"
                             color="red.400" // Subtle red for inactive state
@@ -520,6 +523,7 @@ export default function Stock() {
                               borderColor: "red.500", // Border color matches hover icon
                             }}
                             onClick={() => handleDeleteStock(item.id)}
+                            isDisabled={true}
                           />
                           </HStack>
                         </Td>

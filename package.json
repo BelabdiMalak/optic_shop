@@ -24,6 +24,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^6.3.1",
     "@prisma/client": "^5.22.0",
+    "date-fns": "^4.1.0",
     "electron-is-dev": "^3.0.1",
     "electron-log": "^5.2.0",
     "framer-motion": "^10.16.4",

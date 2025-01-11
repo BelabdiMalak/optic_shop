@@ -1,5 +1,6 @@
 const prisma = require('../../config/prisma.config.js');
 const log = require('electron-log')
+const { startOfDay, endOfDay, startOfWeek, startOfMonth, startOfYear } = require('date-fns');
 
 const createOne = async (data) => {
     try {
@@ -179,6 +180,101 @@ const deleteById = async (id) => {
     }
 }
 
+const getTurnOver = async () =>  {
+    try {
+        const now = new Date();
+        const filters = {
+            day: {
+              gte: startOfDay(now),
+              lt: endOfDay(now),
+            },
+            week: {
+              gte: startOfWeek(now),
+              lt: endOfDay(now),
+            },
+            month: {
+              gte: startOfMonth(now),
+              lt: endOfDay(now),
+            },
+            year: {
+              gte: startOfYear(now),
+              lt: endOfDay(now),
+            },
+        };
+
+        return await Promise.all(
+            Object.entries(filters).map(
+                async ([key, filter]) => {
+                    const revenue = await prisma.order.aggregate({
+                        where: { 
+                            date: filter,
+                            status: 'Complétée'
+                        },
+                        _sum: { productPrice: true, framePrice: true }
+                    })
+                    return { 
+                        period: key, 
+                        revenue: (revenue._sum.productPrice || 0) + (revenue._sum.framePrice || 0) 
+                    };
+                }
+            )
+        )
+        
+    } catch (error) {
+        throw new Error('Error in getting turnover: ' + error.message);
+    }
+}
+
+const getProductsSold = async () =>  {
+    try {
+        const now = new Date();
+        const filters = {
+            day: {
+              gte: startOfDay(now),
+              lt: endOfDay(now),
+            },
+            week: {
+              gte: startOfWeek(now),
+              lt: endOfDay(now),
+            },
+            month: {
+              gte: startOfMonth(now),
+              lt: endOfDay(now),
+            },
+            year: {
+              gte: startOfYear(now),
+              lt: endOfDay(now),
+            },
+        };
+
+        return await Promise.all(
+            Object.entries(filters).map(async ([key, filter]) => {
+              const products = await prisma.order.groupBy({
+                by: ['productId'],
+                where: { 
+                    date: filter,
+                    status: 'Complétée'
+                },
+                _count: { productId: true },
+                orderBy: { _count: { productId: 'desc' } },
+              });
+      
+              return {
+                period: key,
+                items: products.map((item) => ({
+                  productId: item.productId,
+                  count: item._count.productId,
+                })),
+              };
+            })
+          );
+        
+    } catch (error) {
+        throw new Error('Error in getting products sold: ' + error.message);
+    }
+}
+
+
 module.exports = {
     createOne,
     findMany,
@@ -186,5 +282,7 @@ module.exports = {
     updateOne,
     findBy,
     _findMany,
-    deleteById
+    deleteById,
+    getTurnOver,
+    getProductsSold
 }

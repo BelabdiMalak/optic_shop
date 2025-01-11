@@ -11,7 +11,6 @@ import {
     Text,
     useColorModeValue,
     useDisclosure,
-    Input,
     VStack,
     Spinner,
     Drawer,
@@ -23,12 +22,14 @@ import {
     useToast,
 } from '@chakra-ui/react';
 import { BiMenu } from 'react-icons/bi';
-import { AiOutlineClose, AiOutlineShoppingCart, AiOutlineUsergroupAdd } from 'react-icons/ai';
+import { AiOutlineClose } from 'react-icons/ai';
 import { FaClipboardList } from 'react-icons/fa';
-import { MdOutlineInventory2 } from 'react-icons/md';
 import { Head, PreviewOptionsNavbar } from '@src/components';
 import { BrandName } from '@src/constants';
 import { Link } from 'react-router-dom';
+import { HiUsers } from "react-icons/hi2";
+import { FaBoxOpen } from "react-icons/fa6";
+import { IoMdHome } from "react-icons/io";
 
 // Define the Product type
 interface Product {
@@ -52,10 +53,10 @@ interface GroupedProduct {
 }
 
 const listItems = [
+    { text: 'Général', icon: IoMdHome },
     { text: 'Commandes', icon: FaClipboardList },
-    { text: 'Clients', icon: AiOutlineUsergroupAdd },
-    { text: 'Produits', icon: AiOutlineShoppingCart },
-    { text: 'Stock', icon: MdOutlineInventory2 },
+    { text: 'Clients', icon: HiUsers },
+    { text: 'Stock', icon: FaBoxOpen },
 ];
 
 const Products: React.FC = () => {
@@ -124,7 +125,7 @@ const Products: React.FC = () => {
     return (
         <>
             <Head>
-                <title>Produits</title>
+                <title>Général</title>
             </Head>
             <PreviewOptionsNavbar />
             <Flex as="nav" alignItems="center" h="16" py="2.5" px="2.5">
@@ -137,7 +138,7 @@ const Products: React.FC = () => {
                         aria-label="open menu"
                         onClick={onSidebarOpen}
                     />
-                    <Heading as="h1" size="md">Produits</Heading>
+                    <Heading as="h1" size="md">Général</Heading>
                 </HStack>
             </Flex>
             <HStack align="start" spacing={0}>
