@@ -202,7 +202,7 @@ const getTurnOver = async () =>  {
             },
         };
 
-        return await Promise.all(
+        const results = await Promise.all(
             Object.entries(filters).map(
                 async ([key, filter]) => {
                     const revenue = await prisma.order.aggregate({
@@ -220,60 +220,81 @@ const getTurnOver = async () =>  {
             )
         )
         
+        return results.reduce((acc, { period, revenue }) => {
+            acc[period] = revenue;
+            return acc;
+        }, {});
+        
     } catch (error) {
         throw new Error('Error in getting turnover: ' + error.message);
     }
 }
 
-const getProductsSold = async () =>  {
+const getProductsSold = async () => {
     try {
-        const now = new Date();
-        const filters = {
-            day: {
-              gte: startOfDay(now),
-              lt: endOfDay(now),
+      const now = new Date();
+      const filters = {
+        day: {
+          gte: startOfDay(now),
+          lt: endOfDay(now),
+        },
+        week: {
+          gte: startOfWeek(now),
+          lt: endOfDay(now),
+        },
+        month: {
+          gte: startOfMonth(now),
+          lt: endOfDay(now),
+        },
+        year: {
+          gte: startOfYear(now),
+          lt: endOfDay(now),
+        },
+      };
+  
+      // Get all products with types and subtypes
+      const allProducts = await prisma.product.findMany({
+        include: { type: true, subType: true },
+      });
+  
+      // Transform the result into the desired format
+      const result = await Promise.all(
+        Object.entries(filters).map(async ([key, filter]) => {
+          // Group orders by productId within the given time filter
+          const groupedOrders = await prisma.order.groupBy({
+            by: ["productId"],
+            where: {
+              date: filter,
+              status: "Complétée",
             },
-            week: {
-              gte: startOfWeek(now),
-              lt: endOfDay(now),
-            },
-            month: {
-              gte: startOfMonth(now),
-              lt: endOfDay(now),
-            },
-            year: {
-              gte: startOfYear(now),
-              lt: endOfDay(now),
-            },
-        };
-
-        return await Promise.all(
-            Object.entries(filters).map(async ([key, filter]) => {
-              const products = await prisma.order.groupBy({
-                by: ['productId'],
-                where: { 
-                    date: filter,
-                    status: 'Complétée'
-                },
-                _count: { productId: true },
-                orderBy: { _count: { productId: 'desc' } },
-              });
-      
-              return {
-                period: key,
-                items: products.map((item) => ({
-                  productId: item.productId,
-                  count: item._count.productId,
-                })),
-              };
-            })
-          );
-        
+            _count: { productId: true },
+          });
+  
+          // Create a map of productId to counts
+          const orderCountsMap = groupedOrders.reduce((map, order) => {
+            map[order.productId] = order._count.productId;
+            return map;
+          }, {});
+  
+          // Map all products to include those with zero orders
+          const productsWithDetails = allProducts.map((product) => ({
+            productId: product.id,
+            count: orderCountsMap[product.id] || 0, // Use 0 if productId is not in the map
+            typeName: product.type?.name,
+            subTypeName: product.subType?.name,
+          }));
+  
+          return { [key]: productsWithDetails };
+        })
+      );
+  
+      // Merge all periods into a single object
+      return Object.assign({}, ...result);
     } catch (error) {
-        throw new Error('Error in getting products sold: ' + error.message);
+      throw new Error("Error in getting products sold: " + error.message);
     }
-}
-
+  };
+  
 
 module.exports = {
     createOne,

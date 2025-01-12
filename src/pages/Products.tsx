@@ -20,18 +20,137 @@ import {
     CardHeader,
     CardBody,
     useToast,
+    Select,
 } from '@chakra-ui/react';
 import { BiMenu } from 'react-icons/bi';
 import { AiOutlineClose } from 'react-icons/ai';
-import { FaClipboardList } from 'react-icons/fa';
-import { Head, PreviewOptionsNavbar } from '@src/components';
-import { BrandName } from '@src/constants';
-import { Link } from 'react-router-dom';
+import { FaCalendarDay, FaCalendarWeek, FaClipboardList } from 'react-icons/fa';
 import { HiUsers } from "react-icons/hi2";
-import { FaBoxOpen } from "react-icons/fa6";
+import { FaBoxOpen, FaCalendarCheck } from "react-icons/fa6";
 import { IoMdHome } from "react-icons/io";
+import { IoCalendarNumber} from "react-icons/io5";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import ThemeToggle from "@src/components/ThemeToggle";
+import { Head, OverViewCard, PreviewOptionsNavbar } from '@src/components';
+import { Link } from "react-router-dom";
+import { BrandName } from '@src/constants';
 
-// Define the Product type
+const colorPalette = [
+    '#6c9eaf', // Soft Blue
+    '#74c2ba', // Muted Turquoise
+    '#d3b69f', // Warm Beige
+    '#c78e41', // Deep Gold
+    '#8b67b1', // Dusty Purple
+    '#db9f44', // Earthy Yellow
+    '#f56a7d', // Soft Pink
+    '#4fc8ab', // Deeper Mint Green
+    '#f27a4f', // Rusty Orange
+    '#5a1f26', // Dark Burgundy
+    '#93b9a6', // Sage Green
+    '#7e6e97', // Lavender Gray
+    '#a4c3d2', // Stormy Blue
+    '#9e9e9e', // Slate Gray
+    '#4f6f68', // Charcoal Green
+    '#758b6a', // Moss Green
+    '#c0a0b3', // Dusty Rose
+    '#b3b0d2', // Misty Purple
+    '#d69b5a'  // Mustard Yellow
+];
+
+
+const GLASS = 'Verre Correcteur';
+const SUNGLASS = 'Verre Solaire';
+const LENSES = 'Lentille';
+const GLASS_CLEANER = 'Nettoyant';
+const LENS_CLEANER = 'Produit';
+
+const HC = 'HC';
+const HMC = 'HMC';
+const TRHC = 'TRHC';
+const BB = 'BB';
+const TRB = 'TRB';
+
+const GREEN = 'VERT';
+const BLEU = 'BLEU';
+const BROWN = 'MARRON';
+const GRAY = 'GRIS';
+
+const SPICE = 'SPICE';
+const JADE = 'JADE';
+const BLUE = 'BLUE';
+const PERLA = 'PERLA';
+const GIALLO = 'GIALLO';
+
+const JAZZ = 'JAZZ';
+const GP = 'GP';
+const AQUASOFT = 'AQUASOFT';
+const BIO = 'BIO';
+
+const DEFAULT = 'DEFAULT';
+
+const GLASS_SUBTYPES = {
+    HC,
+    HMC,
+    TRHC,
+    BB,
+    TRB
+};
+
+const SUNGLASS_SUBTYPES = {
+    GREEN,
+    BLEU,
+    BROWN,
+    GRAY
+};
+
+const LENS_SUBTYPES = {
+    SPICE,
+    JADE,
+    PERLA,
+    BLUE,
+    GIALLO
+};
+
+const LENS_CLEANER_SUBTYPES = {
+    JAZZ,
+    GP,
+    AQUASOFT,
+    BIO
+};
+
+const GLASS_CLEANER_SUBTYPES = {
+    DEFAULT
+};
+
+// Define the type for valid subtypes
+type Subtypes = Record<string, string>;
+
+// Update getSubtypes function to return the correct subtype type
+const getSubtypes = (typeName: string): Subtypes => {
+    switch (typeName) {
+        case GLASS:
+            return GLASS_SUBTYPES;
+        case SUNGLASS:
+            return SUNGLASS_SUBTYPES;
+        case LENSES:
+            return LENS_SUBTYPES;
+        case GLASS_CLEANER:
+            return GLASS_CLEANER_SUBTYPES;
+        case LENS_CLEANER:
+            return LENS_CLEANER_SUBTYPES;
+        default:
+            return {}; // Return an empty object if no match
+    }
+};
+
+// Define types for our data
+interface SalesDataItem {
+  productId: string;
+  count: number;
+  typeName: string;
+  subTypeName: string;
+}
+
 interface Product {
     id: string;
     type: {
@@ -61,10 +180,31 @@ const listItems = [
 
 const Products: React.FC = () => {
     const { isOpen: isSidebarOpen, onOpen: onSidebarOpen, onClose: onSidebarClose, getButtonProps: getSidebarButtonProps } = useDisclosure();
-
+    const [turnoverData, setTurnoverData] = useState<any>({ daily: 0, weekly: 0, monthly: 0, yearly: 0 });
     const [products, setProducts] = useState<GroupedProduct[]>([]);
+    const [salesData, setSalesData] = useState<{ [key: string]: SalesDataItem[] }>({});
+    const [selectedPeriod, setSelectedPeriod] = useState<string>('month');
     const [isLoading, setIsLoading] = useState(true);
     const toast = useToast();
+
+    const fetchTurnoverData = async () => {
+        try {
+            setIsLoading(true);
+            const response = await window.electron.getTurnOver();
+            setTurnoverData(response.data);
+        } catch (error) {
+            console.error('Error fetching turnover data:', error);
+            toast({
+                title: 'Error fetching turnover data',
+                description: 'There was an error loading the turnover data. Please try again.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const fetchProducts = async () => {
         try {
@@ -81,6 +221,26 @@ const Products: React.FC = () => {
             toast({
                 title: 'Error fetching products',
                 description: 'There was an error loading the product list. Please try again.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const fetchSalesData = async () => {
+        try {
+            setIsLoading(true);
+            const response = await window.electron.getProductsSold();
+            //console.log(response.data)
+            setSalesData(response.data);
+        } catch (error) {
+            console.error('Error fetching sales data:', error);
+            toast({
+                title: 'Error fetching sales data',
+                description: 'There was an error loading the sales data. Please try again.',
                 status: 'error',
                 duration: 5000,
                 isClosable: true,
@@ -118,8 +278,39 @@ const Products: React.FC = () => {
         return Object.values(groupedProducts);
     };
 
+    const prepareChartData = (data: { [key: string]: SalesDataItem[] }) => {
+        if (!data || !data[selectedPeriod]) return [];
+    
+        const groupedData: { [key: string]: { [key: string]: number } } = {};
+        const allSubTypes = new Set<string>();
+    
+        data[selectedPeriod].forEach((item) => {
+            // Collect all unique subtypes
+            allSubTypes.add(item.subTypeName);
+    
+            if (!groupedData[item.typeName]) {
+                groupedData[item.typeName] = {};
+            }
+            groupedData[item.typeName][item.subTypeName] = item.count;
+        });
+    
+        // Ensure every typeName includes all subtypes, even with 0 count
+        return Object.entries(groupedData).map(([typeName, subTypes]) => ({
+            typeName,
+            ...Array.from(allSubTypes).reduce((acc, subTypeName) => {
+                acc[subTypeName] = subTypes[subTypeName] || 0; // Default to 0 if not present
+                return acc;
+            }, {} as { [key: string]: number }),
+        }));
+    };
+    
+
+    const chartData = prepareChartData(salesData);
+
     useEffect(() => {
         fetchProducts();
+        fetchTurnoverData();
+        fetchSalesData();
     }, []);
 
     return (
@@ -140,7 +331,9 @@ const Products: React.FC = () => {
                     />
                     <Heading as="h1" size="md">Général</Heading>
                 </HStack>
+                <ThemeToggle />
             </Flex>
+
             <HStack align="start" spacing={0}>
                 <Drawer
                     autoFocus={false}
@@ -156,58 +349,173 @@ const Products: React.FC = () => {
                     </DrawerContent>
                 </Drawer>
                 <Box p={4} w="full">
-    <Box overflowX="auto">
-        {isLoading ? (
-            <Flex justify="center" align="center" height="200px">
-                <Spinner size="xl" />
-            </Flex>
-        ) : (
-            <Flex justify="center" align="center">
-                <SimpleGrid
-                    columns={{ base: 1, sm: 2, md: 3, lg: 5 }}
-                    spacing={{ base: 4, md: 6 }}
-                    py={4}
-                >
-                    {products.map((product) => (
-                        <Card
-                            key={product.typeName}
-                            p={4}
-                            width="240px"
-                            borderWidth="1px"
-                            borderRadius="lg"
-                            boxShadow="lg"
-                            _hover={{ boxShadow: "xl", transform: "translateY(-5px)" }}
-                            transition="all 0.2s"
-                        >
-                            <CardHeader p={2}>
-                                <Heading size="md" textAlign="center">
-                                    {product.typeName}
-                                </Heading>
-                            </CardHeader>
-                            <CardBody p={2}>
-                                <VStack align="stretch" spacing={2}>
-                                    {product.subtypes.map((subtype) => (
-                                        <HStack key={subtype.name} justify="space-between">
-                                            <Text fontSize="sm">{subtype.name}:</Text>
-                                            <Text fontSize="sm" fontWeight="bold">
-                                                {subtype.quantity}
-                                            </Text>
-                                        </HStack>
-                                    ))}
-                                </VStack>
-                            </CardBody>
-                        </Card>
-                    ))}
-                </SimpleGrid>
-            </Flex>
-        )}
-    </Box>
-</Box>
+                    <Box overflowX="auto">
+                        {isLoading ? (
+                            <Flex justify="center" align="center" height="200px">
+                                <Spinner size="xl" />
+                            </Flex>
+                        ) : (
+                            <>
+                                {/* Turnover Data Section */}
+                                <Box mb={6}>
+                                    <SimpleGrid
+                                        columns={{ base: 1, sm: 2, md: 3, lg: 4 }}
+                                        spacing={{ base: 4, md: 6 }}
+                                        py={4}
+                                    >
+                                        <OverViewCard
+                                            icon={FaCalendarDay}
+                                            entity="Chiffre d'affire quotidien"
+                                            value={turnoverData.day}
+                                            currency='DA'
+                                        />
+                                        <OverViewCard
+                                            icon={FaCalendarWeek}
+                                            entity="Chiffre d'affire hebdomadaire"
+                                            value={turnoverData.week}
+                                            currency='DA'
+                                        />
+                                        <OverViewCard
+                                            icon={IoCalendarNumber}
+                                            entity="Chiffre d'affire mensuel"
+                                            value={turnoverData.month}
+                                            currency='DA'
+                                        />
+                                        <OverViewCard
+                                            icon={FaCalendarCheck}
+                                            entity="Chiffre d'affire annuel"
+                                            value={turnoverData.year}
+                                            currency='DA'
+                                        />
+                                    </SimpleGrid>
+                                </Box>
 
+                                {/* Product Cards Section */}
+                                <Box>
+                                    <SimpleGrid
+                                        columns={{ base: 1, sm: 2, md: 3, lg: 5 }}
+                                        spacing={{ base: 4, md: 6 }}
+                                        py={4}
+                                    >
+                                        {products.map((product) => (
+                                            <Card
+                                                key={product.typeName}
+                                                p={6}
+                                                width="240px"
+                                                borderRadius="xl"
+                                                borderWidth="1px"
+                                                borderColor={useColorModeValue("gray.200", "gray.700")} // Light border color similar to Card 2
+                                                bg= {useColorModeValue("gray.50", "gray.900")}
+                                                boxShadow="md"
+                                                _hover={{
+                                                    boxShadow: "lg", 
+                                                    transform: "translateY(-5px)"
+                                                }}
+                                                transition="all 0.3s"
+                                                >
+                                                <CardHeader p={2}>
+                                                    <Heading size="md" textAlign="center" color={useColorModeValue("gray.800", "gray.100")}>
+                                                    {product.typeName}
+                                                    </Heading>
+                                                </CardHeader>
+                                                <CardBody p={2}>
+                                                    <VStack align="stretch" spacing={2}>
+                                                    {product.subtypes.map((subtype) => (
+                                                        <HStack key={subtype.name} justify="space-between">
+                                                        <Text fontSize="sm" color="gray.500">{subtype.name}:</Text>
+                                                        <Text fontSize="sm" fontWeight="bold" color={useColorModeValue("green.600", "green.100")}>
+                                                            {subtype.quantity}
+                                                        </Text>
+                                                        </HStack>
+                                                    ))}
+                                                    </VStack>
+                                                </CardBody>
+                                                </Card>
+
+                                        ))}
+                                    </SimpleGrid>
+                                </Box>
+
+                                {/* Stacked Bar Chart Section */}
+                                <Box mt={6}>
+                                    <Heading size="md" mb={4}>Product Sales</Heading>
+                                    <Select
+                                        value={selectedPeriod}
+                                        onChange={(e) => setSelectedPeriod(e.target.value)}
+                                        mb={4}
+                                        width="200px"
+                                    >
+                                        <option value="day">By Day</option>
+                                        <option value="week">By Week</option>
+                                        <option value="month">By Month</option>
+                                        <option value="year">By Year</option>
+                                    </Select>
+                                    <Box height="400px" >
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={chartData}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="typeName" />
+                                            <YAxis />
+                                            <Tooltip
+                                                content={({ payload }) => {
+                                                    if (!payload || payload.length === 0) return null;
+
+                                                    const typeName = payload[0].payload.typeName;
+
+                                                    // Get the correct subtypes for this type
+                                                    const validSubtypes = getSubtypes(typeName);
+
+                                                    // Map through the subtypes and their values from the chart data
+                                                    const subtypes = Object.keys(payload[0].payload)
+                                                        .filter(key => key !== 'typeName') // Exclude 'typeName'
+                                                        .filter(key => validSubtypes[key]) // Only include valid subtypes for this type
+                                                        .map(key => ({
+                                                            name: key,
+                                                            count: payload[0].payload[key]
+                                                        }));
+
+                                                    return (
+                                                        <Box
+                                                            p={2}
+                                                            bg={useColorModeValue("gray.50", "gray.900")}
+                                                            borderRadius="md"
+                                                            boxShadow="lg"
+                                                            border="1px"
+                                                            borderColor={useColorModeValue("gray.200", "gray.700")}
+                                                        >
+                                                            <Heading size="sm">{typeName}</Heading>
+                                                            <VStack align="start" spacing={1} mt={2}>
+                                                                {subtypes.map((subtype) => (
+                                                                    <HStack key={subtype.name} justify="space-between" width="full">
+                                                                        <Text fontSize="sm">{subtype.name}:</Text>
+                                                                        <Text fontSize="sm" fontWeight="bold">{subtype.count}</Text>
+                                                                    </HStack>
+                                                                ))}
+                                                            </VStack>
+                                                        </Box>
+                                                    );
+                                                }}
+                                            />
+                                            <Legend />
+                                            {Object.keys(chartData[0] || {})
+                                                .filter((key) => key !== 'typeName') // Exclude typeName
+                                                .map((key, index) => (
+                                                    <Bar key={key} dataKey={key} stackId="a" fill={colorPalette[index % colorPalette.length]} />
+                                                ))}
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </Box>
+
+                                </Box>
+                            </>
+                        )}
+                    </Box>
+                </Box>
             </HStack>
         </>
     );
 };
+
 const Aside = ({ onClose }: { onClose: () => void }) => {
     return (
         <Box borderRight="2px" borderColor={useColorModeValue('gray.200', 'gray.900')}>

@@ -1,15 +1,15 @@
-import { Package, Tag, Hash } from 'lucide-react'
+import { Package, Tag, Hash } from 'lucide-react';
 
 interface ProductCardProps {
-  name: string
-  type: string
-  subType: string
-  quantity: number
+  name: string;
+  type: string;
+  subType: string;
+  quantity: number;
 }
 
 export default function ProductCard({ name, type, subType, quantity }: ProductCardProps) {
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+    <div className="bg-gray.50 shadow-md rounded-lg overflow-hidden transition-transform transform hover:scale-105">
       <div className="p-4">
         <h3 className="text-lg font-semibold mb-2">{name}</h3>
         <div className="space-y-2">
@@ -28,6 +28,5 @@ export default function ProductCard({ name, type, subType, quantity }: ProductCa
         </div>
       </div>
     </div>
-  )
+  );
 }
-

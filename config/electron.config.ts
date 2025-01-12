@@ -30,6 +30,8 @@ export interface ElectronAPI {
     createOrder: (data: Omit<Order, 'id' | 'createdAt' | 'updatedAt'| 'date'>) => Promise<ResponseType>
     deleteOrder: (id: string) => Promise<ResponseType>
     updateOrder: (id: string, data: any) => Promise<ResponseType>
+    getTurnOver: () => Promise<ResponseType>
+    getProductsSold: () => Promise<ResponseType>
   }
   
   declare global {

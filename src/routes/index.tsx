@@ -8,7 +8,7 @@ import Stock from '@src/pages/Stock'
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <Orders />
+        element: <Products />
     },
     {
         path: '/clients',
