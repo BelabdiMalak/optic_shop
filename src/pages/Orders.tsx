@@ -594,7 +594,9 @@ export default function OrderManagement() {
                   value={newOrder.userId}
                   onChange={(e) => setNewOrder({ ...newOrder, userId: e.target.value })}
                 >
-                  {users.map((user) => (
+                  {users
+                  .filter(user => user.isDeleted===false)
+                  .map((user) => (
                     <option key={user.id} value={user.id}>
                       {`${user.name} ${user.surename}`}
                     </option>
@@ -709,7 +711,9 @@ export default function OrderManagement() {
                         setOrderToEdit({ ...orderToEdit, userId: e.target.value })
                       }
                     >
-                      {users.map((user) => (
+                      {users
+                      .filter(user => user.isDeleted === false || user.id === orderToEdit.userId)
+                      .map((user) => (
                         <option key={user.id} value={user.id}>
                           {`${user.name} ${user.surename}`}
                         </option>

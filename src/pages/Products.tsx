@@ -57,7 +57,6 @@ const colorPalette = [
     '#d69b5a'  // Mustard Yellow
 ];
 
-
 const GLASS = 'Verre Correcteur';
 const SUNGLASS = 'Verre Solaire';
 const LENSES = 'Lentille';
@@ -308,11 +307,13 @@ const Products: React.FC = () => {
     const chartData = prepareChartData(salesData);
 
     useEffect(() => {
+        // Always call these functions in the same order
         fetchProducts();
         fetchTurnoverData();
         fetchSalesData();
-    }, []);
-
+    }, []); // Empty dependency array means this runs once on component mount
+    
+    
     return (
         <>
             <Head>
