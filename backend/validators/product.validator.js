@@ -29,6 +29,15 @@ const createSchema = Joi.object({
             'string.guid': 'SubType ID must be a valid UUID',
             'any.required': 'SubType ID is required'
         }),
+    
+    category: Joi.string()
+        .valid('torique', 'spherique'),
+    
+    sphere: Joi
+        .number(),
+
+    cylinder: Joi
+        .number()
 });
 
 

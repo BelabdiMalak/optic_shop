@@ -3,6 +3,8 @@ const productModel = require('../models/product.model');
 const orderModel = require('../models/order.model');
 const userModel = require('../models/user.model');
 const { ORDER_STATUS } = require('../const/order.const');
+const prisma = require('../../config/prisma.config');
+const { log } = require('console');
 
 const createOrder = async (data) => {
     try {
@@ -40,6 +42,30 @@ const createOrder = async (data) => {
                 }
             };
 
+        const productDetails = data.category && await prisma.productDetail.findFirst({
+            where: {
+                category: data.category,
+                productId: data.productId,
+                sphere: data.sphere, // put default 0 in frontend?
+                cylinder: data.cylinder,
+            }
+        })
+
+        if (data.category && (!productDetails || 1 > productDetails.quantity))
+            return {
+                status: false,
+                message: 'Insufficient stock quantity',
+                data: {
+                    quantity: productDetails ? productDetails.quantity : 0
+                }
+            }
+
+        data.category && productDetails && await prisma.productDetail.update({
+            where: { id: productDetails.id },
+            data: {
+                quantity: (productDetails.quantity - 1)
+            }
+        })
         const createdOrder = await orderModel.createOne({
             ...(data.date && { date: data.date }),
             ...(data.deposit && { deposit: data.deposit }),
@@ -47,7 +73,8 @@ const createOrder = async (data) => {
             ...(data.userId && { userId: data.userId }),
             ...(data.framePrice && { framePrice: data.framePrice }),
             ...(data.productPrice && { productPrice: data.productPrice }),
-            ...(data.productId && { productId: data.productId })
+            ...(data.productId && { productId: data.productId }),
+            ...(data.category && { detailsId: productDetails.id })
         });
 
         // update product quantity

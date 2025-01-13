@@ -33,9 +33,9 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { BiMenu, BiPlus } from 'react-icons/bi';
-import { AiOutlineClose, AiOutlineShoppingCart, AiOutlineUsergroupAdd } from 'react-icons/ai';
+import { AiOutlineClose } from 'react-icons/ai';
 import { FaBoxOpen, FaClipboardList } from 'react-icons/fa';
-import { MdDelete, MdModeEditOutline, MdOutlineInventory2 } from 'react-icons/md';
+import { MdDelete, MdModeEditOutline } from 'react-icons/md';
 import { Head, PreviewOptionsNavbar, ThemeToggle } from '@src/components';
 import { BrandName } from '@src/constants';
 import { Link } from 'react-router-dom';
@@ -66,14 +66,17 @@ export default function Stock() {
     type: 'in',
     quantity: 0,
     productId: '',
+    category: 'spherique',
+    sphere: '',
+    cylinder: ''
   });
   const [isAddStockOpen, setIsAddStockOpen] = useState(false);
-  const [typeFilter, setTypeFilter] = useState('');
-  const [subtypeFilter, setSubtypeFilter] = useState('');
+  const [_typeFilter, setTypeFilter] = useState('');
+  const [_subtypeFilter, setSubtypeFilter] = useState('');
   const [typeFilterV2, setTypeFilterV2] = useState('');
   const [subtypeFilterV2, setSubtypeFilterV2] = useState('');
-  const [typeFilterV3, setTypeFilterV3] = useState('');
-  const [subtypeFilterV3, setSubtypeFilterV3] = useState('');
+  //const [typeFilterV3, setTypeFilterV3] = useState('');
+  const [_subtypeFilterV3, setSubtypeFilterV3] = useState('');
   const [stockTypeFilter, setStockTypeFilter] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -319,9 +322,10 @@ export default function Stock() {
 
     try {
       const response = await window.electron.createStock(newStock);
+      console.log(response)
       if (response && response.data && response.status === true) {
         setStock((prevStock) => [...prevStock, response.data]);
-        setNewStock({ date: '', type: 'in', quantity: 0, productId: '' });
+        setNewStock({ date: '', type: 'in', quantity: 0, productId: '', category: 'spherique', sphere: '', cylinder: ''});
         setIsAddStockOpen(false);
         toast({
           title: 'Stock added',
@@ -584,7 +588,7 @@ export default function Stock() {
 
       {/* Ajouter un Stock */}
       <Drawer isOpen={isAddStockOpen} onClose={() => setIsAddStockOpen(false)}>
-        <DrawerContent>
+        <DrawerContent maxHeight="100vh" overflowY="auto">
           <Box p="4">
             <Heading as="h3" size="md">
               Ajouter un Nouveau Stock
@@ -631,9 +635,7 @@ export default function Stock() {
                   value={selectedType}
                   onChange={(e) => handleTypeChange(e.target.value)}
                 >
-                  {
-                  
-                  types.map((type) => (
+                  {types.map((type) => (
                     <option key={type.id} value={type.id}>
                       {type.name}
                     </option>
@@ -657,6 +659,40 @@ export default function Stock() {
                 </Select>
               </FormControl>
 
+              {/* Show these fields only when the selected type is "Verre Correcteur" */}
+              {selectedType && types.find((type) => type.id === selectedType)?.name === 'Verre Correcteur' && (
+                <>
+                  <FormControl>
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      value={newStock.category}
+                      onChange={(e) => setNewStock({ ...newStock, category: e.target.value })}
+                      isDisabled={!selectedType}
+                    >
+                      <option value="spherique">Sphérique</option>
+                      <option value="torique">Torique</option>
+                    </Select>
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Sphère</FormLabel>
+                    <Input
+                      value={newStock.sphere}
+                      onChange={(e) => setNewStock({ ...newStock, sphere: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Cylindre</FormLabel>
+                    <Input
+                      value={newStock.cylinder}
+                      onChange={(e) => setNewStock({ ...newStock, cylinder: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+                </>
+              )}
               <HStack spacing={4} mt={4}>
                 <Button onClick={() => setIsAddStockOpen(false)} variant="outline">
                   Annuler

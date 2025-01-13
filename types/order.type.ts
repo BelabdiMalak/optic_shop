@@ -1,4 +1,4 @@
-import { Product, User } from "@prisma/client";
+import { Product, ProductDetail, User } from "@prisma/client";
 
 export interface Order {
     id: string;
@@ -13,4 +13,9 @@ export interface Order {
     updatedAt?: Date;
     user?: User;
     product?: Product;
+    details?: ProductDetail;
+    detailsId?: string;
+    category?: string;
+    sphere?: string;
+    cylinder?: string;
   };

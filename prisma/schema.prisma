@@ -13,7 +13,6 @@ model User {
   surename        String
   sphere          String?
   cylinder        String?
-  axis            String?
 
   // metadata
   createdAt       DateTime   @default(now())
@@ -64,6 +63,9 @@ model Stock {
   // relations
   productId       String
   product         Product       @relation(fields: [productId], references: [id])
+
+  detailsId       String?
+  details         ProductDetail? @relation(fields: [detailsId], references: [id])
 }
 
 model Product {
@@ -83,6 +85,7 @@ model Product {
 
   order           Order[]
   stocks          Stock[]
+  details         ProductDetail[]
   
   @@unique([typeId, subTypeId])
 }
@@ -105,4 +108,27 @@ model Order {
 
   productId       String
   product         Product     @relation(fields: [productId], references: [id])
+
+  detailsId       String?
+  details         ProductDetail? @relation(fields: [detailsId], references: [id])
+}
+
+model ProductDetail {
+  id              String     @id @default(uuid())
+  sphere          String?    // defalt 0???
+  cylinder        String?
+  quantity        Int        @default(0)
+  category        String    // torique || spherique
+
+  // metadata
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // relations
+  productId       String
+  product         Product     @relation(fields: [productId], references: [id])
+  orders          Order[]
+  stocks          Stock[]
+
+  @@unique([productId, sphere, cylinder, category])
 }

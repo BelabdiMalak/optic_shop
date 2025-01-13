@@ -75,7 +75,10 @@ export default function OrderManagement() {
     productPrice: 0,
     deposit: 0,
     status: 'En attente',
-    date: ''
+    date: '',
+    category: '',
+    sphere: '',
+    cylinder: ''
   });
   const [types, setTypes] = useState<Type[]>([]); // List of types
   const [subtypes, setSubtypes] = useState<SubType[]>([]); // List of subtypes
@@ -89,7 +92,7 @@ export default function OrderManagement() {
   const [selectedType, setSelectedType] = useState('');
   const [selectedSubtype, setSelectedSubtype] = useState('');
   const [filteredSubtypes, setFilteredSubtypes] = useState<SubType[]>([]);
-  const [subtypeFilter, setSubtypeFilter] = useState('');
+  const [_subtypeFilter, setSubtypeFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [allProducts, setAllProducts] = useState<Product[]>([]); // List of products
 
@@ -338,7 +341,10 @@ export default function OrderManagement() {
           productPrice: 0,
           deposit: 0,
           status: 'En attente',
-          date: ''
+          date: '',
+          category: '',
+          sphere: '',
+          cylinder: ''
         });
         setIsAddOrderOpen(false);
         toast({
@@ -581,7 +587,7 @@ export default function OrderManagement() {
 
       {/* Add Order Drawer */}
       <Drawer isOpen={isAddOrderOpen} onClose={() => setIsAddOrderOpen(false)}>
-        <DrawerContent>
+        <DrawerContent maxHeight="100vh" overflowY="auto">
           <Box p="4">
             <Heading as="h3" size="md">
               Ajouter une commande
@@ -679,6 +685,41 @@ export default function OrderManagement() {
                 </NumberInput>
               </FormControl>
 
+              {/* Show these fields only when the selected type is "Verre Correcteur" */}
+              {selectedType && types.find((type) => type.id === selectedType)?.name === 'Verre Correcteur' && (
+                <>
+                  <FormControl>
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      value={newOrder.category}
+                      onChange={(e) => setNewOrder({ ...newOrder, category: e.target.value })}
+                      isDisabled={!selectedType}
+                    >
+                      <option value="spherique">Sphérique</option>
+                      <option value="torique">Torique</option>
+                    </Select>
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Sphère</FormLabel>
+                    <Input
+                      value={newOrder.sphere}
+                      onChange={(e) => setNewOrder({ ...newOrder, sphere: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Cylindre</FormLabel>
+                    <Input
+                      value={newOrder.cylinder}
+                      onChange={(e) => setNewOrder({ ...newOrder, cylinder: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+                </>
+              )}
+              
               <HStack spacing={4} mt={4}>
                 <Button onClick={() => setIsAddOrderOpen(false)} variant="outline">
                   Annuler

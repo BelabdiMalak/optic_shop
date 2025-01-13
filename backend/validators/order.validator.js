@@ -67,7 +67,30 @@ const createSchema = Joi.object({
             'string.base': 'Product ID must be a string.',
             'string.guid': 'Product ID must be a valid UUID.',
             'any.required': 'Product ID is required.'
-        })
+        }),
+
+    category: Joi.string().optional()
+        .allow(null)
+        .empty('')
+        .valid('torique', 'spherique'),
+    
+    sphere: Joi
+        .number()
+        .optional()
+        .allow(null) // Allow `null` explicitly
+        .empty('')   // Treat empty strings as `undefined`
+        .messages({
+            'number.base': 'Sphere must be a number or empty'
+        }),
+
+    cylinder: Joi
+        .number()
+        .optional()
+        .allow(null) // Allow `null` explicitly
+        .empty('')   // Treat empty strings as `undefined`
+        .messages({
+            'number.base': 'Cylinder must be a number or empty'
+        }),
 });
 
 const updateSchema = Joi.object({

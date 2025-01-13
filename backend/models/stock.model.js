@@ -22,7 +22,8 @@ const createOne = async (data) => {
                             }
                        }
                     },
-                }
+                },
+                details: true
             }
         });
     } catch (error) {
@@ -66,7 +67,8 @@ const findMany = async ({ page, limit, orderField, orderBy, date, type, productI
                             }
                        }
                     },
-                }
+                },
+                details: true
             },
             take: limit,
             skip: page ? (page - 1) * limit : undefined,

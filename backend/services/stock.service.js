@@ -2,6 +2,8 @@ const stockValidator = require('../validators/stock.validator');
 const productModel = require('../models/product.model');
 const { STOCK_TYPE } = require('../const/stock.const');
 const stockModel = require('../models/stock.model');
+const prisma = require('../../config/prisma.config');
+const { log } = require('console');
 
 const createStock = async (data) => {
     try {
@@ -35,14 +37,68 @@ const createStock = async (data) => {
             { stockQuantity: (product.stockQuantity + data.quantity)}
         )
 
-        data.type === STOCK_TYPE.OUT && await productModel.updateOne(
+        data.type === STOCK_TYPE.OUT && !data.category && await productModel.updateOne(
             product.id,
             { stockQuantity: (product.stockQuantity - data.quantity)}
         )
 
+        // Specific handling for type = 'GLASS' to add/update product details
+        const productDetails = data.category && await prisma.productDetail.findFirst({
+            where: {
+                category: data.category,
+                productId: data.productId,
+                sphere: data.sphere, // put default 0 in frontend?
+                cylinder: data.cylinder,
+            }
+        })
+
+        // if not enough quantity or type=out and productdetails does not exist
+        if (data.category && data.type === STOCK_TYPE.OUT && 
+            (!productDetails || data.quantity > productDetails.quantity))
+            return {
+                status: false,
+                message: 'Insufficient',
+                data: {
+                    quantity: productDetails ? productDetails.quantity : 0
+                }
+            }
+
+        // in case product details exists and has quantity update stock
+        data.category && productDetails && data.type === STOCK_TYPE.IN && await prisma.productDetail.update({
+            where: { id: productDetails.id },
+            data: {
+                quantity: { increment: data.quantity }
+            }
+        })
+
+        data.category && productDetails && data.type === STOCK_TYPE.OUT && await prisma.productDetail.update({
+            where: { id: productDetails.id },
+            data: {
+                quantity: { decrement: data.quantity }
+            }
+        })
+
+        data.category && productDetails && data.type === STOCK_TYPE.OUT && await productModel.updateOne(
+            product.id,
+            { stockQuantity: (product.stockQuantity - data.quantity)}
+        )
+        
+        const createdDetails = data.category && !productDetails && await prisma.productDetail.create({
+            data: {
+                productId: data.productId,
+                category: data.category,
+                quantity: data.quantity,
+                sphere: data.sphere,
+                cylinder: data.cylinder
+            }
+        })
+
         const createdStock = await stockModel.createOne({
-            ...data,
-            date: new Date(data.date)
+            type: data.type,
+            date: new Date(data.date),
+            quantity: data.quantity,
+            productId: data.productId,
+            ...(data.category && {detailsId: productDetails ? productDetails.id : createdDetails.id}),
         });
 
         return {

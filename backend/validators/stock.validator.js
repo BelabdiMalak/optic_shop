@@ -27,7 +27,28 @@ const createSchema = Joi.object({
                 'date.base': 'Date must be a valid date',
                 'any.default': 'Date defaults to now if not provided'
             }),
+    category: Joi.string().optional()
+        .valid('torique', 'spherique'),
+    
+    sphere: Joi
+        .number()
+        .optional()
+        .allow(null) // Allow `null` explicitly
+        .empty('')   // Treat empty strings as `undefined`
+        .messages({
+            'number.base': 'Sphere must be a number or empty'
+        }),
+
+    cylinder: Joi
+        .number()
+        .optional()
+        .allow(null) // Allow `null` explicitly
+        .empty('')   // Treat empty strings as `undefined`
+        .messages({
+            'number.base': 'Cylinder must be a number or empty'
+        }),
 });
+
 
 const updateSchema = Joi.object({
     type: Joi.string().valid(...Object.values(STOCK_TYPE))
