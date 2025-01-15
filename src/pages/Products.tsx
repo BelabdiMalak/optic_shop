@@ -36,19 +36,6 @@ import { Link } from "react-router-dom";
 import { BrandName } from '@src/constants';
 import { IoEyeSharp } from "react-icons/io5";
 
-interface ProductDetail {
-    id: string;
-    product: {
-        subType: {
-            name: string;
-        };
-    };
-    category: string;
-    sphere: string;
-    cylinder: string;
-    quantity: number;
-}
-
 const colorPalette = [
     '#6c9eaf', // Soft Blue
     '#74c2ba', // Muted Turquoise
@@ -200,7 +187,6 @@ const Products: React.FC = () => {
     const [selectedPeriod, setSelectedPeriod] = useState<string>('month');
     const [isLoading, setIsLoading] = useState(true);
     const toast = useToast();
-    const [_details, setDetails] = useState<ProductDetail[]>([]);
 
 
     const fetchTurnoverData = async () => {
