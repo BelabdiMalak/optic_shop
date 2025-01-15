@@ -9,6 +9,7 @@ export function useProducts() {
     async function fetchProducts() {
       try {
         const response = await window.electron.getProducts({})
+        console.log(response)
         setProducts(response.data)
       } catch (error) {
         console.error('Failed to fetch products:', error)

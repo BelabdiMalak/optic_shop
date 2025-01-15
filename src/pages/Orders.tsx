@@ -49,6 +49,7 @@ import ThemeToggle from "@src/components/ThemeToggle";
 import { LuFilterX } from "react-icons/lu";
 import { IoMdHome } from 'react-icons/io';
 import { HiUsers } from 'react-icons/hi2';
+import { IoEyeSharp } from 'react-icons/io5';
 
 type ListItemType = {
   text?: string;
@@ -60,6 +61,7 @@ const listItems = [
     { text: 'Commandes', icon: FaClipboardList },
     { text: 'Clients', icon: HiUsers },
     { text: 'Stock', icon: FaBoxOpen },
+    { text: 'Puissances', icon: IoEyeSharp },
 ];
 
 export default function OrderManagement() {
@@ -116,7 +118,6 @@ export default function OrderManagement() {
   const fetchData = async () => {
     try {
       const typesResponse = await window.electron.getTypes({});
-      console.log(typesResponse)
       const subtypesResponse = await window.electron.getSubTypes({});
       const productsResponse = await window.electron.getProducts({});
 

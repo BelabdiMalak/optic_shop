@@ -18,6 +18,7 @@ export interface ElectronAPI {
     getSubType: (filter: any) => Promise<ResponseType>
     getTypes: (filter: any) => Promise<ResponseType>
     getSubTypes: (filter: any) => Promise<ResponseType>
+    getProductDetails: () => Promise<ResponseType>;
 
     // Stocks
     getStocks: (filter: any) => Promise<ResponseType>

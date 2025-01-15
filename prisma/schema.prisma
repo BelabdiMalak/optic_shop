@@ -115,8 +115,8 @@ model Order {
 
 model ProductDetail {
   id              String     @id @default(uuid())
-  sphere          String?    // defalt 0???
-  cylinder        String?
+  sphere          String?    @default("0")
+  cylinder        String?    @default("0")
   quantity        Int        @default(0)
   category        String    // torique || spherique
 

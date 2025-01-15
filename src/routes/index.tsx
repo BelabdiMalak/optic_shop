@@ -4,6 +4,7 @@ import { Clients } from '@src/pages'
 import Products from '@src/pages/Products'
 import Orders from '@src/pages/Orders'
 import Stock from '@src/pages/Stock'
+import Puissances from '@src/pages/Puissance'
 
 const router = createBrowserRouter([
     {
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
     {
         path: '/stock',
         element: <Stock />
+    },
+    {
+        path: '/Puissances',
+        element: <Puissances />
     },
 ])
 

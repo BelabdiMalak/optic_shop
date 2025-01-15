@@ -34,6 +34,20 @@ import ThemeToggle from "@src/components/ThemeToggle";
 import { Head, OverViewCard, PreviewOptionsNavbar } from '@src/components';
 import { Link } from "react-router-dom";
 import { BrandName } from '@src/constants';
+import { IoEyeSharp } from "react-icons/io5";
+
+interface ProductDetail {
+    id: string;
+    product: {
+        subType: {
+            name: string;
+        };
+    };
+    category: string;
+    sphere: string;
+    cylinder: string;
+    quantity: number;
+}
 
 const colorPalette = [
     '#6c9eaf', // Soft Blue
@@ -69,10 +83,10 @@ const TRHC = 'TRHC';
 const BB = 'BB';
 const TRB = 'TRB';
 
-const GREEN = 'VERT';
+const VERT = 'VERT';
 const BLEU = 'BLEU';
-const BROWN = 'MARRON';
-const GRAY = 'GRIS';
+const MARRON = 'MARRON';
+const GRIS = 'GRIS';
 
 const SPICE = 'SPICE';
 const JADE = 'JADE';
@@ -96,10 +110,10 @@ const GLASS_SUBTYPES = {
 };
 
 const SUNGLASS_SUBTYPES = {
-    GREEN,
+    VERT,
     BLEU,
-    BROWN,
-    GRAY
+    MARRON,
+    GRIS
 };
 
 const LENS_SUBTYPES = {
@@ -175,6 +189,7 @@ const listItems = [
     { text: 'Commandes', icon: FaClipboardList },
     { text: 'Clients', icon: HiUsers },
     { text: 'Stock', icon: FaBoxOpen },
+    { text: 'Puissances', icon: IoEyeSharp },
 ];
 
 const Products: React.FC = () => {
@@ -185,6 +200,8 @@ const Products: React.FC = () => {
     const [selectedPeriod, setSelectedPeriod] = useState<string>('month');
     const [isLoading, setIsLoading] = useState(true);
     const toast = useToast();
+    const [_details, setDetails] = useState<ProductDetail[]>([]);
+
 
     const fetchTurnoverData = async () => {
         try {
@@ -233,7 +250,6 @@ const Products: React.FC = () => {
         try {
             setIsLoading(true);
             const response = await window.electron.getProductsSold();
-            //console.log(response.data)
             setSalesData(response.data);
         } catch (error) {
             console.error('Error fetching sales data:', error);
@@ -302,10 +318,8 @@ const Products: React.FC = () => {
             }, {} as { [key: string]: number }),
         }));
     };
-    
 
     const chartData = prepareChartData(salesData);
-
     useEffect(() => {
         // Always call these functions in the same order
         fetchProducts();
@@ -357,8 +371,17 @@ const Products: React.FC = () => {
                             </Flex>
                         ) : (
                             <>
-                                {/* Turnover Data Section */}
+                                {/* Section des données de Chiffre d'Affaires */}
                                 <Box mb={6}>
+                                <Heading 
+                                    size="md" 
+                                    mb={4} 
+                                    textAlign="center" 
+                                    color={useColorModeValue("gray.800", "gray.100")} 
+                                    fontWeight="bold"
+                                >
+                                   Chiffres d'Affaires
+                                </Heading>
                                     <SimpleGrid
                                         columns={{ base: 1, sm: 2, md: 3, lg: 4 }}
                                         spacing={{ base: 4, md: 6 }}
@@ -366,33 +389,42 @@ const Products: React.FC = () => {
                                     >
                                         <OverViewCard
                                             icon={FaCalendarDay}
-                                            entity="Chiffre d'affire quotidien"
+                                            entity="Chiffre d'affaire quotidien"
                                             value={turnoverData.day}
-                                            currency='DA'
+                                            currency="DA"
                                         />
                                         <OverViewCard
                                             icon={FaCalendarWeek}
-                                            entity="Chiffre d'affire hebdomadaire"
+                                            entity="Chiffre d'affaire hebdomadaire"
                                             value={turnoverData.week}
-                                            currency='DA'
+                                            currency="DA"
                                         />
                                         <OverViewCard
                                             icon={IoCalendarNumber}
-                                            entity="Chiffre d'affire mensuel"
+                                            entity="Chiffre d'affaire mensuel"
                                             value={turnoverData.month}
-                                            currency='DA'
+                                            currency="DA"
                                         />
                                         <OverViewCard
                                             icon={FaCalendarCheck}
-                                            entity="Chiffre d'affire annuel"
+                                            entity="Chiffre d'affaire annuel"
                                             value={turnoverData.year}
-                                            currency='DA'
+                                            currency="DA"
                                         />
                                     </SimpleGrid>
                                 </Box>
 
-                                {/* Product Cards Section */}
+                                {/* Section des produits */}
                                 <Box>
+                                <Heading 
+                                    size="md" 
+                                    mb={4} 
+                                    textAlign="center" 
+                                    color={useColorModeValue("gray.800", "gray.100")} 
+                                    fontWeight="bold"
+                                >
+                                   Disponible en Stock
+                                </Heading>
                                     <SimpleGrid
                                         columns={{ base: 1, sm: 2, md: 3, lg: 5 }}
                                         spacing={{ base: 4, md: 6 }}
@@ -405,108 +437,111 @@ const Products: React.FC = () => {
                                                 width="240px"
                                                 borderRadius="xl"
                                                 borderWidth="1px"
-                                                borderColor={useColorModeValue("gray.200", "gray.700")} // Light border color similar to Card 2
-                                                bg= {useColorModeValue("gray.50", "gray.900")}
+                                                borderColor={useColorModeValue("gray.200", "gray.700")}
+                                                bg={useColorModeValue("gray.50", "gray.900")}
                                                 boxShadow="md"
                                                 _hover={{
-                                                    boxShadow: "lg", 
-                                                    transform: "translateY(-5px)"
+                                                    boxShadow: "lg",
+                                                    transform: "translateY(-5px)",
                                                 }}
                                                 transition="all 0.3s"
-                                                >
+                                            >
                                                 <CardHeader p={2}>
                                                     <Heading size="md" textAlign="center" color={useColorModeValue("gray.800", "gray.100")}>
-                                                    {product.typeName}
+                                                        {product.typeName}
                                                     </Heading>
                                                 </CardHeader>
                                                 <CardBody p={2}>
                                                     <VStack align="stretch" spacing={2}>
-                                                    {product.subtypes.map((subtype) => (
-                                                        <HStack key={subtype.name} justify="space-between">
-                                                        <Text fontSize="sm" color="gray.500">{subtype.name}:</Text>
-                                                        <Text fontSize="sm" fontWeight="bold" color={useColorModeValue("green.600", "green.100")}>
-                                                            {subtype.quantity}
-                                                        </Text>
-                                                        </HStack>
-                                                    ))}
+                                                        {product.subtypes.map((subtype) => (
+                                                            <HStack key={subtype.name} justify="space-between">
+                                                                <Text fontSize="sm" color="gray.500">
+                                                                    {subtype.name}:
+                                                                </Text>
+                                                                <Text fontSize="sm" fontWeight="bold" color={useColorModeValue("green.600", "green.100")}>
+                                                                    {subtype.quantity}
+                                                                </Text>
+                                                            </HStack>
+                                                        ))}
                                                     </VStack>
                                                 </CardBody>
-                                                </Card>
-
+                                            </Card>
                                         ))}
                                     </SimpleGrid>
                                 </Box>
 
-                                {/* Stacked Bar Chart Section */}
+                                {/* Section du graphique des ventes */}
                                 <Box mt={6}>
-                                    <Heading size="md" mb={4}>Product Sales</Heading>
+                                <Heading 
+                                    size="md" 
+                                    mb={4} 
+                                    textAlign="center" 
+                                    color={useColorModeValue("gray.800", "gray.100")} 
+                                    fontWeight="bold"
+                                >
+                                    Analyse des Ventes
+                                </Heading>
+
                                     <Select
                                         value={selectedPeriod}
                                         onChange={(e) => setSelectedPeriod(e.target.value)}
                                         mb={4}
                                         width="200px"
                                     >
-                                        <option value="day">By Day</option>
-                                        <option value="week">By Week</option>
-                                        <option value="month">By Month</option>
-                                        <option value="year">By Year</option>
+                                        <option value="day">Par Jour</option>
+                                        <option value="week">Par Semaine</option>
+                                        <option value="month">Par Mois</option>
+                                        <option value="year">Par Année</option>
                                     </Select>
-                                    <Box height="400px" >
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={chartData}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="typeName" />
-                                            <YAxis />
-                                            <Tooltip
-                                                content={({ payload }) => {
-                                                    if (!payload || payload.length === 0) return null;
-
-                                                    const typeName = payload[0].payload.typeName;
-
-                                                    // Get the correct subtypes for this type
-                                                    const validSubtypes = getSubtypes(typeName);
-
-                                                    // Map through the subtypes and their values from the chart data
-                                                    const subtypes = Object.keys(payload[0].payload)
-                                                        .filter(key => key !== 'typeName') // Exclude 'typeName'
-                                                        .filter(key => validSubtypes[key]) // Only include valid subtypes for this type
-                                                        .map(key => ({
-                                                            name: key,
-                                                            count: payload[0].payload[key]
-                                                        }));
-
-                                                    return (
-                                                        <Box
-                                                            p={2}
-                                                            bg={useColorModeValue("gray.50", "gray.900")}
-                                                            borderRadius="md"
-                                                            boxShadow="lg"
-                                                            border="1px"
-                                                            borderColor={useColorModeValue("gray.200", "gray.700")}
-                                                        >
-                                                            <Heading size="sm">{typeName}</Heading>
-                                                            <VStack align="start" spacing={1} mt={2}>
-                                                                {subtypes.map((subtype) => (
-                                                                    <HStack key={subtype.name} justify="space-between" width="full">
-                                                                        <Text fontSize="sm">{subtype.name}:</Text>
-                                                                        <Text fontSize="sm" fontWeight="bold">{subtype.count}</Text>
-                                                                    </HStack>
-                                                                ))}
-                                                            </VStack>
-                                                        </Box>
-                                                    );
-                                                }}
-                                            />
-                                            <Legend />
-                                            {Object.keys(chartData[0] || {})
-                                                .filter((key) => key !== 'typeName') // Exclude typeName
-                                                .map((key, index) => (
-                                                    <Bar key={key} dataKey={key} stackId="a" fill={colorPalette[index % colorPalette.length]} />
-                                                ))}
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </Box>
-
+                                    <Box height="400px">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={chartData}>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey="typeName" />
+                                                <YAxis />
+                                                <Tooltip
+                                                    content={({ payload }) => {
+                                                        if (!payload || payload.length === 0) return null;
+                                                        const typeName = payload[0].payload.typeName;
+                                                        const validSubtypes = getSubtypes(typeName);
+                                                        const subtypes = Object.keys(payload[0].payload)
+                                                            .filter((key) => key !== "typeName")
+                                                            .filter((key) => validSubtypes[key])
+                                                            .map((key) => ({
+                                                                name: key,
+                                                                count: payload[0].payload[key],
+                                                            }));
+                                                        return (
+                                                            <Box
+                                                                p={2}
+                                                                bg={useColorModeValue("gray.50", "gray.900")}
+                                                                borderRadius="md"
+                                                                boxShadow="lg"
+                                                                border="1px"
+                                                                borderColor={useColorModeValue("gray.200", "gray.700")}
+                                                            >
+                                                                <Heading size="sm">{typeName}</Heading>
+                                                                <VStack align="start" spacing={1} mt={2}>
+                                                                    {subtypes.map((subtype) => (
+                                                                        <HStack key={subtype.name} justify="space-between" width="full">
+                                                                            <Text fontSize="sm">{subtype.name}:</Text>
+                                                                            <Text fontSize="sm" fontWeight="bold">{subtype.count}</Text>
+                                                                        </HStack>
+                                                                    ))}
+                                                                </VStack>
+                                                            </Box>
+                                                        );
+                                                    }}
+                                                />
+                                                <Legend />
+                                                {Object.keys(chartData[0] || {})
+                                                    .filter((key) => key !== "typeName")
+                                                    .map((key, index) => (
+                                                        <Bar key={key} dataKey={key} stackId="a" fill={colorPalette[index % colorPalette.length]} />
+                                                    ))}
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </Box>
                                 </Box>
                             </>
                         )}

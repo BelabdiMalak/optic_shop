@@ -45,6 +45,7 @@ import { Type, SubType, Product } from 'types/product.type';
 import { LuFilterX } from "react-icons/lu";
 import { IoMdHome } from 'react-icons/io';
 import { HiUsers } from 'react-icons/hi2';
+import { IoEyeSharp } from 'react-icons/io5';
 
 type ListItemType = {
   text?: string;
@@ -56,6 +57,7 @@ const listItems = [
     { text: 'Commandes', icon: FaClipboardList },
     { text: 'Clients', icon: HiUsers },
     { text: 'Stock', icon: FaBoxOpen },
+    { text: 'Puissances', icon: IoEyeSharp },
 ];
 
 export default function Stock() {

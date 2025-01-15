@@ -26,6 +26,7 @@ contextBridge.exposeInMainWorld('electron', {
   createProduct: (data) => ipcRenderer.invoke('create-product', data),
   getProducts: (filter) => ipcRenderer.invoke('get-products', filter),
   updateProduct: (id, data) => ipcRenderer.invoke('update-product', id, data),
+  getProductDetails: () => ipcRenderer.invoke('get-products-details'),
 
   // Stock
   getStock: (id) => ipcRenderer.invoke('get-stock', id),

@@ -2,6 +2,7 @@ const productValidator = require('../validators/product.validator');
 const productModel = require('../models/product.model');
 const subTypeModel = require('../models/subType.model');
 const typeModel = require('../models/type.model');
+const prisma = require('../../config/prisma.config');
 
 const createProduct = async (data) => {
     try {
@@ -122,9 +123,40 @@ const getProducts = async ({
     }
 };
 
+const getProductDetails = async () => {
+    try {
+        return {
+            status: true,
+            message: 'success',
+             data: await prisma.productDetail.findMany({
+                select: {
+                    id: true,
+                    category: true,
+                    sphere: true,
+                    cylinder: true,
+                    productId: true,
+                    quantity: true,
+                    product: {
+                        select: {
+                            subType: {
+                                select: {
+                                    name: true
+                                }
+                            }
+                        }
+                    }
+                }
+             })
+        }
+    } catch (error) {
+        throw new Error(`Error in finding products details (service): ${error}`);
+    }
+}
+
 module.exports = {
     createProduct,
     updateProduct,
     findProductById,
-    getProducts
+    getProducts,
+    getProductDetails
 };
