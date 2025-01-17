@@ -8,127 +8,94 @@ datasource db {
 }
 
 model User {
-  id              String     @id @default(uuid())
-  name            String
-  surename        String
-  sphere          String?
-  cylinder        String?
-
-  // metadata
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  isDeleted       Boolean?   @default(false)
-  
-  // relations
-  orders          Order[]
+  id        String   @id @default(uuid())
+  name      String
+  surename  String
+  sphere    String?
+  cylinder  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean? @default(false)
+  orders    Order[]
 }
 
 model Type {
-  id              String     @id @default(uuid())
-  name            String     @unique
-
-  // metadata
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-
-  // relations
-  subTypes        SubType[]
-  products        Product[]
+  id        String    @id @default(uuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+  subTypes  SubType[]
 }
 
 model SubType {
-  id              String     @id @default(uuid())
-  name            String     @unique
-
-  // metadata
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  
-  // relations
-  typeId          String    
-  type            Type      @relation(fields: [typeId], references: [id])
-  products        Product[]
+  id        String    @id @default(uuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  typeId    String
+  products  Product[]
+  type      Type      @relation(fields: [typeId], references: [id])
 }
 
 model Stock {
-  id              String     @id @default(uuid())
-  date            DateTime   @default(now())
-  type            String
-  quantity        Int
-
-  // metadata
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  
-  // relations
-  productId       String
-  product         Product       @relation(fields: [productId], references: [id])
-
-  detailsId       String?
-  details         ProductDetail? @relation(fields: [detailsId], references: [id])
+  id        String         @id @default(uuid())
+  date      DateTime       @default(now())
+  type      String
+  quantity  Int
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  productId String
+  detailsId String?
+  details   ProductDetail? @relation(fields: [detailsId], references: [id])
+  product   Product        @relation(fields: [productId], references: [id])
 }
 
 model Product {
-  id              String     @id @default(uuid())
-  stockQuantity   Int        @default(0)
+  id            String          @id @default(uuid())
+  stockQuantity Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  typeId        String
+  subTypeId     String
+  order         Order[]
+  subType       SubType         @relation(fields: [subTypeId], references: [id])
+  type          Type            @relation(fields: [typeId], references: [id])
+  details       ProductDetail[]
+  stocks        Stock[]
 
-  // metadata
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  
-  // relations
-  typeId          String
-  type            Type       @relation(fields: [typeId], references: [id])
-
-  subTypeId       String
-  subType         SubType    @relation(fields: [subTypeId], references: [id])
-
-  order           Order[]
-  stocks          Stock[]
-  details         ProductDetail[]
-  
   @@unique([typeId, subTypeId])
 }
 
 model Order {
-  id              String     @id @default(uuid())
-  date            DateTime   @default(now())
-  deposit         Int        @default(0)
-  status          String
-  framePrice      Int?       @default(0)
-  productPrice    Int?       @default(0)
-
-  // metadata
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  
-  // relations
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
-
-  productId       String
-  product         Product     @relation(fields: [productId], references: [id])
-
-  detailsId       String?
-  details         ProductDetail? @relation(fields: [detailsId], references: [id])
+  id           String         @id @default(uuid())
+  date         DateTime       @default(now())
+  deposit      Int            @default(0)
+  status       String
+  framePrice   Int?           @default(0)
+  productPrice Int?           @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  userId       String
+  productId    String
+  detailsId    String?
+  details      ProductDetail? @relation(fields: [detailsId], references: [id])
+  product      Product        @relation(fields: [productId], references: [id])
+  user         User           @relation(fields: [userId], references: [id])
 }
 
 model ProductDetail {
-  id              String     @id @default(uuid())
-  sphere          String?    @default("0")
-  cylinder        String?    @default("0")
-  quantity        Int        @default(0)
-  category        String    // torique || spherique
-
-  // metadata
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-
-  // relations
-  productId       String
-  product         Product     @relation(fields: [productId], references: [id])
-  orders          Order[]
-  stocks          Stock[]
+  id        String   @id @default(uuid())
+  sphere    String?  @default("0")
+  cylinder  String?  @default("0")
+  quantity  Int      @default(0)
+  category  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  productId String
+  orders    Order[]
+  product   Product  @relation(fields: [productId], references: [id])
+  stocks    Stock[]
 
   @@unique([productId, sphere, cylinder, category])
 }

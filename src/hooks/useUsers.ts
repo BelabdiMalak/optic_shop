@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { User } from '@prisma/client'
+import { Client } from 'types/client.type'
 
 export function useUsers() {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<Client[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {

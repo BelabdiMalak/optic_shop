@@ -11,10 +11,10 @@
   "scripts": {
     "dev": "concurrently \"vite\" \"npm run electron:dev\"",
     "electron:dev": "electronmon .",
-    "build": "tsc && vite build",
+    "build": "npx prisma generate && tsc && vite build",
     "preview": "vite preview",
     "electron": "electron electron.js",
-    "package": "electron-builder",
+    "package": "npx prisma generate && electron-builder",
     "start": "vite"
   },
   "dependencies": {
@@ -67,24 +67,33 @@
       "output": "dist_electron"
     },
     "files": [
+      "preload.js",
+      "prisma/**",
+      "ipcHandlers/**",
       "dist/**/*",
       "electron.js",
       "src/**/*",
-      "ipcHandlers/**/*",
       "backend/**/*",
       "config/**/*",
-      "node_modules/.prisma/**/*",
-      "node_modules/@prisma/client/**/*",
-      "resources/**/*"
+      "config/prisma.config.js",
+      "dev.db"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/.prisma/**",
+      "node_modules/@prisma/client/**"
     ],
     "extraResources": [
+      "prisma/**/*",
+      "node_modules/.prisma/**/*",
+      "node_modules/@prisma/client/**/*",
       {
         "from": "dist/",
         "to": "app/dist/"
       },
       {
-        "from": "resources/database.db",
-        "to": "app/resources/database.db"
+        "from": "prisma/dev.db",
+        "to": "app/prisma/dev.db"
       }
     ],
     "win": {

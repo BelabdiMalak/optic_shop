@@ -1,7 +1,7 @@
 const { join } = require('path');
-const preloadPath = join(__dirname, 'preload.js');
 const { app, BrowserWindow } = require('electron');
-const handlersPath = join(__dirname, 'ipcHandlers/index.js')
+const preloadPath = join(app.getAppPath(), 'preload.js');
+const handlersPath = join(__dirname, '/ipcHandlers/index.js')
 const { registerAllHandlers } = require(handlersPath);
 
 try {
@@ -19,7 +19,8 @@ try {
         nodeIntegration: true,
         contextIsolation: true,
         webSecurity: true,
-      },
+        enableRemoteModule: false,
+      }
     });
 
     let startURL;

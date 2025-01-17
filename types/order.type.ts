@@ -1,4 +1,6 @@
-import { Product, ProductDetail, User } from "@prisma/client";
+import { ProductDetail } from "./details.type";
+import { Client } from "./client.type";
+import { Product } from "./product.type";
 
 export interface Order {
     id: string;
@@ -11,7 +13,7 @@ export interface Order {
     productId: string;
     createdAt?: Date;
     updatedAt?: Date;
-    user?: User;
+    user?: Client;
     product?: Product;
     details?: ProductDetail;
     detailsId?: string;

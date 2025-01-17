@@ -1,4 +1,4 @@
-import { ProductDetail } from '@prisma/client';
+import { ProductDetail } from './details.type';
 import { Product } from './product.type';
 
 export interface StockType {

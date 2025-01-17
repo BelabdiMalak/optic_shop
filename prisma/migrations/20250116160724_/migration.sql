@@ -3,11 +3,11 @@ CREATE TABLE "User" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "surename" TEXT NOT NULL,
-    "sphere" TEXT NOT NULL,
-    "cylinder" TEXT NOT NULL,
-    "axis" TEXT NOT NULL,
+    "sphere" TEXT,
+    "cylinder" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "updatedAt" DATETIME NOT NULL,
+    "isDeleted" BOOLEAN DEFAULT false
 );
 
 -- CreateTable
@@ -37,7 +37,9 @@ CREATE TABLE "Stock" (
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     "productId" TEXT NOT NULL,
-    CONSTRAINT "Stock_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "detailsId" TEXT,
+    CONSTRAINT "Stock_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Stock_detailsId_fkey" FOREIGN KEY ("detailsId") REFERENCES "ProductDetail" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -58,24 +60,29 @@ CREATE TABLE "Order" (
     "date" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "deposit" INTEGER NOT NULL DEFAULT 0,
     "status" TEXT NOT NULL,
+    "framePrice" INTEGER DEFAULT 0,
+    "productPrice" INTEGER DEFAULT 0,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     "userId" TEXT NOT NULL,
-    CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "productId" TEXT NOT NULL,
+    "detailsId" TEXT,
+    CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Order_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Order_detailsId_fkey" FOREIGN KEY ("detailsId") REFERENCES "ProductDetail" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
-CREATE TABLE "OrderItem" (
+CREATE TABLE "ProductDetail" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "framePrice" INTEGER NOT NULL,
-    "productPrice" INTEGER NOT NULL,
-    "quantity" INTEGER NOT NULL DEFAULT 1,
+    "sphere" TEXT DEFAULT '0',
+    "cylinder" TEXT DEFAULT '0',
+    "quantity" INTEGER NOT NULL DEFAULT 0,
+    "category" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     "productId" TEXT NOT NULL,
-    "orderId" TEXT NOT NULL,
-    CONSTRAINT "OrderItem_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "OrderItem_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "ProductDetail_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateIndex
@@ -86,3 +93,6 @@ CREATE UNIQUE INDEX "SubType_name_key" ON "SubType"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Product_typeId_subTypeId_key" ON "Product"("typeId", "subTypeId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ProductDetail_productId_sphere_cylinder_category_key" ON "ProductDetail"("productId", "sphere", "cylinder", "category");
