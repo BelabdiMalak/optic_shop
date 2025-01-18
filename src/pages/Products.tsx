@@ -194,7 +194,7 @@ const Products: React.FC = () => {
             setIsLoading(true);
             const response = await window.electron.getTurnOver();
             console.log(response)
-            setTurnoverData(response.data);
+            setTurnoverData(response.data || { daily: 0, weekly: 0, monthly: 0, yearly: 0 });
         } catch (error) {
             console.error('Error fetching turnover data:', error);
             toast({

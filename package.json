@@ -87,6 +87,8 @@
       "prisma/**/*",
       "node_modules/.prisma/**/*",
       "node_modules/@prisma/client/**/*",
+      "src/assets/fonts/shahd.otf",
+      "src/theme/config.tsx",
       {
         "from": "dist/",
         "to": "app/dist/"

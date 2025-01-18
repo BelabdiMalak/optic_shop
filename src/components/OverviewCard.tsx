@@ -58,7 +58,7 @@ export default function EnhancedCard({ icon, entity, value, currency, trend, var
           </Text>
           <Stat>
             <StatNumber fontSize="2xl" fontWeight="bold" color={textColor}>
-              {value.toLocaleString()}
+              {value?.toLocaleString()}
               <Text as="span" fontSize="lg" fontWeight="medium" ml={1}>
                 {currency}
               </Text>
