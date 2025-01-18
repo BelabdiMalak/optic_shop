@@ -37,6 +37,7 @@ const createStock = async (data) => {
             { stockQuantity: (product.stockQuantity + data.quantity)}
         )
 
+        log(data.type === STOCK_TYPE.OUT && !data.category)
         data.type === STOCK_TYPE.OUT && !data.category && await productModel.updateOne(
             product.id,
             { stockQuantity: (product.stockQuantity - data.quantity)}

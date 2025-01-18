@@ -133,6 +133,7 @@ export default function OrderManagement() {
       setIsLoading(true);
       setError(null);
       const fetchedOrders = await window.electron.getOrders({});
+      console.log(fetchedOrders)
       if (fetchedOrders && fetchedOrders.data && Array.isArray(fetchedOrders.data)) {
         setOrders(fetchedOrders.data);
       } else {
@@ -178,6 +179,14 @@ export default function OrderManagement() {
     setFilteredSubtypes(filtered); // Update the filtered subtypes list
     setSelectedSubtype(''); // Reset selected subtype
     setSubtypeFilter(''); // Reset subtype filter
+    const selectedType = types.find((type) => type.id === typeId);
+    const selectedTypeName = selectedType?.name || '';
+
+    if (selectedTypeName === 'Verre Correcteur') {
+      setNewOrder({ ...newOrder, category: 'spherique' });
+    } else {
+      setNewOrder({ ...newOrder, category: '' });
+    }
   };
   
   const handleClearFilters = () => {
@@ -314,6 +323,7 @@ export default function OrderManagement() {
     // Update the new order with the calculated status
     const updatedOrder = { ...newOrder, status, date };
   
+    console.log(updatedOrder)
     try {
       console.log('Sending order data:', updatedOrder);
       const response = await window.electron.createOrder(updatedOrder);

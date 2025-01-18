@@ -83,13 +83,19 @@ const Puissances: React.FC = () => {
         setCurrentPage(1);
       };
 
-    const fetchDetails = async () => {
-        setIsLoading(true)
-        const response = await window.electron.getProductDetails();
-        setDetails(response?.data || []);
-        setFilteredDetails(response?.data || []);
-        setIsLoading(false)
-    };
+      const fetchDetails = async () => {
+        setIsLoading(true);
+        try {
+            const response = await window.electron.getProductDetails();
+            const data = response?.data || [];
+            setDetails(data);
+            setFilteredDetails(data);
+        } catch (error) {
+            console.error("Error fetching product details:", error);
+        } finally {
+            setIsLoading(false); // Ensure loading is set to false
+        }
+    };    
 
     const handleFilterChange = (column: string, value: string) => {
         const updatedFilters = { ...filters, [column]: value };
@@ -237,23 +243,30 @@ const Puissances: React.FC = () => {
                       <Th>Catégorie</Th>
                       <Th>Sphère</Th>
                       <Th>Cylindre</Th>
+                      <Th>Quantité</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {currentDetails.length === 0 ? (
-                      <Tr>
-                        <Td colSpan={4} textAlign="center">No details found</Td>
-                      </Tr>
+                  {currentDetails.length === 0 ? (
+                    <Tr>
+                        <Td colSpan={5} textAlign="center">
+                        <Text>
+                            Aucune puissance trouvée.
+                        </Text>
+                        </Td>
+                    </Tr>
                     ) : (
-                      currentDetails.map((detail) => (
+                    currentDetails.map((detail) => (
                         <Tr key={detail.id}>
-                          <Td>{detail.product.subType.name}</Td>
-                          <Td>{detail.category}</Td>
-                          <Td>{detail.sphere}</Td>
-                          <Td>{detail.cylinder}</Td>
+                        <Td>{detail.product.subType.name}</Td>
+                        <Td>{detail.category}</Td>
+                        <Td>{detail.sphere}</Td>
+                        <Td>{detail.cylinder}</Td>
+                        <Td>{detail.quantity}</Td>
                         </Tr>
-                      ))
+                    ))
                     )}
+
                   </Tbody>
                 </Table>
 

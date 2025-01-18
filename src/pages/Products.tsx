@@ -193,6 +193,7 @@ const Products: React.FC = () => {
         try {
             setIsLoading(true);
             const response = await window.electron.getTurnOver();
+            console.log(response)
             setTurnoverData(response.data);
         } catch (error) {
             console.error('Error fetching turnover data:', error);

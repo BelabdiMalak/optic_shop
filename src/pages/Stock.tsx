@@ -68,7 +68,7 @@ export default function Stock() {
     type: 'in',
     quantity: 0,
     productId: '',
-    category: 'spherique',
+    category: '',
     sphere: '',
     cylinder: ''
   });
@@ -124,7 +124,6 @@ export default function Stock() {
     setIsEditStockOpen(true); // Ouvrir le formulaire
   };
   
-
   const handleUpdateStock = async () => {
     try {
       if (!stockToEdit) return;
@@ -258,20 +257,36 @@ export default function Stock() {
   };
 
   const handleTypeChange = (typeId: string) => {
+    console.log('Selected Type ID:', typeId);
+  
     setSelectedType(typeId);
     const filtered = subtypes.filter((subtype) => subtype.typeId === typeId);
     setFilteredSubtypes(filtered);
     setSelectedSubtype('');
     setSubtypeFilter(''); // Reset subtype filter
-    const selectedTypeName = types.find((type) => type.id === typeId)?.name || '';
+  
+    const selectedType = types.find((type) => type.id === typeId);
+    const selectedTypeName = selectedType?.name || '';
+  
     setTypeFilter(selectedTypeName.toLowerCase()); // Update type filter
+  
+    // Update category based on the selected type
+    if (selectedTypeName === 'Verre Correcteur') {
+      setNewStock({ ...newStock, category: 'spherique' });
+    } else {
+      setNewStock({ ...newStock, category: '' });
+    }
   };
+
   
   const handleSubtypeChange = (subtypeId: string) => {
+    console.log('selected Subtype ID: ', subtypeId)
     setSelectedSubtype(subtypeId);
     const product = products.find(
       (product) => product.typeId === selectedType && product.subTypeId === subtypeId
     )
+
+    console.log("Selected Product: ", product)
     if (product) {
       setNewStock({ ...newStock, productId: product.id });
     }
@@ -304,13 +319,13 @@ export default function Stock() {
     setSelectedSubtypeV3(''); // Réinitialiser le sous-type sélectionné
   };
   
-  
   const handleSubtypeChangeV3 = (subtypeId: string) => {
     setSelectedSubtypeV3(subtypeId);
     const selectedSubtypeName = subtypes.find((subtype) => subtype.id === subtypeId)?.name || '';
     setSubtypeFilterV3(selectedSubtypeName.toLowerCase()); // Update subtype filter
   };  
   const handleAddStock = async () => {
+    console.log("stock to add: ", newStock)
     if (!newStock.date || newStock.quantity <= 0 || !newStock.productId) {
       toast({
         title: 'Invalid input',
@@ -327,7 +342,7 @@ export default function Stock() {
       console.log(response)
       if (response && response.data && response.status === true) {
         setStock((prevStock) => [...prevStock, response.data]);
-        setNewStock({ date: '', type: 'in', quantity: 0, productId: '', category: 'spherique', sphere: '', cylinder: ''});
+        setNewStock({ date: '', type: 'in', quantity: 0, productId: '', category: '', sphere: '', cylinder: ''});
         setIsAddStockOpen(false);
         toast({
           title: 'Stock added',
@@ -635,7 +650,7 @@ export default function Stock() {
                 <Select
                   placeholder="Sélectionner le Type"
                   value={selectedType}
-                  onChange={(e) => handleTypeChange(e.target.value)}
+                  onChange={(e) => {console.log("e typeID:", e.target.value); return handleTypeChange(e.target.value)}}
                 >
                   {types.map((type) => (
                     <option key={type.id} value={type.id}>
@@ -650,7 +665,7 @@ export default function Stock() {
                 <Select
                   placeholder="Sélectionner le Sous-Type"
                   value={selectedSubtype}
-                  onChange={(e) => handleSubtypeChange(e.target.value)}
+                  onChange={(e) => {console.log("e subtypeID: ", e.target.value); return handleSubtypeChange(e.target.value)}}
                   isDisabled={!selectedType}
                 >
                   {filteredSubtypes.map((subtype) => (
@@ -664,17 +679,18 @@ export default function Stock() {
               {/* Show these fields only when the selected type is "Verre Correcteur" */}
               {selectedType && types.find((type) => type.id === selectedType)?.name === 'Verre Correcteur' && (
                 <>
-                  <FormControl>
-                    <FormLabel>Category</FormLabel>
-                    <Select
-                      value={newStock.category}
-                      onChange={(e) => setNewStock({ ...newStock, category: e.target.value })}
-                      isDisabled={!selectedType}
-                    >
-                      <option value="spherique">Sphérique</option>
-                      <option value="torique">Torique</option>
-                    </Select>
-                  </FormControl>
+                <FormControl>
+                  <FormLabel>Category</FormLabel>
+                  <Select
+                    placeholder="Sélectionner la Catégorie"
+                    value={newStock.category}
+                    onChange={(e) => setNewStock({ ...newStock, category: e.target.value })}
+                    isDisabled={!(selectedType && types.find((type) => type.id === selectedType)?.name === 'Verre Correcteur')}
+                  >
+                    <option value="spherique">Sphérique</option>
+                    <option value="torique">Torique</option>
+                  </Select>
+                </FormControl>
 
                   <FormControl>
                     <FormLabel>Sphère</FormLabel>

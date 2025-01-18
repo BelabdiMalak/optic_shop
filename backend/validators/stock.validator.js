@@ -27,7 +27,10 @@ const createSchema = Joi.object({
                 'date.base': 'Date must be a valid date',
                 'any.default': 'Date defaults to now if not provided'
             }),
-    category: Joi.string().optional()
+    category: Joi.string()
+    .allow(null) // Allow `null` explicitly
+    .empty('')   // Treat empty strings as `undefined`
+    .optional()
         .valid('torique', 'spherique'),
     
     sphere: Joi

@@ -22,8 +22,7 @@ const createOne = async (data) => {
                             }
                        }
                     },
-                },
-                details: true
+                }            
             }
         });
     } catch (error) {
