@@ -65,6 +65,7 @@ export default function Clients() {
     surename: '',
     sphere: '', 
     cylinder: '', 
+    axis: ''
   });
 
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
@@ -216,7 +217,7 @@ export default function Clients() {
       const response = await window.electron.createUser(newClient);
       if (response && response.data) {
         setClients((prevClients) => [...prevClients, response.data]);
-        setNewClient({ name: '', surename: '', sphere: '', cylinder: '' });
+        setNewClient({ name: '', surename: '', sphere: '', cylinder: '', axis: '' });
         setIsAddClientOpen(false);
         toast({
           title: 'Client ajouté',
@@ -318,6 +319,7 @@ export default function Clients() {
                       <Th>Nom</Th>
                       <Th>Sphère</Th>
                       <Th>Cylindre</Th>
+                      <Th>Axe</Th>
                       <Th>Date de création</Th>
                       <Th>Date de mise à jour</Th>
                     </Tr>
@@ -334,6 +336,7 @@ export default function Clients() {
                           <Td>{client.surename}</Td>
                           <Td>{client.sphere}</Td>
                           <Td>{client.cylinder}</Td>
+                          <Td>{client.axis}</Td>
                           <Td>{client.createdAt ? new Date(client.createdAt).toLocaleDateString() : '-'}</Td>
                           <Td>{client.updatedAt ? new Date(client.updatedAt).toLocaleDateString() : '-'}</Td>
 
@@ -469,6 +472,16 @@ export default function Clients() {
                 />
               </FormControl>
 
+              <FormControl>
+                <FormLabel>Axe</FormLabel>
+                <Input
+                  value={newClient.axis}
+                  onChange={(e) =>
+                    setNewClient({ ...newClient, axis: e.target.value })
+                  }
+                />
+              </FormControl>
+
               <HStack spacing={4} mt={4}>
                 <Button onClick={() => setIsAddClientOpen(false)} variant="outline">
                   Annuler
@@ -526,6 +539,17 @@ export default function Clients() {
                       }
                     />
                   </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Axe</FormLabel>
+                    <Input
+                      value={clientToEdit.axis}
+                      onChange={(e) =>
+                        setClientToEdit({ ...clientToEdit, axis: e.target.value })
+                      }
+                    />
+                  </FormControl>
+
 
                   <HStack spacing={4} mt={4}>
                     <Button onClick={() => setIsEditClientOpen(false)} variant="outline">
