@@ -344,6 +344,8 @@ export default function Stock() {
         setStock((prevStock) => [...prevStock, response.data]);
         setNewStock({ date: '', type: 'in', quantity: 0, productId: '', category: '', sphere: '', cylinder: ''});
         setIsAddStockOpen(false);
+        setSelectedType('');
+        setSelectedSubtype('');
         toast({
           title: 'Stock added',
           description: 'The new stock has been successfully added.',

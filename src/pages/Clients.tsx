@@ -94,8 +94,7 @@ export default function Clients() {
       );
       if (!confirmation) return;
   
-      const de = await window.electron.deleteUser(clientId);
-      console.log('suppression : ', de)
+      await window.electron.deleteUser(clientId);
       setClients((prevClients) => prevClients.filter((client) => client.id !== clientId));
   
       toast({
