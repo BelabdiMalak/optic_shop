@@ -153,10 +153,35 @@ const getProductDetails = async () => {
     }
 }
 
+const updateProductDetails = async (id, data) => {
+    try {
+        const { error } = productValidator.updateProductDetailsSchema.validate(data);
+        if (error) {
+            return {
+                status: false,
+                message: 'Validation error',
+                data: error.details.map((err) => err.message)
+            };
+        }
+
+        return {
+            status: true,
+            message: 'success',
+            data: await prisma.productDetail.update({
+                where: { id: id },
+                data: data
+            })
+        }
+    } catch (error) {
+        throw new Error(`Error in updating products details (service): ${error}`);
+    }
+}
+
 module.exports = {
     createProduct,
     updateProduct,
     findProductById,
     getProducts,
-    getProductDetails
+    getProductDetails,
+    updateProductDetails
 };

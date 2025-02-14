@@ -4,7 +4,7 @@ export interface ProductDetail {
     id?: string;
     sphere?: string;
     cylinder?: string;
-    quantity: number;
+    quantity?: number;
     category: string;
     createdAt?: Date;
     updatedAt?: Date;

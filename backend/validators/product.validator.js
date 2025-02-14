@@ -69,7 +69,33 @@ const updateSchema = Joi.object({
     //     }),
 });
 
+const updateProductDetailsSchema = Joi.object({
+    category: Joi.string().optional()
+        .allow(null)
+        .empty('')
+        .valid('torique', 'spherique'),
+    
+    sphere: Joi
+        .number()
+        .optional()
+        .allow(null) // Allow `null` explicitly
+        .empty('')   // Treat empty strings as `undefined`
+        .messages({
+            'number.base': 'Sphere must be a number or empty'
+        }),
+
+    cylinder: Joi
+        .number()
+        .optional()
+        .allow(null) // Allow `null` explicitly
+        .empty('')   // Treat empty strings as `undefined`
+        .messages({
+            'number.base': 'Cylinder must be a number or empty'
+        }),
+});
+
 module.exports = { 
     createSchema,
-    updateSchema
+    updateSchema,
+    updateProductDetailsSchema
 };

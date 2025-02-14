@@ -78,7 +78,7 @@ export default function Stock() {
   const [typeFilterV2, setTypeFilterV2] = useState('');
   const [subtypeFilterV2, setSubtypeFilterV2] = useState('');
   //const [typeFilterV3, setTypeFilterV3] = useState('');
-  const [_subtypeFilterV3, setSubtypeFilterV3] = useState('');
+  //const [_subtypeFilterV3, setSubtypeFilterV3] = useState('');
   const [stockTypeFilter, setStockTypeFilter] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,14 +89,14 @@ export default function Stock() {
   // for filtering
   const [filteredSubtypesV2, setFilteredSubtypesV2] = useState<SubType[]>([]);
   // for edition
-  const [filteredSubtypesV3, setFilteredSubtypesV3] = useState<SubType[]>([]);
+  const [_filteredSubtypesV3, setFilteredSubtypesV3] = useState<SubType[]>([]);
   const [products, setProducts] = useState<Product[]>([]); // List of products
   const [selectedType, setSelectedType] = useState('');
   const [selectedSubtype, setSelectedSubtype] = useState('');
   const [selectedTypeV2, setSelectedTypeV2] = useState('');
   const [selectedSubtypeV2, setSelectedSubtypeV2] = useState('');
-  const [selectedTypeV3, setSelectedTypeV3] = useState('');
-  const [selectedSubtypeV3, setSelectedSubtypeV3] = useState('');
+  const [_selectedTypeV3, setSelectedTypeV3] = useState('');
+  const [_selectedSubtypeV3, setSelectedSubtypeV3] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [dateFilter, setDateFilter] = useState('');
@@ -128,23 +128,19 @@ export default function Stock() {
     try {
       if (!stockToEdit) return;
 
-      const product = products.find(
-        (product) => product.typeId === selectedTypeV3 && product.subTypeId === selectedSubtypeV3
-      ) || null
-      const updatedStock = {
-        ...stockToEdit,
-        productId: product?.id || ''
-      }
-
-      delete updatedStock.product
-
-      const {id, ...data} = updatedStock
-      const response = await window.electron.updateStock(id, data);
-
+      const data = {...stockToEdit.details, detailsId: stockToEdit.details?.id}
+      delete data?.product
+      delete data?.id
+      delete data?.quantity
+      delete data?.createdAt
+      delete data?.updatedAt
+      console.log(data)
+      const response = await window.electron.updateStock(stockToEdit.id, data);
+      console.log(response)
       if (response?.status) {
         setStock((prevStocks) =>
           prevStocks.map((stock) =>
-            stock.id === updatedStock.id ? updatedStock : stock
+            stock.id === stockToEdit.id ? stockToEdit : stock
           )
         );
         toast({
@@ -218,6 +214,7 @@ export default function Stock() {
       setIsLoading(true);
       setError(null);
       const response = await window.electron.getStocks({});
+      console.log(response.data)
       if (response && response.data && Array.isArray(response.data)) {
         setStock(response.data);
       } else {
@@ -310,20 +307,20 @@ export default function Stock() {
     setSubtypeFilterV2(selectedSubtypeName.toLowerCase()); // Update subtype filter
   };  
   
-  const handleTypeChangeV3 = (typeId: string) => {
-    setSelectedTypeV3(typeId);
+  // const handleTypeChangeV3 = (typeId: string) => {
+  //   setSelectedTypeV3(typeId);
   
-    const filtered = subtypes.filter((subtype) => subtype.typeId === typeId);
-    setFilteredSubtypesV3(filtered); // Mise à jour correcte des sous-types
+  //   const filtered = subtypes.filter((subtype) => subtype.typeId === typeId);
+  //   setFilteredSubtypesV3(filtered); // Mise à jour correcte des sous-types
   
-    setSelectedSubtypeV3(''); // Réinitialiser le sous-type sélectionné
-  };
+  //   setSelectedSubtypeV3(''); // Réinitialiser le sous-type sélectionné
+  // };
   
-  const handleSubtypeChangeV3 = (subtypeId: string) => {
-    setSelectedSubtypeV3(subtypeId);
-    const selectedSubtypeName = subtypes.find((subtype) => subtype.id === subtypeId)?.name || '';
-    setSubtypeFilterV3(selectedSubtypeName.toLowerCase()); // Update subtype filter
-  };  
+  // const handleSubtypeChangeV3 = (subtypeId: string) => {
+  //   setSelectedSubtypeV3(subtypeId);
+  //   const selectedSubtypeName = subtypes.find((subtype) => subtype.id === subtypeId)?.name || '';
+  //   setSubtypeFilterV3(selectedSubtypeName.toLowerCase()); // Update subtype filter
+  // };  
   const handleAddStock = async () => {
     console.log("stock to add: ", newStock)
     if (!newStock.date || newStock.quantity <= 0 || !newStock.productId) {
@@ -499,6 +496,9 @@ export default function Stock() {
                       <Th>Date</Th>
                       <Th>Type de Produit</Th>
                       <Th>Sous-Type de Produit</Th>
+                      <Th>Type de Verre</Th>
+                      <Th>Sphère</Th>
+                      <Th>Cylinder</Th>
                       <Th>Type de Stock</Th>
                       <Th>Quantité</Th>
                     </Tr>
@@ -514,6 +514,9 @@ export default function Stock() {
                           <Td>{new Date(item.date).toLocaleDateString()}</Td>
                           <Td>{item.product ? item.product.type.name: '-'}</Td>
                           <Td>{item.product ? item.product.subType.name: '-'}</Td>
+                          <Td>{item.details ? item.details.category: '-'}</Td>
+                          <Td>{item.details?.sphere ? item.details.sphere: '-'}</Td>
+                          <Td>{item.details?.cylinder ? item.details.cylinder: '-'}</Td>
                           <Td>{item.type}</Td>
                           <Td>{item.quantity}</Td>
                         <Td>
@@ -531,7 +534,7 @@ export default function Stock() {
                               borderColor: "blue.500", // Border color matches hover icon
                             }}
                             onClick={() => handleEditStock(item)}
-                            isDisabled={true}
+                            isDisabled={!item.details}
                           />
                           <IconButton
                             aria-label="Delete Stock"
@@ -733,91 +736,66 @@ export default function Stock() {
               Modifier le Stock
             </Heading>
             <VStack spacing={4} align="stretch">
-              {
-                stockToEdit && (
-                  <>
-                    <FormControl isRequired>
-                      <FormLabel>Date</FormLabel>
-                      <Input
-                        type="date"
-                        value={new Date(stockToEdit.date).toISOString().split('T')[0]}
-                        onChange={(e) => setStockToEdit({ ...stockToEdit, date: e.target.value })}
-                      />
-                    </FormControl>
+              {stockToEdit && (
+                <>
+                  <FormControl>
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      placeholder="Sélectionner la Catégorie"
+                      value={stockToEdit.details?.category || ''}
+                      onChange={(e) =>
+                        setStockToEdit((prev: any) => ({
+                          ...prev,
+                          details: { ...prev.details, category: e.target.value },
+                        }))
+                      }
+                    >
+                      <option value="spherique">Sphérique</option>
+                      <option value="torique">Torique</option>
+                    </Select>
+                  </FormControl>
 
-                    <FormControl isRequired>
-                      <FormLabel>Quantité</FormLabel>
-                      <NumberInput
-                        value={stockToEdit.quantity}
-                        onChange={(valueString) => setStockToEdit({ ...stockToEdit, quantity: parseInt(valueString, 10) || 0 })}
-                      >
-                        <NumberInputField />
-                        <NumberInputStepper>
-                          <NumberIncrementStepper />
-                          <NumberDecrementStepper />
-                        </NumberInputStepper>
-                      </NumberInput>
-                    </FormControl>
+                  <FormControl>
+                    <FormLabel>Sphère</FormLabel>
+                    <Input
+                      value={stockToEdit.details?.sphere || ''}
+                      onChange={(e) =>
+                        setStockToEdit((prev:any) => ({
+                          ...prev,
+                          details: { ...prev.details, sphere: e.target.value },
+                        }))
+                      }
+                    />
+                  </FormControl>
 
-                    <FormControl isRequired>
-                      <FormLabel>Type</FormLabel>
-                      <Select
-                        value={stockToEdit.type}
-                        onChange={(e) => setStockToEdit({ ...stockToEdit, type: e.target.value })}
-                      >
-                        <option value="in">Entrée</option>
-                        <option value="out">Sortie</option>
-                      </Select>
-                    </FormControl>
+                  <FormControl>
+                    <FormLabel>Cylindre</FormLabel>
+                    <Input
+                      value={stockToEdit.details?.cylinder || ''}
+                      onChange={(e) =>
+                        setStockToEdit((prev: any) => ({
+                          ...prev,
+                          details: { ...prev.details, cylinder: e.target.value },
+                        }))
+                      }
+                    />
+                  </FormControl>
 
-                    <FormControl isRequired>
-                      <FormLabel>Type de Produit</FormLabel>
-                      <Select
-                          placeholder="Sélectionner le Type"
-                          value={selectedTypeV3}
-                          onChange={(e) => {
-                            handleTypeChangeV3(e.target.value);
-                          }}
-                        >
-                        {types.map((type) => (
-                          <option key={type.id} value={type.id}>
-                            {type.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    <FormControl isRequired>
-                      <FormLabel>Sous-Type de Produit</FormLabel>
-                      <Select
-                        placeholder="Sélectionner le Sous-Type"
-                        value={selectedSubtypeV3}
-                        onChange={(e) => handleSubtypeChangeV3(e.target.value)}
-                        isDisabled={!selectedTypeV3}
-                      >
-                        {filteredSubtypesV3.map((subtype) => (
-                          <option key={subtype.id} value={subtype.id}>
-                            {subtype.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    <HStack spacing={4} mt={4}>
-                      <Button onClick={() => setIsEditStockOpen(false)} variant="outline">
-                        Annuler
-                      </Button>
-                      <Button colorScheme="green" onClick={() => handleUpdateStock()}>
-                        Mettre à jour
-                      </Button>
-                    </HStack>
-                  </>
-                )
-              }
+                  <HStack spacing={4} mt={4}>
+                    <Button onClick={() => setIsEditStockOpen(false)} variant="outline">
+                      Annuler
+                    </Button>
+                    <Button colorScheme="green" onClick={() => handleUpdateStock()}>
+                      Mettre à jour
+                    </Button>
+                  </HStack>
+                </>
+              )}
             </VStack>
           </Box>
         </DrawerContent>
       </Drawer>
+
 
     </>
   );

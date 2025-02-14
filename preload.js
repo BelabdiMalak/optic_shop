@@ -63,7 +63,10 @@ process.once('loaded', () => {
     getProductDetails: function () {
       return ipcRenderer.invoke('get-products-details');
     },
-  
+    updateProductDetails: function (id, data) {
+      return ipcRenderer.invoke('update-product-details', id, data);
+    },
+
     // Stock
     getStock: function (id) {
       return ipcRenderer.invoke('get-stock', id);

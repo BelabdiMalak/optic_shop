@@ -114,6 +114,7 @@ const createStock = async (data) => {
 
 const updateStock = async (id, data) => {
     try {
+        // check if stock exists
         const stock = await stockModel.findUnique(id);
         if (!stock) {
             return {
@@ -122,6 +123,7 @@ const updateStock = async (id, data) => {
             };
         }
 
+        // Data validation
         const { error } = stockValidator.updateSchema.validate(data);
         if (error) {
             return {
@@ -131,18 +133,84 @@ const updateStock = async (id, data) => {
             };
         }
 
-        const product = data.productId && productModel.findUnique(data.productId);
-        if (data.productId && !product)
-            return {
-                status: false,
-                message: 'Invalid product ID'
+        // Check if product exists
+        // const product = data.productId && productModel.findUnique(data.productId);
+        // if (data.productId && !product)
+        //     return {
+        //         status: false,
+        //         message: 'Invalid product ID'
+        //     }
+
+        // Product Details valiation
+        const details = await prisma.productDetail.findUnique({ where: { id: data.detailsId } });
+
+        const newCategory = data.category ? data.category : details.category;
+        const newSphere = data.sphere ? data.sphere : details.sphere;
+        const newCylinder = data.cylinder ? data.cylinder : details.cylinder; // ! check empty values
+
+        const newDetails = await prisma.productDetail.findUnique({
+            where: {
+              productId_sphere_cylinder_category: {
+                productId: data.productId, // Assurez-vous que cette valeur est définie
+                sphere: newSphere,
+                cylinder: newCylinder,
+                category: data.category,
+              },
+            },
+          });
+          
+
+        !newDetails && await prisma.productDetail.update({
+            where: { id: details.id },
+            data: {
+                category: newCategory,
+                sphere: newSphere,
+                cylinder: newCylinder
+            }
+        })
+
+
+        //! check newDetails && newDetails.id == details.id
+        if (newDetails && newDetails.id !== details.id) {
+            await stockModel.updateOne(id, {
+                detailsId: newDetails.id
+            });
+
+            if (stock.type === STOCK_TYPE.OUT) {
+                await prisma.productDetail.update({
+                    where: { id: newDetails.id },
+                    data: {
+                        quantity: { decrement: stock.quantity }
+                    }
+                })
+                await prisma.productDetail.update({
+                    where: { id: details.id },
+                    data: {
+                        quantity: { increment: stock.quantity }
+                    }
+                })
             }
 
-        const updatedStock = await stockModel.updateOne(id, data);
+            if (stock.type === STOCK_TYPE.IN) {
+                await prisma.productDetail.update({
+                    where: { id: newDetails.id },
+                    data: {
+                        quantity: { increment: stock.quantity }
+                    }
+                })
+                await prisma.productDetail.update({
+                    where: { id: details.id },
+                    data: {
+                        quantity: { decrement: stock.quantity }
+                    }
+                })
+    
+            }
+        }
+
         return {
             status: true,
             message: 'Stock updated successfully',
-            data: updatedStock
         };
     } catch (error) {
         throw new Error(`Error in updating stock (service): ${error}`);

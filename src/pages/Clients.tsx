@@ -88,32 +88,54 @@ export default function Clients() {
   };
 
   const handleDeleteClient = async (clientId: string) => {
-    try {
-      const confirmation = window.confirm(
-        "Êtes-vous sûr de vouloir supprimer ce client ?"
-      );
-      if (!confirmation) return;
-  
-      await window.electron.deleteUser(clientId);
-      setClients((prevClients) => prevClients.filter((client) => client.id !== clientId));
-  
-      toast({
-        title: "Client supprimé",
-        description: "Le client a été supprimé avec succès.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error("Erreur lors de la suppression du client :", error);
-      toast({
-        title: "Erreur lors de la suppression du client",
-        description: "Une erreur est survenue lors de la suppression du client.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    }
+    const toastId = toast({
+      title: "Confirmation",
+      description: "Êtes-vous sûr de vouloir supprimer ce client ?",
+      status: "warning",
+      duration: null, // Laisse le toast ouvert jusqu'à une action
+      isClosable: true,
+      position: "top",
+      render: ({ onClose }) => (
+        <Box p={3} bg={useColorModeValue('gray.50', 'gray.900')} borderRadius="md" boxShadow="md">
+          <Text fontWeight="bold">Confirmation</Text>
+          <Text mt={2}>Êtes-vous sûr de vouloir supprimer ce client ?</Text>
+          <HStack justifyContent="flex-end" mt={3}>
+            <Button size="sm" onClick={onClose} colorScheme="gray">
+              Annuler
+            </Button>
+            <Button
+              size="sm"
+              colorScheme="red"
+              onClick={async () => {
+                toast.close(toastId);
+                try {
+                  await window.electron.deleteUser(clientId);
+                  setClients((prevClients) => prevClients.filter((client) => client.id !== clientId));
+                  toast({
+                    title: "Client supprimé",
+                    description: "Le client a été supprimé avec succès.",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                  });
+                } catch (error) {
+                  console.error("Erreur lors de la suppression du client :", error);
+                  toast({
+                    title: "Erreur",
+                    description: "Une erreur est survenue lors de la suppression.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                  });
+                }
+              }}
+            >
+              Supprimer
+            </Button>
+          </HStack>
+        </Box>
+      ),
+    });
   };
   
   const handleUpdateClient = async (updatedClient: Client) => {

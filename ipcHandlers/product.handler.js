@@ -45,6 +45,15 @@ async function getProductDetails(event) {
     }
 }
 
+async function updateProductDetails(event, id, data) {
+    try {
+        return await productService.updateProductDetails(id, data);
+    } catch (error) {
+        console.error('Error updating product details (handler):', error);
+        throw error;
+    }
+}
+
 // Register the IPC handlers
 function registerProductHandlers(ipcMain) {
     ipcMain.handle('get-product', getProduct);
@@ -52,6 +61,7 @@ function registerProductHandlers(ipcMain) {
     ipcMain.handle('create-product', createProduct);
     ipcMain.handle('update-product', updateProduct);
     ipcMain.handle('get-products-details', getProductDetails);
+    ipcMain.handle('update-product-details', updateProductDetails);
 }
 
 module.exports = {

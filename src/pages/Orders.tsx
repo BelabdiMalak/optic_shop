@@ -249,48 +249,68 @@ export default function OrderManagement() {
   };
   
   const handleDeleteOrder = async (orderId: string) => {
-    try {
-      const confirmation = window.confirm(
-        "Êtes-vous sûr de vouloir supprimer cette commande ?"
-      );
-      if (!confirmation) return;
+    const toastId = toast({
+      title: "Confirmation",
+      description: "Êtes-vous sûr de vouloir supprimer cette commande ?",
+      status: "warning",
+      duration: null, // Laisse le toast ouvert jusqu'à une action
+      isClosable: true,
+      position: "top",
+      render: ({ onClose }) => (
+        <Box p={3} bg={useColorModeValue('gray.50', 'gray.900')} borderRadius="md" boxShadow="md">
+          <Text fontWeight="bold">Confirmation</Text>
+          <Text mt={2}>Êtes-vous sûr de vouloir supprimer cette commande ?</Text>
+          <HStack justifyContent="flex-end" mt={3}>
+            <Button size="sm" onClick={onClose} colorScheme="gray">
+              Annuler
+            </Button>
+            <Button
+              size="sm"
+              colorScheme="red"
+              onClick={async () => {
+                toast.close(toastId);
+                try {
+                  const response = await window.electron.deleteOrder(orderId);
   
-      const response = await window.electron.deleteOrder(orderId);
+                  if (response.status === false) {
+                    toast({
+                      title: "Erreur de suppression",
+                      description: "Impossible de supprimer une commande complétée.",
+                      status: "error",
+                      duration: 5000,
+                      isClosable: true,
+                    });
+                    return;
+                  }
   
-      if (response.status === false) {
-        // Gérer le cas où la suppression échoue
-        toast({
-          title: "Erreur de suppression",
-          description: "Impossible de supprimer une commande complétée.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-        return;
-      }
+                  setOrders((prevOrders) => prevOrders.filter((order) => order.id !== orderId));
   
-      // Si la suppression réussit, mettre à jour l'état
-      setOrders((prevOrders) => prevOrders.filter((order) => order.id !== orderId));
-  
-      toast({
-        title: "Commande supprimée",
-        description: "La commande a été supprimée avec succès.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error("Erreur lors de la suppression de la commande :", error);
-      toast({
-        title: "Erreur lors de la suppression",
-        description: "Une erreur est survenue lors de la suppression de la commande.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    }
+                  toast({
+                    title: "Commande supprimée",
+                    description: "La commande a été supprimée avec succès.",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                  });
+                } catch (error) {
+                  console.error("Erreur lors de la suppression de la commande :", error);
+                  toast({
+                    title: "Erreur lors de la suppression",
+                    description: "Une erreur est survenue lors de la suppression de la commande.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                  });
+                }
+              }}
+            >
+              Supprimer
+            </Button>
+          </HStack>
+        </Box>
+      ),
+    });
   };
-  
   
   
   // Pagination Logic
@@ -490,7 +510,7 @@ export default function OrderManagement() {
                     const product = products.find((p) => p.id === order.productId);
                     const total = order.framePrice + order.productPrice;
                     const rest = total - order.deposit;
-                    const isCompleted = order.status === "Complétée";
+                    const isCompleted = order.status === "Complétée" || order.status === "Annulée";
 
                     return (
                       <Tr key={order.id}>
