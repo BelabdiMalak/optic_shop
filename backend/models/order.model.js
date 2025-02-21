@@ -135,7 +135,8 @@ const findUnique = async (id) => {
                 framePrice: true,
                 productPrice: true,
                 user: true,
-                product: true
+                product: true,
+                details: true
             }
         });
 

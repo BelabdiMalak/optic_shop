@@ -181,7 +181,7 @@ export default function OrderManagement() {
     setSubtypeFilter(''); // Reset subtype filter
     const selectedType = types.find((type) => type.id === typeId);
     const selectedTypeName = selectedType?.name || '';
-
+    console.log('selected type: ', selectedType)
     if (selectedTypeName === 'Verre Correcteur') {
       setNewOrder({ ...newOrder, category: 'spherique' });
     } else {
@@ -204,6 +204,7 @@ export default function OrderManagement() {
     const product = allProducts.find(
       (product) => product.typeId === selectedType && product.subTypeId === subtypeId
     );
+    console.log('selected product: ', product, subtypeId)
     if (product) {
       setNewOrder({ ...newOrder, productId: product.id });
     }
@@ -321,6 +322,7 @@ export default function OrderManagement() {
   );
 
   const handleAddOrder = async () => {
+    console.log(newOrder)
     if (!newOrder.userId || !newOrder.productId) {
       toast({
         title: 'Invalid input',
@@ -362,8 +364,11 @@ export default function OrderManagement() {
       }
   
       if (response && response.data) {
+        console.log('order added heeeeeeeeeeeeeeeeeee')
         // Order created successfully
         setOrders((prevOrders) => [...prevOrders, response.data]);
+        setSelectedType('')
+        setSelectedSubtype('')
         setNewOrder({
           userId: '',
           productId: '',

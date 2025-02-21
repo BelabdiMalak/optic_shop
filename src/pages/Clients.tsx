@@ -140,10 +140,8 @@ export default function Clients() {
   
   const handleUpdateClient = async (updatedClient: Client) => {
     try {
-      delete updatedClient.createdAt;
-      delete updatedClient.updatedAt;
       
-      const {id, isDeleted, ...data} = updatedClient
+      const {id, isDeleted, createdAt, updatedAt, ...data} = updatedClient
       const response = await window.electron.updateUser(id, data);
       console.log(response)
       if (response?.status) {

@@ -119,6 +119,14 @@ const updateOrder = async (id, data) => {
                 order.product.id,
                 { stockQuantity: { increment: 1 } }
             )
+
+            if (order.details) 
+                await prisma.productDetail.update({
+                    where: { id: order.details.id },
+                    data: {
+                        quantity: { increment: 1 }
+                    }
+                })
         }
         
         const updatedOrder = await orderModel.updateOne(id, data);
@@ -202,6 +210,14 @@ const deleteOrder = async (id) => {
             order.product.id,
             { stockQuantity: { increment: 1 } }
         )
+
+        if (order.details) 
+            await prisma.productDetail.update({
+                where: { id: order.details.id },
+                data: {
+                    quantity: { increment: 1 }
+                }
+            })
 
         await orderModel.deleteById(id);
         return {

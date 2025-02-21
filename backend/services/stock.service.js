@@ -114,7 +114,7 @@ const createStock = async (data) => {
 
 const updateStock = async (id, data) => {
     try {
-        // check if stock exists
+        // Vérifier si le stock existe
         const stock = await stockModel.findUnique(id);
         if (!stock) {
             return {
@@ -123,7 +123,7 @@ const updateStock = async (id, data) => {
             };
         }
 
-        // Data validation
+        // Validation des données
         const { error } = stockValidator.updateSchema.validate(data);
         if (error) {
             return {
@@ -133,87 +133,82 @@ const updateStock = async (id, data) => {
             };
         }
 
-        // Check if product exists
-        // const product = data.productId && productModel.findUnique(data.productId);
-        // if (data.productId && !product)
-        //     return {
-        //         status: false,
-        //         message: 'Invalid product ID'
-        //     }
+        // Vérifier si le détail du produit existe déjà
+        const details = data.detailsId 
+            ? await prisma.productDetail.findUnique({ where: { id: data.detailsId } }) 
+            : null;
 
-        // Product Details valiation
-        const details = await prisma.productDetail.findUnique({ where: { id: data.detailsId } });
+        // Déterminer les nouvelles valeurs
+        const newCategory = data.category || details?.category;
+        const newSphere = data.sphere || details?.sphere;
+        const newCylinder = data.cylinder || details?.cylinder;
 
-        const newCategory = data.category ? data.category : details.category;
-        const newSphere = data.sphere ? data.sphere : details.sphere;
-        const newCylinder = data.cylinder ? data.cylinder : details.cylinder; // ! check empty values
-
-        const newDetails = await prisma.productDetail.findUnique({
+        // Vérifier si un détail de produit avec ces caractéristiques existe déjà
+        let newDetails = await prisma.productDetail.findUnique({
             where: {
-              productId_sphere_cylinder_category: {
-                productId: data.productId, // Assurez-vous que cette valeur est définie
-                sphere: newSphere,
-                cylinder: newCylinder,
-                category: data.category,
-              },
+                productId_sphere_cylinder_category: {
+                    productId: data.productId,
+                    sphere: newSphere,
+                    cylinder: newCylinder,
+                    category: newCategory,
+                },
             },
-          });
-          
+        });
 
-        !newDetails && await prisma.productDetail.update({
-            where: { id: details.id },
-            data: {
-                category: newCategory,
-                sphere: newSphere,
-                cylinder: newCylinder
-            }
-        })
-
-
-        //! check newDetails && newDetails.id == details.id
-        if (newDetails && newDetails.id !== details.id) {
-            await stockModel.updateOne(id, {
-                detailsId: newDetails.id
+        // Si `newDetails` n'existe pas, on le crée
+        if (!newDetails) {
+            newDetails = await prisma.productDetail.create({
+                data: {
+                    productId: data.productId,
+                    sphere: newSphere,
+                    cylinder: newCylinder,
+                    category: newCategory,
+                    quantity: 0, // Valeur initiale, peut être ajustée
+                },
             });
+        }
 
+        // Vérifier si `details` est différent de `newDetails`
+        if (newDetails.id !== details?.id) {
+            // Mettre à jour le stock avec le nouvel ID de détails
+            await stockModel.updateOne(id, { detailsId: newDetails.id });
+
+            // Gestion des ajustements de stock
             if (stock.type === STOCK_TYPE.OUT) {
                 await prisma.productDetail.update({
                     where: { id: newDetails.id },
-                    data: {
-                        quantity: { decrement: stock.quantity }
-                    }
-                })
-                await prisma.productDetail.update({
-                    where: { id: details.id },
-                    data: {
-                        quantity: { increment: stock.quantity }
-                    }
-                })
+                    data: { quantity: { decrement: stock.quantity } }
+                });
+
+                if (details) {
+                    await prisma.productDetail.update({
+                        where: { id: details.id },
+                        data: { quantity: { increment: stock.quantity } }
+                    });
+                }
             }
 
             if (stock.type === STOCK_TYPE.IN) {
                 await prisma.productDetail.update({
                     where: { id: newDetails.id },
-                    data: {
-                        quantity: { increment: stock.quantity }
-                    }
-                })
-                await prisma.productDetail.update({
-                    where: { id: details.id },
-                    data: {
-                        quantity: { decrement: stock.quantity }
-                    }
-                })
-    
+                    data: { quantity: { increment: stock.quantity } }
+                });
+
+                if (details) {
+                    await prisma.productDetail.update({
+                        where: { id: details.id },
+                        data: { quantity: { decrement: stock.quantity } }
+                    });
+                }
             }
-        }
+        } 
 
         return {
             status: true,
             message: 'Stock updated successfully',
         };
     } catch (error) {
-        throw new Error(`Error in updating stock (service): ${error}`);
+        throw new Error(`Error in updating stock (service): ${error.message}`);
     }
 };
 
