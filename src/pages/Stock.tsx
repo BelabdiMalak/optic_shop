@@ -69,8 +69,8 @@ export default function Stock() {
     quantity: 0,
     productId: '',
     category: '',
-    sphere: '',
-    cylinder: ''
+    sphere: '0',
+    cylinder: '0'
   });
   const [isAddStockOpen, setIsAddStockOpen] = useState(false);
   const [_typeFilter, setTypeFilter] = useState('');
@@ -339,7 +339,7 @@ export default function Stock() {
       console.log(response)
       if (response && response.data && response.status === true) {
         setStock((prevStock) => [...prevStock, response.data]);
-        setNewStock({ date: '', type: 'in', quantity: 0, productId: '', category: '', sphere: '', cylinder: ''});
+        setNewStock({ date: '', type: 'in', quantity: 0, productId: '', category: '', sphere: '0', cylinder: '0'});
         setIsAddStockOpen(false);
         setSelectedType('');
         setSelectedSubtype('');

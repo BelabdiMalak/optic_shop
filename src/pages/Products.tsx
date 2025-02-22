@@ -68,7 +68,7 @@ const HC = 'HC';
 const HMC = 'HMC';
 const TRHC = 'TRHC';
 const BB = 'BB';
-const TRB = 'TRB';
+const TRBB = 'TRBB';
 
 const VERT = 'VERT';
 const BLEU = 'BLEU';
@@ -93,7 +93,7 @@ const GLASS_SUBTYPES = {
     HMC,
     TRHC,
     BB,
-    TRB
+    TRBB
 };
 
 const SUNGLASS_SUBTYPES = {
