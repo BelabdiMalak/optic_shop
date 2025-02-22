@@ -63,9 +63,9 @@ export default function Clients() {
   const [newClient, setNewClient] = useState<Omit<Client, 'id' | 'createdAt' | 'updatedAt'>>({
     name: '',
     surename: '',
-    sphere: '', 
-    cylinder: '', 
-    axis: ''
+    sphere: '0', 
+    cylinder: '0', 
+    axis: '0'
   });
 
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
@@ -236,7 +236,7 @@ export default function Clients() {
       const response = await window.electron.createUser(newClient);
       if (response && response.data) {
         setClients((prevClients) => [...prevClients, response.data]);
-        setNewClient({ name: '', surename: '', sphere: '', cylinder: '', axis: '' });
+        setNewClient({ name: '', surename: '', sphere: '0', cylinder: '0', axis: '0' });
         setIsAddClientOpen(false);
         toast({
           title: 'Client ajouté',

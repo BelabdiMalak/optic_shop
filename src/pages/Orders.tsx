@@ -77,9 +77,9 @@ export default function OrderManagement() {
     deposit: 0,
     status: 'En attente',
     date: '',
-    category: '',
-    sphere: '',
-    cylinder: ''
+    category: '0',
+    sphere: '0',
+    cylinder: '0'
   });
   const [types, setTypes] = useState<Type[]>([]); // List of types
   const [subtypes, setSubtypes] = useState<SubType[]>([]); // List of subtypes
@@ -377,9 +377,9 @@ export default function OrderManagement() {
           deposit: 0,
           status: 'En attente',
           date: '',
-          category: '',
-          sphere: '',
-          cylinder: ''
+          category: '0',
+          sphere: '0',
+          cylinder: '0'
         });
         setIsAddOrderOpen(false);
         toast({
