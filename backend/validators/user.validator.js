@@ -15,14 +15,23 @@ const createSchema = Joi.object({
             'string.max': 'Surname cannot exceed 255 characters',
             'any.required': 'Surname is required'
         }),
-    sphere: Joi.string().allow('').messages({
-        'string.base': 'Sphere value must be a string',
+    sphereL: Joi.string().allow('').messages({
+        'string.base': 'Sphere (L) value must be a string',
     }),
-    cylinder: Joi.string().allow('').messages({
-        'string.base': 'Cylinder value must be a string',
+    cylinderL: Joi.string().allow('').messages({
+        'string.base': 'Cylinder (L) value must be a string',
     }),
-    axis: Joi.string().allow('').messages({
-        'string.base': 'Axis value must be a string',
+    axisL: Joi.string().allow('').messages({
+        'string.base': 'Axis (L) value must be a string',
+    }),
+    sphereR: Joi.string().allow('').messages({
+        'string.base': 'Sphere (R) value must be a string',
+    }),
+    cylinderR: Joi.string().allow('').messages({
+        'string.base': 'Cylinder (R) value must be a string',
+    }),
+    axisR: Joi.string().allow('').messages({
+        'string.base': 'Axis (R) value must be a string',
     }),
 });
 
@@ -40,17 +49,29 @@ const updateSchema = Joi.object({
             'string.empty': 'Surname cannot be empty',
             'string.max': 'Surname cannot exceed 255 characters',
         }),
-    sphere: Joi.string().allow('')
+    sphereL: Joi.string().allow('')
         .messages({
-            'string.base': 'Sphere value must be a string',
+            'string.base': 'Sphere (L) value must be a string',
         }),
-    cylinder: Joi.string().allow('')
+    cylinderL: Joi.string().allow('')
         .messages({
-            'string.base': 'Cylinder value must be a string',
+            'string.base': 'Cylinder (L) value must be a string',
         }),
-    axis: Joi.string().allow('')
+    axisL: Joi.string().allow('')
         .messages({
-            'string.base': 'Axis value must be a string',
+            'string.base': 'Axis (L) value must be a string',
+        }),
+    sphereR: Joi.string().allow('')
+        .messages({
+            'string.base': 'Sphere (R) value must be a string',
+        }),
+    cylinderR: Joi.string().allow('')
+        .messages({
+            'string.base': 'Cylinder (R) value must be a string',
+        }),
+    axisR: Joi.string().allow('')
+        .messages({
+            'string.base': 'Axis (R) value must be a string',
         }),
 });
 

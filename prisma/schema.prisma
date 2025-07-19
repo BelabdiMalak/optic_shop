@@ -12,9 +12,12 @@ model User {
   id        String   @id @default(uuid())
   name      String
   surename  String
-  sphere    String?
-  cylinder  String?
-  axis      String?
+  sphereL    String?
+  cylinderL  String?
+  sphereR    String?
+  cylinderR  String?
+  axisL      String?
+  axisR      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isDeleted Boolean? @default(false)
@@ -88,8 +91,10 @@ model Order {
 
 model ProductDetail {
   id        String   @id @default(uuid())
-  sphere    String?  @default("0")
-  cylinder  String?  @default("0")
+  sphereL    String?  @default("0")
+  cylinderL  String?  @default("0")
+  sphereR    String?  @default("0")
+  cylinderR  String?  @default("0")
   quantity  Int      @default(0)
   category  String
   createdAt DateTime @default(now())
@@ -99,5 +104,5 @@ model ProductDetail {
   product   Product  @relation(fields: [productId], references: [id])
   stocks    Stock[]
 
-  @@unique([productId, sphere, cylinder, category])
+  @@unique([productId, sphereL, cylinderL, sphereR, cylinderR, category])
 }

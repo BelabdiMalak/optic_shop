@@ -25,6 +25,11 @@ import {
   FormLabel,
   useToast,
   Spinner,
+  DrawerOverlay,
+  DrawerCloseButton,
+  DrawerHeader,
+  DrawerBody,
+  DrawerFooter,
 } from '@chakra-ui/react';
 import { BiMenu, BiPlus } from 'react-icons/bi';
 import { AiOutlineClose } from 'react-icons/ai';
@@ -63,9 +68,12 @@ export default function Clients() {
   const [newClient, setNewClient] = useState<Omit<Client, 'id' | 'createdAt' | 'updatedAt'>>({
     name: '',
     surename: '',
-    sphere: '0', 
-    cylinder: '0', 
-    axis: '0'
+    sphereL: '0', 
+    sphereR: '0',
+    cylinderL: '0',
+    cylinderR: '0', 
+    axisL: '0',
+    axisR: '0',
   });
 
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
@@ -236,7 +244,7 @@ export default function Clients() {
       const response = await window.electron.createUser(newClient);
       if (response && response.data) {
         setClients((prevClients) => [...prevClients, response.data]);
-        setNewClient({ name: '', surename: '', sphere: '0', cylinder: '0', axis: '0' });
+        setNewClient({ name: '', surename: '', sphereL: '0', cylinderL: '0', axisL: '0', sphereR: '0', cylinderR: '0', axisR: '0' });
         setIsAddClientOpen(false);
         toast({
           title: 'Client ajouté',
@@ -336,9 +344,12 @@ export default function Clients() {
                     <Tr>
                       <Th>Prénom</Th>
                       <Th>Nom</Th>
-                      <Th>Sphère</Th>
-                      <Th>Cylindre</Th>
-                      <Th>Axe</Th>
+                      <Th>Sphère (G)</Th>
+                      <Th>Cylindre (G)</Th>
+                      <Th>Axe (G)</Th>
+                      <Th>Sphère (D)</Th>
+                      <Th>Cylindre (D)</Th>
+                      <Th>Axe (D)</Th>
                       <Th>Date de création</Th>
                       <Th>Date de mise à jour</Th>
                     </Tr>
@@ -353,9 +364,12 @@ export default function Clients() {
                         <Tr key={client.id}>
                           <Td>{client.name}</Td>
                           <Td>{client.surename}</Td>
-                          <Td>{client.sphere}</Td>
-                          <Td>{client.cylinder}</Td>
-                          <Td>{client.axis}</Td>
+                          <Td>{client.sphereL}</Td>
+                          <Td>{client.cylinderL}</Td>
+                          <Td>{client.axisL}</Td>
+                          <Td>{client.sphereR}</Td>
+                          <Td>{client.cylinderR}</Td>
+                          <Td>{client.axisR}</Td>
                           <Td>{client.createdAt ? new Date(client.createdAt).toLocaleDateString() : '-'}</Td>
                           <Td>{client.updatedAt ? new Date(client.updatedAt).toLocaleDateString() : '-'}</Td>
 
@@ -447,143 +461,194 @@ export default function Clients() {
         </Box>
       </HStack>
 
-      {/* Ajouter un Client */}
-      <Drawer isOpen={isAddClientOpen} onClose={() => setIsAddClientOpen(false)}>
-        <DrawerContent>
-          <Box p="4">
-            <Heading as="h3" size="md">
-              Ajouter un Nouveau Client
-            </Heading>
-            <VStack spacing={4} align="stretch">
-              <FormControl isRequired>
-                <FormLabel>Prénom</FormLabel>
-                <Input
-                  value={newClient.name}
-                  onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
-                />
-              </FormControl>
 
-              <FormControl isRequired>
-                <FormLabel>Nom</FormLabel>
-                <Input
-                  value={newClient.surename}
-                  onChange={(e) => setNewClient({ ...newClient, surename: e.target.value })}
-                />
-              </FormControl>
+    <Drawer isOpen={isAddClientOpen} onClose={() => setIsAddClientOpen(false)}>
+      <DrawerOverlay />
+      <DrawerContent>
+        <DrawerCloseButton />
+        <DrawerHeader>Ajouter un Nouveau Client</DrawerHeader>
 
-              <FormControl>
-                <FormLabel>Sphère</FormLabel>
-                <Input
-                  value={newClient.sphere}
-                  onChange={(e) =>
-                    setNewClient({ ...newClient, sphere: e.target.value })
-                  }
-                />
-              </FormControl>
+        {/* This part becomes scrollable */}
+        <DrawerBody>
+          <VStack spacing={4} align="stretch">
+            <FormControl isRequired>
+              <FormLabel>Prénom</FormLabel>
+              <Input
+                value={newClient.name}
+                onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
+              />
+            </FormControl>
 
-              <FormControl>
-                <FormLabel>Cylindre</FormLabel>
-                <Input
-                  value={newClient.cylinder}
-                  onChange={(e) =>
-                    setNewClient({ ...newClient, cylinder: e.target.value })
-                  }
-                />
-              </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Nom</FormLabel>
+              <Input
+                value={newClient.surename}
+                onChange={(e) => setNewClient({ ...newClient, surename: e.target.value })}
+              />
+            </FormControl>
 
-              <FormControl>
-                <FormLabel>Axe</FormLabel>
-                <Input
-                  value={newClient.axis}
-                  onChange={(e) =>
-                    setNewClient({ ...newClient, axis: e.target.value })
-                  }
-                />
-              </FormControl>
+            <FormControl>
+              <FormLabel>Sphère (G)</FormLabel>
+              <Input
+                value={newClient.sphereL}
+                onChange={(e) => setNewClient({ ...newClient, sphereL: e.target.value })}
+              />
+            </FormControl>
 
-              <HStack spacing={4} mt={4}>
-                <Button onClick={() => setIsAddClientOpen(false)} variant="outline">
-                  Annuler
-                </Button>
-                <Button colorScheme="green" onClick={handleAddClient}>
-                  Ajouter
-                </Button>
-              </HStack>
-            </VStack>
-          </Box>
-        </DrawerContent>
-      </Drawer>
-      {/* Modifier un Client */}
-      <Drawer isOpen={isEditClientOpen} onClose={() => setIsEditClientOpen(false)}>
-        <DrawerContent>
-          <Box p="4">
-            <Heading as="h3" size="md">
-              Modifier un Client
-            </Heading>
-            <VStack spacing={4} align="stretch">
-              { clientToEdit && (
-                <>
-                  <FormControl isRequired>
-                    <FormLabel>Prénom</FormLabel>
-                    <Input
-                      value={clientToEdit.name}
-                      onChange={(e) => setClientToEdit({ ...clientToEdit, name: e.target.value })}
-                    />
-                  </FormControl>
+            <FormControl>
+              <FormLabel>Cylindre (G)</FormLabel>
+              <Input
+                value={newClient.cylinderL}
+                onChange={(e) => setNewClient({ ...newClient, cylinderL: e.target.value })}
+              />
+            </FormControl>
 
-                  <FormControl isRequired>
-                    <FormLabel>Nom</FormLabel>
-                    <Input
-                      value={clientToEdit.surename}
-                      onChange={(e) => setClientToEdit({ ...clientToEdit, surename: e.target.value })}
-                    />
-                  </FormControl>
+            <FormControl>
+              <FormLabel>Axe (G)</FormLabel>
+              <Input
+                value={newClient.axisL}
+                onChange={(e) => setNewClient({ ...newClient, axisL: e.target.value })}
+              />
+            </FormControl>
 
-                  <FormControl>
-                    <FormLabel>Sphère</FormLabel>
-                    <Input
-                      value={clientToEdit.sphere}
-                      onChange={(e) =>
-                        setClientToEdit({ ...clientToEdit, sphere: e.target.value })
-                      }
-                    />
-                  </FormControl>
+            <FormControl>
+              <FormLabel>Sphère (D)</FormLabel>
+              <Input
+                value={newClient.sphereR}
+                onChange={(e) => setNewClient({ ...newClient, sphereR: e.target.value })}
+              />
+            </FormControl>
 
-                  <FormControl>
-                    <FormLabel>Cylindre</FormLabel>
-                    <Input
-                      value={clientToEdit.cylinder}
-                      onChange={(e) =>
-                        setClientToEdit({ ...clientToEdit, cylinder: e.target.value })
-                      }
-                    />
-                  </FormControl>
+            <FormControl>
+              <FormLabel>Cylindre (D)</FormLabel>
+              <Input
+                value={newClient.cylinderR}
+                onChange={(e) => setNewClient({ ...newClient, cylinderR: e.target.value })}
+              />
+            </FormControl>
 
-                  <FormControl>
-                    <FormLabel>Axe</FormLabel>
-                    <Input
-                      value={clientToEdit.axis}
-                      onChange={(e) =>
-                        setClientToEdit({ ...clientToEdit, axis: e.target.value })
-                      }
-                    />
-                  </FormControl>
+            <FormControl>
+              <FormLabel>Axe (D)</FormLabel>
+              <Input
+                value={newClient.axisR}
+                onChange={(e) => setNewClient({ ...newClient, axisR: e.target.value })}
+              />
+            </FormControl>
+          </VStack>
+        </DrawerBody>
 
+        <DrawerFooter>
+          <HStack spacing={4}>
+            <Button variant="outline" onClick={() => setIsAddClientOpen(false)}>
+              Annuler
+            </Button>
+            <Button colorScheme="green" onClick={handleAddClient}>
+              Ajouter
+            </Button>
+          </HStack>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+    <Drawer isOpen={isEditClientOpen} onClose={() => setIsEditClientOpen(false)}>
+      <DrawerOverlay />
+      <DrawerContent>
+        <DrawerCloseButton />
+        <DrawerHeader>
+          Modifier un Client
+        </DrawerHeader>
 
-                  <HStack spacing={4} mt={4}>
-                    <Button onClick={() => setIsEditClientOpen(false)} variant="outline">
-                      Annuler
-                    </Button>
-                    <Button colorScheme="green" onClick={() => handleUpdateClient(clientToEdit)}>
-                      Mettre à jour
-                    </Button>
-                  </HStack>
-                </>
-              )}
-            </VStack>
-          </Box>
-        </DrawerContent>
-      </Drawer>
+        <DrawerBody>
+          <VStack spacing={4} align="stretch">
+            {clientToEdit && (
+              <>
+                <FormControl isRequired>
+                  <FormLabel>Prénom</FormLabel>
+                  <Input
+                    value={clientToEdit.name}
+                    onChange={(e) => setClientToEdit({ ...clientToEdit, name: e.target.value })}
+                  />
+                </FormControl>
+
+                <FormControl isRequired>
+                  <FormLabel>Nom</FormLabel>
+                  <Input
+                    value={clientToEdit.surename}
+                    onChange={(e) => setClientToEdit({ ...clientToEdit, surename: e.target.value })}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Sphère (G)</FormLabel>
+                  <Input
+                    value={clientToEdit.sphereL}
+                    onChange={(e) => setClientToEdit({ ...clientToEdit, sphereL: e.target.value })}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Cylindre (G)</FormLabel>
+                  <Input
+                    value={clientToEdit.cylinderL}
+                    onChange={(e) => setClientToEdit({ ...clientToEdit, cylinderL: e.target.value })}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Axe (G)</FormLabel>
+                  <Input
+                    value={clientToEdit.axisL}
+                    onChange={(e) => setClientToEdit({ ...clientToEdit, axisL: e.target.value })}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Sphère (D)</FormLabel>
+                  <Input
+                    value={clientToEdit.sphereR}
+                    onChange={(e) => setClientToEdit({ ...clientToEdit, sphereR: e.target.value })}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Cylindre (D)</FormLabel>
+                  <Input
+                    value={clientToEdit.cylinderR}
+                    onChange={(e) => setClientToEdit({ ...clientToEdit, cylinderR: e.target.value })}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Axe (D)</FormLabel>
+                  <Input
+                    value={clientToEdit.axisR}
+                    onChange={(e) => setClientToEdit({ ...clientToEdit, axisR: e.target.value })}
+                  />
+                </FormControl>
+              </>
+            )}
+          </VStack>
+        </DrawerBody>
+
+        <DrawerFooter>
+          <HStack spacing={4}>
+            <Button onClick={() => setIsEditClientOpen(false)} variant="outline">
+              Annuler
+            </Button>
+            <Button
+              colorScheme="green"
+              onClick={() => {
+                if (clientToEdit) {
+                  handleUpdateClient(clientToEdit);
+                }
+              }}
+            >
+              Mettre à jour
+            </Button>
+
+          </HStack>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
 
     </>
   );
