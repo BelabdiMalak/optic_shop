@@ -69,8 +69,10 @@ export default function Stock() {
     quantity: 0,
     productId: '',
     category: '',
-    sphere: '0',
-    cylinder: '0'
+    sphereL: '0',
+    cylinderL: '0',
+    sphereR: '0',
+    cylinderR: '0',
   });
   const [isAddStockOpen, setIsAddStockOpen] = useState(false);
   const [_typeFilter, setTypeFilter] = useState('');
@@ -339,7 +341,7 @@ export default function Stock() {
       console.log(response)
       if (response && response.data && response.status === true) {
         setStock((prevStock) => [...prevStock, response.data]);
-        setNewStock({ date: '', type: 'in', quantity: 0, productId: '', category: '', sphere: '0', cylinder: '0'});
+        setNewStock({ date: '', type: 'in', quantity: 0, productId: '', category: '', sphereL: '0', cylinderL: '0', sphereR: '0', cylinderR: '0' });
         setIsAddStockOpen(false);
         setSelectedType('');
         setSelectedSubtype('');
@@ -497,8 +499,10 @@ export default function Stock() {
                       <Th>Type de Produit</Th>
                       <Th>Sous-Type de Produit</Th>
                       <Th>Type de Verre</Th>
-                      <Th>Sphère</Th>
-                      <Th>Cylinder</Th>
+                      <Th>Sphère (G)</Th>
+                      <Th>Cylinder (G)</Th>
+                      <Th>Sphère (D)</Th>
+                      <Th>Cylinder (D)</Th>
                       <Th>Type de Stock</Th>
                       <Th>Quantité</Th>
                     </Tr>
@@ -515,8 +519,10 @@ export default function Stock() {
                           <Td>{item.product ? item.product.type.name: '-'}</Td>
                           <Td>{item.product ? item.product.subType.name: '-'}</Td>
                           <Td>{item.details ? item.details.category: '-'}</Td>
-                          <Td>{item.details?.sphere ? item.details.sphere: '-'}</Td>
-                          <Td>{item.details?.cylinder ? item.details.cylinder: '-'}</Td>
+                          <Td>{item.details?.sphereL ? item.details.sphereL: '-'}</Td>
+                          <Td>{item.details?.cylinderL ? item.details.cylinderL: '-'}</Td>
+                          <Td>{item.details?.sphereR ? item.details.sphereR: '-'}</Td>
+                          <Td>{item.details?.cylinderR ? item.details.cylinderR: '-'}</Td>
                           <Td>{item.type}</Td>
                           <Td>{item.quantity}</Td>
                         <Td>
@@ -698,19 +704,36 @@ export default function Stock() {
                 </FormControl>
 
                   <FormControl>
-                    <FormLabel>Sphère</FormLabel>
+                    <FormLabel>Sphère (G)</FormLabel>
                     <Input
-                      value={newStock.sphere}
-                      onChange={(e) => setNewStock({ ...newStock, sphere: e.target.value })}
+                      value={newStock.sphereL}
+                      onChange={(e) => setNewStock({ ...newStock, sphereL: e.target.value })}
                       isDisabled={!selectedType}
                     />
                   </FormControl>
 
                   <FormControl>
-                    <FormLabel>Cylindre</FormLabel>
+                    <FormLabel>Cylindre (G)</FormLabel>
                     <Input
-                      value={newStock.cylinder}
-                      onChange={(e) => setNewStock({ ...newStock, cylinder: e.target.value })}
+                      value={newStock.cylinderL}
+                      onChange={(e) => setNewStock({ ...newStock, cylinderL: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Sphère (D)</FormLabel>
+                    <Input
+                      value={newStock.sphereR}
+                      onChange={(e) => setNewStock({ ...newStock, sphereR: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Cylindre (D)</FormLabel>
+                    <Input
+                      value={newStock.cylinderR}
+                      onChange={(e) => setNewStock({ ...newStock, cylinderR: e.target.value })}
                       isDisabled={!selectedType}
                     />
                   </FormControl>
@@ -756,26 +779,51 @@ export default function Stock() {
                   </FormControl>
 
                   <FormControl>
-                    <FormLabel>Sphère</FormLabel>
+                    <FormLabel>Sphère (G)</FormLabel>
                     <Input
-                      value={stockToEdit.details?.sphere || ''}
+                      value={stockToEdit.details?.sphereL || ''}
                       onChange={(e) =>
                         setStockToEdit((prev:any) => ({
                           ...prev,
-                          details: { ...prev.details, sphere: e.target.value },
+                          details: { ...prev.details, sphereL: e.target.value },
                         }))
                       }
                     />
                   </FormControl>
 
                   <FormControl>
-                    <FormLabel>Cylindre</FormLabel>
+                    <FormLabel>Cylindre (G)</FormLabel>
                     <Input
-                      value={stockToEdit.details?.cylinder || ''}
+                      value={stockToEdit.details?.cylinderL || ''}
                       onChange={(e) =>
                         setStockToEdit((prev: any) => ({
                           ...prev,
-                          details: { ...prev.details, cylinder: e.target.value },
+                          details: { ...prev.details, cylinderL: e.target.value },
+                        }))
+                      }
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Sphère (D)</FormLabel>
+                    <Input
+                      value={stockToEdit.details?.sphereR || ''}
+                      onChange={(e) =>
+                        setStockToEdit((prev: any) => ({
+                          ...prev,
+                          details: { ...prev.details, sphereR: e.target.value },
+                        }))
+                      }
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Cylindre (D)</FormLabel>
+                    <Input
+                      value={stockToEdit.details?.cylinderR || ''}
+                      onChange={(e) =>
+                        setStockToEdit((prev: any) => ({
+                          ...prev,
+                          details: { ...prev.details, cylinderR: e.target.value },
                         }))
                       }
                     />

@@ -48,8 +48,10 @@ const createStock = async (data) => {
             where: {
                 category: data.category,
                 productId: data.productId,
-                sphere: data.sphere, // put default 0 in frontend?
-                cylinder: data.cylinder,
+                sphereL: data.sphereL, // put default 0 in frontend?
+                cylinderL: data.cylinderL,
+                sphereR: data.sphereR,
+                cylinderR: data.cylinderR,
             }
         })
 
@@ -89,8 +91,10 @@ const createStock = async (data) => {
                 productId: data.productId,
                 category: data.category,
                 quantity: data.quantity,
-                sphere: data.sphere,
-                cylinder: data.cylinder
+                sphereL: data.sphereL,
+                cylinderL: data.cylinderL,
+                sphereR: data.sphereR,
+                cylinderR: data.cylinderR,
             }
         })
 
@@ -140,16 +144,20 @@ const updateStock = async (id, data) => {
 
         // Déterminer les nouvelles valeurs
         const newCategory = data.category || details?.category;
-        const newSphere = data.sphere || details?.sphere;
-        const newCylinder = data.cylinder || details?.cylinder;
+        const newSphereL = data.sphereL || details?.sphereL;
+        const newCylinderL = data.cylinderL || details?.cylinderL;
+        const newSphereR = data.sphereR || details?.sphereR;
+        const newCylinderR = data.cylinderR || details?.cylinderR;
 
         // Vérifier si un détail de produit avec ces caractéristiques existe déjà
         let newDetails = await prisma.productDetail.findUnique({
             where: {
-                productId_sphere_cylinder_category: {
+                productId_sphereL_cylinderL_sphereR_cylinderR_category: {
                     productId: data.productId,
-                    sphere: newSphere,
-                    cylinder: newCylinder,
+                    sphereL: newSphereL,
+                    cylinderL: newCylinderL,
+                    sphereR: newSphereR,
+                    cylinderR: newCylinderR,
                     category: newCategory,
                 },
             },
@@ -160,8 +168,10 @@ const updateStock = async (id, data) => {
             newDetails = await prisma.productDetail.create({
                 data: {
                     productId: data.productId,
-                    sphere: newSphere,
-                    cylinder: newCylinder,
+                    sphereL: newSphereL,
+                    cylinderL: newCylinderL,
+                    sphereR: newSphereR,
+                    cylinderR: newCylinderR,
                     category: newCategory,
                     quantity: 0, // Valeur initiale, peut être ajustée
                 },

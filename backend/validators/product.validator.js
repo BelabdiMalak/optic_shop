@@ -33,11 +33,15 @@ const createSchema = Joi.object({
     category: Joi.string()
         .valid('torique', 'spherique'),
     
-    sphere: Joi
+    sphereL: Joi
         .number(),
 
-    cylinder: Joi
-        .number()
+    cylinderL: Joi
+        .number(),
+    sphereR: Joi
+        .number(),
+    cylinderR: Joi
+        .number(),
 });
 
 
@@ -75,23 +79,40 @@ const updateProductDetailsSchema = Joi.object({
         .empty('')
         .valid('torique', 'spherique'),
     
-    sphere: Joi
+    sphereL: Joi
         .number()
         .optional()
         .allow(null) // Allow `null` explicitly
         .empty('')   // Treat empty strings as `undefined`
         .messages({
-            'number.base': 'Sphere must be a number or empty'
+            'number.base': 'Sphere (L) must be a number or empty'
         }),
 
-    cylinder: Joi
+    cylinderL: Joi
         .number()
         .optional()
         .allow(null) // Allow `null` explicitly
         .empty('')   // Treat empty strings as `undefined`
         .messages({
-            'number.base': 'Cylinder must be a number or empty'
+            'number.base': 'Cylinder (L) must be a number or empty'
         }),
+    sphereR: Joi
+        .number()
+        .optional()
+        .allow(null) // Allow `null` explicitly
+        .empty('')   // Treat empty strings as `undefined`
+        .messages({
+            'number.base': 'Sphere (R) must be a number or empty'
+        }),
+    cylinderR: Joi
+        .number()
+        .optional()
+        .allow(null) // Allow `null` explicitly
+        .empty('')   // Treat empty strings as `undefined`
+        .messages({
+            'number.base': 'Cylinder (R) must be a number or empty'
+        }),
+        
 });
 
 module.exports = { 
