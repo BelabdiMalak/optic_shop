@@ -78,8 +78,10 @@ export default function OrderManagement() {
     status: 'En attente',
     date: '',
     category: '0',
-    sphere: '0',
-    cylinder: '0'
+    sphereL: '0',
+    cylinderL: '0',
+    sphereR: '0',
+    cylinderR: '0',
   });
   const [types, setTypes] = useState<Type[]>([]); // List of types
   const [subtypes, setSubtypes] = useState<SubType[]>([]); // List of subtypes
@@ -378,8 +380,10 @@ export default function OrderManagement() {
           status: 'En attente',
           date: '',
           category: '0',
-          sphere: '0',
-          cylinder: '0'
+          sphereL: '0',
+          cylinderL: '0',
+          sphereR: '0',
+          cylinderR: '0',
         });
         setIsAddOrderOpen(false);
         toast({
@@ -736,19 +740,35 @@ export default function OrderManagement() {
                   </FormControl>
 
                   <FormControl>
-                    <FormLabel>Sphère</FormLabel>
+                    <FormLabel>Sphère (G)</FormLabel>
                     <Input
-                      value={newOrder.sphere}
-                      onChange={(e) => setNewOrder({ ...newOrder, sphere: e.target.value })}
+                      value={newOrder.sphereL}
+                      onChange={(e) => setNewOrder({ ...newOrder, sphereL: e.target.value })}
                       isDisabled={!selectedType}
                     />
                   </FormControl>
 
                   <FormControl>
-                    <FormLabel>Cylindre</FormLabel>
+                    <FormLabel>Cylindre (G)</FormLabel>
                     <Input
-                      value={newOrder.cylinder}
-                      onChange={(e) => setNewOrder({ ...newOrder, cylinder: e.target.value })}
+                      value={newOrder.cylinderL}
+                      onChange={(e) => setNewOrder({ ...newOrder, cylinderL: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Sphère (D)</FormLabel>
+                    <Input
+                      value={newOrder.sphereR}
+                      onChange={(e) => setNewOrder({ ...newOrder, sphereR: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Cylindre (D)</FormLabel>
+                    <Input
+                      value={newOrder.cylinderR}
+                      onChange={(e) => setNewOrder({ ...newOrder, cylinderR: e.target.value })}
                       isDisabled={!selectedType}
                     />
                   </FormControl>

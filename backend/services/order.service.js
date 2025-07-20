@@ -46,8 +46,10 @@ const createOrder = async (data) => {
             where: {
                 category: data.category,
                 productId: data.productId,
-                sphere: data.sphere, // put default 0 in frontend?
-                cylinder: data.cylinder,
+                sphereL: data.sphereL, // put default 0 in frontend?
+                cylinderL: data.cylinderL,
+                sphereR: data.sphereR, // put default 0 in frontend?
+                cylinderR: data.cylinderR,
             }
         })
 
