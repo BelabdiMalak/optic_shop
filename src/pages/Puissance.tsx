@@ -56,8 +56,10 @@ interface ProductDetail {
     };
     productId: string;
     category: string;
-    sphere: string;
-    cylinder: string;
+    sphereL: string;
+    cylinderL: string;
+    sphereR: string;
+    cylinderR: string;
     quantity: number;
 }
 
@@ -259,8 +261,10 @@ const Puissances: React.FC = () => {
                                             <Tr>
                                             <Th>Produit</Th>
                                             <Th>Catégorie</Th>
-                                            <Th>Sphère</Th>
-                                            <Th>Cylindre</Th>
+                                            <Th>Sphère (G)</Th>
+                                            <Th>Cylindre (G)</Th>
+                                            <Th>Sphère (D)</Th>
+                                            <Th>Cylindre (D)</Th>
                                             <Th>Quantité</Th>
                                             </Tr>
                                         </Thead>
@@ -278,8 +282,10 @@ const Puissances: React.FC = () => {
                                                 <Tr key={detail.id}>
                                                 <Td>{detail.product.subType.name}</Td>
                                                 <Td>{detail.category}</Td>
-                                                <Td>{detail.sphere}</Td>
-                                                <Td>{detail.cylinder}</Td>
+                                                <Td>{detail.sphereL}</Td>
+                                                <Td>{detail.cylinderL}</Td>
+                                                <Td>{detail.sphereR}</Td>
+                                                <Td>{detail.cylinderR}</Td>
                                                 <Td>{detail.quantity}</Td>
                                                 <Td>
                                                 <HStack spacing={2}>
@@ -389,18 +395,33 @@ const Puissances: React.FC = () => {
                                                     </FormControl>
 
                                                     <FormControl>
-                                                        <FormLabel>Sphère</FormLabel>
+                                                        <FormLabel>Sphère (G)</FormLabel>
                                                         <Input
-                                                        value={puissanceToEdit.sphere}
-                                                        onChange={(e) => setPuissanceToEdit({ ...puissanceToEdit, sphere: e.target.value })}
+                                                        value={puissanceToEdit.sphereL}
+                                                        onChange={(e) => setPuissanceToEdit({ ...puissanceToEdit, sphereL: e.target.value })}
                                                         />
                                                     </FormControl>
 
                                                     <FormControl>
-                                                        <FormLabel>Cylindre</FormLabel>
+                                                        <FormLabel>Cylindre (G)</FormLabel>
                                                         <Input
-                                                        value={puissanceToEdit.cylinder}
-                                                        onChange={(e) => setPuissanceToEdit({ ...puissanceToEdit, cylinder: e.target.value })}
+                                                        value={puissanceToEdit.cylinderL}
+                                                        onChange={(e) => setPuissanceToEdit({ ...puissanceToEdit, cylinderL: e.target.value })}
+                                                        />
+                                                    </FormControl>
+
+                                                    <FormControl>
+                                                        <FormLabel>Sphère (D)</FormLabel>
+                                                        <Input
+                                                        value={puissanceToEdit.sphereR}
+                                                        onChange={(e) => setPuissanceToEdit({ ...puissanceToEdit, sphereR: e.target.value })}
+                                                        />
+                                                    </FormControl>
+                                                    <FormControl>
+                                                        <FormLabel>Cylindre (D)</FormLabel>
+                                                        <Input
+                                                        value={puissanceToEdit.cylinderR}
+                                                        onChange={(e) => setPuissanceToEdit({ ...puissanceToEdit, cylinderR: e.target.value })}
                                                         />
                                                     </FormControl>
 
