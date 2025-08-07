@@ -33,41 +33,41 @@ const createOrder = async (data) => {
                 message: `Product ${data.productId} not found`
             };
 
-        if (productData.stockQuantity < 1) 
-            return {
-                status: false,
-                message: `Insufficient quantity for product ${data.productId}`,
-                data: {
-                    quantity: productData.stockQuantity
-                }
-            };
+        // if (productData.stockQuantity < 1) 
+        //     return {
+        //         status: false,
+        //         message: `Insufficient quantity for product ${data.productId}`,
+        //         data: {
+        //             quantity: productData.stockQuantity
+        //         }
+        //     };
 
-        const productDetails = data.category && await prisma.productDetail.findFirst({
-            where: {
-                category: data.category,
-                productId: data.productId,
-                sphereL: data.sphereL, // put default 0 in frontend?
-                cylinderL: data.cylinderL,
-                sphereR: data.sphereR, // put default 0 in frontend?
-                cylinderR: data.cylinderR,
-            }
-        })
+        // const productDetails = data.category && await prisma.productDetail.findFirst({
+        //     where: {
+        //         category: data.category,
+        //         productId: data.productId,
+        //         sphereL: data.sphereL, // put default 0 in frontend?
+        //         cylinderL: data.cylinderL,
+        //         sphereR: data.sphereR, // put default 0 in frontend?
+        //         cylinderR: data.cylinderR,
+        //     }
+        // })
 
-        if (data.category && (!productDetails || 1 > productDetails.quantity))
-            return {
-                status: false,
-                message: 'Insufficient stock quantity',
-                data: {
-                    quantity: productDetails ? productDetails.quantity : 0
-                }
-            }
+        // if (data.category && (!productDetails || 1 > productDetails.quantity))
+        //     return {
+        //         status: false,
+        //         message: 'Insufficient stock quantity',
+        //         data: {
+        //             quantity: productDetails ? productDetails.quantity : 0
+        //         }
+        //     }
 
-        data.category && productDetails && await prisma.productDetail.update({
-            where: { id: productDetails.id },
-            data: {
-                quantity: (productDetails.quantity - 1)
-            }
-        })
+        // data.category && productDetails && await prisma.productDetail.update({
+        //     where: { id: productDetails.id },
+        //     data: {
+        //         quantity: (productDetails.quantity - 1)
+        //     }
+        // })
         const createdOrder = await orderModel.createOne({
             ...(data.date && { date: data.date }),
             ...(data.deposit && { deposit: data.deposit }),
@@ -76,14 +76,14 @@ const createOrder = async (data) => {
             ...(data.framePrice && { framePrice: data.framePrice }),
             ...(data.productPrice && { productPrice: data.productPrice }),
             ...(data.productId && { productId: data.productId }),
-            ...(data.category && { detailsId: productDetails.id })
+            // ...(data.category && { detailsId: productDetails.id })
         });
 
         // update product quantity
-        await productModel.updateOne(
-            data.productId,
-            { stockQuantity: { decrement: 1 } }
-        )
+        // await productModel.updateOne(
+        //     data.productId,
+        //     { stockQuantity: { decrement: 1 } }
+        // )
 
         const order = await orderModel.findUnique(createdOrder.id);
 
@@ -116,20 +116,20 @@ const updateOrder = async (id, data) => {
             };
         }
 
-        if (data.status && data.status === 'Annulée') {
-            await productModel.updateOne(
-                order.product.id,
-                { stockQuantity: { increment: 1 } }
-            )
+        // if (data.status && data.status === 'Annulée') {
+        //     await productModel.updateOne(
+        //         order.product.id,
+        //         { stockQuantity: { increment: 1 } }
+        //     )
 
-            if (order.details) 
-                await prisma.productDetail.update({
-                    where: { id: order.details.id },
-                    data: {
-                        quantity: { increment: 1 }
-                    }
-                })
-        }
+        //     if (order.details) 
+        //         await prisma.productDetail.update({
+        //             where: { id: order.details.id },
+        //             data: {
+        //                 quantity: { increment: 1 }
+        //             }
+        //         })
+        // }
         
         const updatedOrder = await orderModel.updateOne(id, data);
         return {
@@ -208,18 +208,18 @@ const deleteOrder = async (id) => {
             };
         }
 
-        await productModel.updateOne(
-            order.product.id,
-            { stockQuantity: { increment: 1 } }
-        )
+        // await productModel.updateOne(
+        //     order.product.id,
+        //     { stockQuantity: { increment: 1 } }
+        // )
 
-        if (order.details) 
-            await prisma.productDetail.update({
-                where: { id: order.details.id },
-                data: {
-                    quantity: { increment: 1 }
-                }
-            })
+        // if (order.details) 
+        //     await prisma.productDetail.update({
+        //         where: { id: order.details.id },
+        //         data: {
+        //             quantity: { increment: 1 }
+        //         }
+        //     })
 
         await orderModel.deleteById(id);
         return {
