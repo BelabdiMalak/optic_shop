@@ -344,12 +344,12 @@ export default function Clients() {
                     <Tr>
                       <Th>Prénom</Th>
                       <Th>Nom</Th>
-                      <Th>Sphère (G)</Th>
-                      <Th>Cylindre (G)</Th>
-                      <Th>Axe (G)</Th>
                       <Th>Sphère (D)</Th>
                       <Th>Cylindre (D)</Th>
                       <Th>Axe (D)</Th>
+                      <Th>Sphère (G)</Th>
+                      <Th>Cylindre (G)</Th>
+                      <Th>Axe (G)</Th>
                       <Th>Date de création</Th>
                       <Th>Date de mise à jour</Th>
                     </Tr>
@@ -487,29 +487,6 @@ export default function Clients() {
               />
             </FormControl>
 
-            <FormControl>
-              <FormLabel>Sphère (G)</FormLabel>
-              <Input
-                value={newClient.sphereL}
-                onChange={(e) => setNewClient({ ...newClient, sphereL: e.target.value })}
-              />
-            </FormControl>
-
-            <FormControl>
-              <FormLabel>Cylindre (G)</FormLabel>
-              <Input
-                value={newClient.cylinderL}
-                onChange={(e) => setNewClient({ ...newClient, cylinderL: e.target.value })}
-              />
-            </FormControl>
-
-            <FormControl>
-              <FormLabel>Axe (G)</FormLabel>
-              <Input
-                value={newClient.axisL}
-                onChange={(e) => setNewClient({ ...newClient, axisL: e.target.value })}
-              />
-            </FormControl>
 
             <FormControl>
               <FormLabel>Sphère (D)</FormLabel>
@@ -534,6 +511,31 @@ export default function Clients() {
                 onChange={(e) => setNewClient({ ...newClient, axisR: e.target.value })}
               />
             </FormControl>
+
+            <FormControl>
+              <FormLabel>Sphère (G)</FormLabel>
+              <Input
+                value={newClient.sphereL}
+                onChange={(e) => setNewClient({ ...newClient, sphereL: e.target.value })}
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>Cylindre (G)</FormLabel>
+              <Input
+                value={newClient.cylinderL}
+                onChange={(e) => setNewClient({ ...newClient, cylinderL: e.target.value })}
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>Axe (G)</FormLabel>
+              <Input
+                value={newClient.axisL}
+                onChange={(e) => setNewClient({ ...newClient, axisL: e.target.value })}
+              />
+            </FormControl>
+
           </VStack>
         </DrawerBody>
 
@@ -578,6 +580,30 @@ export default function Clients() {
                 </FormControl>
 
                 <FormControl>
+                  <FormLabel>Sphère (D)</FormLabel>
+                  <Input
+                    value={clientToEdit.sphereR}
+                    onChange={(e) => setClientToEdit({ ...clientToEdit, sphereR: e.target.value })}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Cylindre (D)</FormLabel>
+                  <Input
+                    value={clientToEdit.cylinderR}
+                    onChange={(e) => setClientToEdit({ ...clientToEdit, cylinderR: e.target.value })}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Axe (D)</FormLabel>
+                  <Input
+                    value={clientToEdit.axisR}
+                    onChange={(e) => setClientToEdit({ ...clientToEdit, axisR: e.target.value })}
+                  />
+                </FormControl>
+                
+                <FormControl>
                   <FormLabel>Sphère (G)</FormLabel>
                   <Input
                     value={clientToEdit.sphereL}
@@ -601,29 +627,6 @@ export default function Clients() {
                   />
                 </FormControl>
 
-                <FormControl>
-                  <FormLabel>Sphère (D)</FormLabel>
-                  <Input
-                    value={clientToEdit.sphereR}
-                    onChange={(e) => setClientToEdit({ ...clientToEdit, sphereR: e.target.value })}
-                  />
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel>Cylindre (D)</FormLabel>
-                  <Input
-                    value={clientToEdit.cylinderR}
-                    onChange={(e) => setClientToEdit({ ...clientToEdit, cylinderR: e.target.value })}
-                  />
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel>Axe (D)</FormLabel>
-                  <Input
-                    value={clientToEdit.axisR}
-                    onChange={(e) => setClientToEdit({ ...clientToEdit, axisR: e.target.value })}
-                  />
-                </FormControl>
               </>
             )}
           </VStack>

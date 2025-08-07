@@ -738,7 +738,23 @@ export default function OrderManagement() {
                       <option value="torique">Torique</option>
                     </Select>
                   </FormControl>
-
+                  <FormControl>
+                    <FormLabel>Sphère (D)</FormLabel>
+                    <Input
+                      value={newOrder.sphereR}
+                      onChange={(e) => setNewOrder({ ...newOrder, sphereR: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Cylindre (D)</FormLabel>
+                    <Input
+                      value={newOrder.cylinderR}
+                      onChange={(e) => setNewOrder({ ...newOrder, cylinderR: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+                  
                   <FormControl>
                     <FormLabel>Sphère (G)</FormLabel>
                     <Input
@@ -753,22 +769,6 @@ export default function OrderManagement() {
                     <Input
                       value={newOrder.cylinderL}
                       onChange={(e) => setNewOrder({ ...newOrder, cylinderL: e.target.value })}
-                      isDisabled={!selectedType}
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Sphère (D)</FormLabel>
-                    <Input
-                      value={newOrder.sphereR}
-                      onChange={(e) => setNewOrder({ ...newOrder, sphereR: e.target.value })}
-                      isDisabled={!selectedType}
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Cylindre (D)</FormLabel>
-                    <Input
-                      value={newOrder.cylinderR}
-                      onChange={(e) => setNewOrder({ ...newOrder, cylinderR: e.target.value })}
                       isDisabled={!selectedType}
                     />
                   </FormControl>

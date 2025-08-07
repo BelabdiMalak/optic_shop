@@ -181,55 +181,73 @@ const deleteById = async (id) => {
     }
 }
 
-const getTurnOver = async () =>  {
-    try {
-        const now = new Date();
-        const filters = {
-            day: {
-              gte: startOfDay(now),
-              lt: endOfDay(now),
-            },
-            week: {
-              gte: startOfWeek(now),
-              lt: endOfDay(now),
-            },
-            month: {
-              gte: startOfMonth(now),
-              lt: endOfDay(now),
-            },
-            year: {
-              gte: startOfYear(now),
-              lt: endOfDay(now),
-            },
-        };
+const getTurnOver = async () => {
+  try {
+    const now = new Date();
+    const filters = {
+      day: {
+        gte: startOfDay(now),
+        lt: endOfDay(now),
+      },
+      week: {
+        gte: startOfWeek(now),
+        lt: endOfDay(now),
+      },
+      month: {
+        gte: startOfMonth(now),
+        lt: endOfDay(now),
+      },
+      year: {
+        gte: startOfYear(now),
+        lt: endOfDay(now),
+      },
+    };
 
-        const results = await Promise.all(
-            Object.entries(filters).map(
-                async ([key, filter]) => {
-                    const revenue = await prisma.order.aggregate({
-                        where: { 
-                            date: filter,
-                            status: 'Complétée'
-                        },
-                        _sum: { productPrice: true, framePrice: true }
-                    })
-                    return { 
-                        period: key, 
-                        revenue: (revenue._sum.productPrice || 0) + (revenue._sum.framePrice || 0) 
-                    };
-                }
-            )
-        )
-        
-        return results.reduce((acc, { period, revenue }) => {
-            acc[period] = revenue;
-            return acc;
-        }, {});
-        
-    } catch (error) {
-        throw new Error('Error in getting turnover: ' + error.message);
-    }
-}
+    const results = await Promise.all(
+      Object.entries(filters).map(async ([key, filter]) => {
+        const [completed, pending] = await Promise.all([
+          prisma.order.aggregate({
+            where: {
+              date: filter,
+              status: 'Complétée',
+            },
+            _sum: {
+              productPrice: true,
+              framePrice: true,
+            },
+          }),
+          prisma.order.aggregate({
+            where: {
+              date: filter,
+              status: 'En attente',
+            },
+            _sum: {
+              deposit: true,
+            },
+          }),
+        ]);
+
+        const completedRevenue =
+          (completed._sum.productPrice || 0) +
+          (completed._sum.framePrice || 0);
+        const pendingDeposit = pending._sum.deposit || 0;
+
+        return {
+          period: key,
+          revenue: completedRevenue + pendingDeposit,
+        };
+      })
+    );
+
+    return results.reduce((acc, { period, revenue }) => {
+      acc[period] = revenue;
+      return acc;
+    }, {});
+  } catch (error) {
+    throw new Error('Error in getting turnover: ' + error.message);
+  }
+};
+
 
 const getProductsSold = async () => {
     try {
