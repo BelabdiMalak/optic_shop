@@ -107,6 +107,22 @@ const createSchema = Joi.object({
         .messages({
             'number.base': 'Cylinder (R) must be a number or empty'
         }),
+    axisL: Joi
+        .number()
+        .optional()
+        .allow(null) // Allow `null` explicitly
+        .empty('')   // Treat empty strings as `undefined`
+        .messages({
+            'number.base': 'Axis (L) must be a number or empty'
+        }),
+    axisR: Joi
+        .number()
+        .optional()
+        .allow(null) // Allow `null` explicitly
+        .empty('')   // Treat empty strings as `undefined`
+        .messages({
+            'number.base': 'Axis (R) must be a number or empty'
+        })
 });
 
 const updateSchema = Joi.object({

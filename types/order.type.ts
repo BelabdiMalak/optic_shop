@@ -22,4 +22,6 @@ export interface Order {
     cylinderL?: string;
     sphereR?: string;
     cylinderR?: string;
+    axisL?: string;
+    axisR?: string;
   };

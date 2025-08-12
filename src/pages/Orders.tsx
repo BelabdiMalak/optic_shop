@@ -80,8 +80,10 @@ export default function OrderManagement() {
     category: '0',
     sphereL: '0',
     cylinderL: '0',
+    axisL: '0',
     sphereR: '0',
     cylinderR: '0',
+    axisR: '0'
   });
   const [types, setTypes] = useState<Type[]>([]); // List of types
   const [subtypes, setSubtypes] = useState<SubType[]>([]); // List of subtypes
@@ -382,8 +384,10 @@ export default function OrderManagement() {
           category: '0',
           sphereL: '0',
           cylinderL: '0',
+          axisL: '0',
           sphereR: '0',
           cylinderR: '0',
+          axisR: '0'
         });
         setIsAddOrderOpen(false);
         toast({
@@ -640,11 +644,11 @@ export default function OrderManagement() {
                   onChange={(e) => setNewOrder({ ...newOrder, userId: e.target.value })}
                 >
                   {users
-                  .filter(user => user.isDeleted===false)
-                  .map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {`${user.name} ${user.surename}`}
-                    </option>
+                    .filter(user => user.isDeleted === false)
+                    .map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {`${user.name} ${user.surename}`}
+                      </option>
                   ))}
                 </Select>
               </FormControl>
@@ -746,6 +750,7 @@ export default function OrderManagement() {
                       isDisabled={!selectedType}
                     />
                   </FormControl>
+
                   <FormControl>
                     <FormLabel>Cylindre (D)</FormLabel>
                     <Input
@@ -755,6 +760,15 @@ export default function OrderManagement() {
                     />
                   </FormControl>
                   
+                  <FormControl>
+                    <FormLabel>Axe (D)</FormLabel>
+                    <Input
+                      value={newOrder.axisR}
+                      onChange={(e) => setNewOrder({ ...newOrder, axisR: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+
                   <FormControl>
                     <FormLabel>Sphère (G)</FormLabel>
                     <Input
@@ -769,6 +783,15 @@ export default function OrderManagement() {
                     <Input
                       value={newOrder.cylinderL}
                       onChange={(e) => setNewOrder({ ...newOrder, cylinderL: e.target.value })}
+                      isDisabled={!selectedType}
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Axe (G)</FormLabel>
+                    <Input
+                      value={newOrder.axisL}
+                      onChange={(e) => setNewOrder({ ...newOrder, axisL: e.target.value })}
                       isDisabled={!selectedType}
                     />
                   </FormControl>
@@ -806,13 +829,15 @@ export default function OrderManagement() {
                       onChange={(e) =>
                         setOrderToEdit({ ...orderToEdit, userId: e.target.value })
                       }
+                      height="auto"
+                      overflowY="auto"
                     >
                       {users
-                      .filter(user => user.isDeleted === false || user.id === orderToEdit.userId)
-                      .map((user) => (
-                        <option key={user.id} value={user.id}>
-                          {`${user.name} ${user.surename}`}
-                        </option>
+                        .filter(user => user.isDeleted === false || user.id === orderToEdit.userId)
+                        .map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {`${user.name} ${user.surename}`}
+                          </option>
                       ))}
                     </Select>
                   </FormControl>
