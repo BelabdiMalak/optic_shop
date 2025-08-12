@@ -49,6 +49,7 @@ import { LuFilterX } from "react-icons/lu";
 import { IoMdHome } from 'react-icons/io';
 import { HiUsers } from 'react-icons/hi2';
 import { IoEyeSharp } from 'react-icons/io5';
+import { Select as ChakraSelect } from "chakra-react-select"
 
 type ListItemType = {
   text?: string;
@@ -638,20 +639,31 @@ export default function OrderManagement() {
             <VStack spacing={4} align="stretch">
               <FormControl isRequired>
                 <FormLabel>Utilisateur</FormLabel>
-                <Select
-                  placeholder="Select user"
-                  value={newOrder.userId}
-                  onChange={(e) => setNewOrder({ ...newOrder, userId: e.target.value })}
-                >
-                  {users
+                <ChakraSelect
+                  placeholder="choisir un utilisateur"
+                  value={
+                    users
+                      .filter(user => user.id === newOrder.userId)
+                      .map(user => ({
+                        value: user.id,
+                        label: `${user.name} ${user.surename}`
+                      }))[0] || null
+                  }
+                  onChange={(selected) =>
+                    setNewOrder({ ...newOrder, userId: selected?.value || "" })
+                  }
+                  options={users
                     .filter(user => user.isDeleted === false)
-                    .map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {`${user.name} ${user.surename}`}
-                      </option>
-                  ))}
-                </Select>
+                    .map(user => ({
+                      value: user.id,
+                      label: `${user.name} ${user.surename}`
+                    }))
+                  }
+                  isClearable
+                  isSearchable
+                />
               </FormControl>
+
 
                 <FormControl isRequired>
                   <FormLabel>Type produit</FormLabel>
@@ -823,23 +835,29 @@ export default function OrderManagement() {
                 <>
                   <FormControl isRequired>
                     <FormLabel>Utilisateur</FormLabel>
-                    <Select
-                      placeholder="Select user"
-                      value={orderToEdit.userId}
-                      onChange={(e) =>
-                        setOrderToEdit({ ...orderToEdit, userId: e.target.value })
+                    <ChakraSelect
+                      placeholder="Choisir un utilisateur"
+                      value={
+                        users
+                          .filter(user => user.id === orderToEdit.userId)
+                          .map(user => ({
+                            value: user.id,
+                            label: `${user.name} ${user.surename}`
+                          }))[0] || null
                       }
-                      height="auto"
-                      overflowY="auto"
-                    >
-                      {users
+                      onChange={(selected) =>
+                        setOrderToEdit({ ...orderToEdit, userId: selected?.value || "" })
+                      }
+                      options={users
                         .filter(user => user.isDeleted === false || user.id === orderToEdit.userId)
-                        .map((user) => (
-                          <option key={user.id} value={user.id}>
-                            {`${user.name} ${user.surename}`}
-                          </option>
-                      ))}
-                    </Select>
+                        .map(user => ({
+                          value: user.id,
+                          label: `${user.name} ${user.surename}`
+                        }))
+                      }
+                      isClearable
+                      isSearchable
+                    />
                   </FormControl>
 
                   <FormControl isRequired>
