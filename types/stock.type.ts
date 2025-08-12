@@ -11,8 +11,8 @@ export interface StockType {
     details?: ProductDetail;
     detailsId?: string;
     category?: string;
-    sphereL?: string;
-    cylinderL?: string;
-    sphereR?: string;
-    cylinderR?: string;
+    sphere?: string;
+    cylinder?: string;
+    // sphereR?: string;
+    // cylinderR?: string;
   }

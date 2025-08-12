@@ -132,10 +132,8 @@ const getProductDetails = async () => {
                 select: {
                     id: true,
                     category: true,
-                    sphereL: true,
-                    cylinderL: true,
-                    sphereR: true,
-                    cylinderR: true,
+                    sphere: true,
+                    cylinder: true,
                     productId: true,
                     quantity: true,
                     product: {

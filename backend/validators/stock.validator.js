@@ -33,39 +33,39 @@ const createSchema = Joi.object({
     .optional()
         .valid('torique', 'spherique'),
     
-    sphereL: Joi
+    sphere: Joi
         .number()
         .optional()
         .allow(null) // Allow `null` explicitly
         .empty('')   // Treat empty strings as `undefined`
         .messages({
-            'number.base': 'Sphere (L) must be a number or empty'
+            'number.base': 'Sphere must be a number or empty'
         }),
 
-    cylinderL: Joi
+    cylinder: Joi
         .number()
         .optional()
         .allow(null) // Allow `null` explicitly
         .empty('')   // Treat empty strings as `undefined`
         .messages({
-            'number.base': 'Cylinder (L) must be a number or empty'
+            'number.base': 'Cylinder must be a number or empty'
         }),
-    sphereR: Joi
-        .number()
-        .optional()
-        .allow(null) // Allow `null` explicitly
-        .empty('')   // Treat empty strings as `undefined`
-        .messages({
-            'number.base': 'Sphere (R) must be a number or empty'
-        }),
-    cylinderR: Joi
-        .number()
-        .optional()
-        .allow(null) // Allow `null` explicitly
-        .empty('')   // Treat empty strings as `undefined`
-        .messages({
-            'number.base': 'Cylinder (R) must be a number or empty'
-        }),
+    // sphereR: Joi
+    //     .number()
+    //     .optional()
+    //     .allow(null) // Allow `null` explicitly
+    //     .empty('')   // Treat empty strings as `undefined`
+    //     .messages({
+    //         'number.base': 'Sphere (R) must be a number or empty'
+    //     }),
+    // cylinderR: Joi
+    //     .number()
+    //     .optional()
+    //     .allow(null) // Allow `null` explicitly
+    //     .empty('')   // Treat empty strings as `undefined`
+    //     .messages({
+    //         'number.base': 'Cylinder (R) must be a number or empty'
+    //     }),
 });
 
 
@@ -97,40 +97,40 @@ const updateSchema = Joi.object({
         .optional()
             .valid('torique', 'spherique'),
         
-    sphereL: Joi
+    sphere: Joi
         .number()
         .optional()
         .allow(null) // Allow `null` explicitly
         .empty('')   // Treat empty strings as `undefined`
         .messages({
-            'number.base': 'Sphere (L) must be a number or empty'
+            'number.base': 'Sphere must be a number or empty'
         }),
 
-    cylinderL: Joi
+    cylinder: Joi
         .number()
         .optional()
         .allow(null) // Allow `null` explicitly
         .empty('')   // Treat empty strings as `undefined`
         .messages({
-            'number.base': 'Cylinder (L) must be a number or empty'
+            'number.base': 'Cylinder must be a number or empty'
         }),
 
-    sphereR: Joi
-        .number()
-        .optional()
-        .allow(null) // Allow `null` explicitly
-        .empty('')   // Treat empty strings as `undefined`
-        .messages({
-            'number.base': 'Sphere (R) must be a number or empty'
-        }),
-    cylinderR: Joi
-        .number()
-        .optional()
-        .allow(null) // Allow `null` explicitly
-        .empty('')   // Treat empty strings as `undefined`
-        .messages({
-            'number.base': 'Cylinder (R) must be a number or empty'
-        }),
+    // sphereR: Joi
+    //     .number()
+    //     .optional()
+    //     .allow(null) // Allow `null` explicitly
+    //     .empty('')   // Treat empty strings as `undefined`
+    //     .messages({
+    //         'number.base': 'Sphere (R) must be a number or empty'
+    //     }),
+    // cylinderR: Joi
+    //     .number()
+    //     .optional()
+    //     .allow(null) // Allow `null` explicitly
+    //     .empty('')   // Treat empty strings as `undefined`
+    //     .messages({
+    //         'number.base': 'Cylinder (R) must be a number or empty'
+    //     }),
     detailsId: Joi.string().uuid()
         .messages({
             'string.base': 'Product ID must be a string',
