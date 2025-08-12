@@ -649,9 +649,36 @@ export default function OrderManagement() {
                         label: `${user.name} ${user.surename}`
                       }))[0] || null
                   }
-                  onChange={(selected) =>
-                    setNewOrder({ ...newOrder, userId: selected?.value || "" })
-                  }
+                  onChange={(selected) => {
+                    const userId = selected?.value || "";
+                    const selectedUser = users.find(u => u.id === userId);
+
+                    if (selectedUser) {
+                      setNewOrder({
+                        ...newOrder,
+                        userId,
+                        sphereL: selectedUser.sphereL || "0",
+                        cylinderL: selectedUser.cylinderL || "0",
+                        axisL: selectedUser.axisL || "0",
+                        sphereR: selectedUser.sphereR || "0",
+                        cylinderR: selectedUser.cylinderR || "0",
+                        axisR: selectedUser.axisR || "0"
+                      });
+                    } else {
+                      // reset if cleared
+                      setNewOrder({
+                        ...newOrder,
+                        userId: "",
+                        sphereL: "0",
+                        cylinderL: "0",
+                        axisL: "0",
+                        sphereR: "0",
+                        cylinderR: "0",
+                        axisR: "0"
+                      });
+                    }
+                  }}
+                  
                   options={users
                     .filter(user => user.isDeleted === false)
                     .map(user => ({
