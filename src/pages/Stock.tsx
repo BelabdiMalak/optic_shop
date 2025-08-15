@@ -39,13 +39,21 @@ import { MdDelete, MdModeEditOutline } from 'react-icons/md';
 import { Head, PreviewOptionsNavbar, ThemeToggle } from '@src/components';
 import { BrandName } from '@src/constants';
 import { Link } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StockType } from 'types/stock.type';
 import { Type, SubType, Product } from 'types/product.type';
 import { LuFilterX } from "react-icons/lu";
 import { IoMdHome } from 'react-icons/io';
 import { HiUsers } from 'react-icons/hi2';
 import { IoEyeSharp } from 'react-icons/io5';
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+} from "@chakra-ui/react";
 
 type ListItemType = {
   text?: string;
@@ -103,8 +111,12 @@ export default function Stock() {
   // State for the stock being edited
   const [isEditStockOpen, setIsEditStockOpen] = useState(false);
   const [stockToEdit, setStockToEdit] = useState<StockType | null>(null);
-  const [_isSubmitting, setIsSubmitting] = useState(false);
-
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditConfirmOpen, setIsEditConfirmOpen] = useState(false);
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+  
   const toast = useToast();
 
   useEffect(() => {
@@ -128,7 +140,6 @@ export default function Stock() {
   const handleUpdateStock = async () => {
     try {
       if (!stockToEdit) return;
-      setIsSubmitting(true);
       const data = {...stockToEdit.details, detailsId: stockToEdit.details?.id}
       delete data?.product
       delete data?.id
@@ -151,7 +162,6 @@ export default function Stock() {
           duration: 5000,
           isClosable: true,
         });
-        setIsSubmitting(false);
         setIsEditStockOpen(false); // Fermer le tiroir
       } else {
         throw new Error('Échec de la mise à jour du stock');
@@ -166,6 +176,13 @@ export default function Stock() {
         isClosable: true,
       });
     }
+  };
+  const handleConfirmUpdateStock = async () => {
+    if (!stockToEdit) return;
+    setIsEditSubmitting(true);
+    await handleUpdateStock();
+    setIsEditSubmitting(false);
+    setIsEditConfirmOpen(false);
   };
 
   const handleDeleteStock = async (stockId: string) => {
@@ -337,7 +354,6 @@ export default function Stock() {
     }
 
     try {
-      setIsSubmitting(true);
       const response = await window.electron.createStock(newStock);
       console.log(response)
       if (response && response.data && response.status === true) {
@@ -353,7 +369,6 @@ export default function Stock() {
           duration: 5000,
           isClosable: true,
         });
-        setIsSubmitting(false);
       } else {
         throw new Error('Invalid response structure');
       }
@@ -369,6 +384,12 @@ export default function Stock() {
     }
   };
 
+  const handleConfirmAddStock = async () => {
+    setIsSubmitting(true);
+    await handleAddStock(); // your existing function
+    setIsSubmitting(false);
+    setIsConfirmOpen(false);
+  };
   const filteredStock = stock.filter((item) => {
     const typeMatch = typeFilterV2 ? item.product?.type.name.toLowerCase() === typeFilterV2 : true;
     const subtypeMatch = subtypeFilterV2 ? item.product?.subType.name.toLowerCase() === subtypeFilterV2 : true;
@@ -724,10 +745,46 @@ export default function Stock() {
                 <Button onClick={() => setIsAddStockOpen(false)} variant="outline">
                   Annuler
                 </Button>
-                <Button colorScheme="green" onClick={handleAddStock}>
+                <Button colorScheme="green" onClick={() => setIsConfirmOpen(true)}>
                   Ajouter le Stock
                 </Button>
               </HStack>
+              {/* Confirmation Dialog */}
+              <AlertDialog
+                isOpen={isConfirmOpen}
+                leastDestructiveRef={cancelRef}
+                onClose={() => !isSubmitting && setIsConfirmOpen(false)}
+              >
+                <AlertDialogOverlay>
+                  <AlertDialogContent>
+                    <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                      Confirmer l'ajout
+                    </AlertDialogHeader>
+
+                    <AlertDialogBody>
+                      Êtes-vous sûr de vouloir ajouter ce stock ?
+                    </AlertDialogBody>
+
+                    <AlertDialogFooter>
+                      <Button
+                        ref={cancelRef}
+                        onClick={() => setIsConfirmOpen(false)}
+                        disabled={isSubmitting}
+                      >
+                        Annuler
+                      </Button>
+                      <Button
+                        colorScheme="green"
+                        onClick={handleConfirmAddStock}
+                        ml={3}
+                        isLoading={isSubmitting}
+                      >
+                        Oui, ajouter
+                      </Button>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialogOverlay>
+              </AlertDialog>
             </VStack>
           </Box>
         </DrawerContent>
@@ -788,10 +845,45 @@ export default function Stock() {
                     <Button onClick={() => setIsEditStockOpen(false)} variant="outline">
                       Annuler
                     </Button>
-                    <Button colorScheme="green" onClick={() => handleUpdateStock()}>
+                    <Button colorScheme="green" onClick={() => setIsEditConfirmOpen(true)}>
                       Mettre à jour
                     </Button>
                   </HStack>
+               <AlertDialog
+                  isOpen={isEditConfirmOpen}
+                  leastDestructiveRef={cancelRef}
+                  onClose={() => !isEditSubmitting && setIsEditConfirmOpen(false)}
+                >
+                  <AlertDialogOverlay>
+                    <AlertDialogContent>
+                      <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                        Confirmer la mise à jour
+                      </AlertDialogHeader>
+
+                      <AlertDialogBody>
+                        Êtes-vous sûr de vouloir mettre à jour ce stock ?
+                      </AlertDialogBody>
+
+                      <AlertDialogFooter>
+                        <Button
+                          ref={cancelRef}
+                          onClick={() => setIsEditConfirmOpen(false)}
+                          disabled={isEditSubmitting}
+                        >
+                          Annuler
+                        </Button>
+                        <Button
+                          colorScheme="blue"
+                          onClick={handleConfirmUpdateStock}
+                          ml={3}
+                          isLoading={isEditSubmitting}
+                        >
+                          Oui, mettre à jour
+                        </Button>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialogOverlay>
+                </AlertDialog>
                 </>
               )}
             </VStack>

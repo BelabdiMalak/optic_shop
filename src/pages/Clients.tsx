@@ -38,12 +38,20 @@ import { MdDelete, MdModeEditOutline } from 'react-icons/md';
 import { Head, PreviewOptionsNavbar, ThemeToggle } from '@src/components';
 import { BrandName } from '@src/constants';
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Client } from 'types/client.type';
 import { LuFilterX } from "react-icons/lu";
 import { IoMdHome } from 'react-icons/io';
 import { HiUsers } from 'react-icons/hi2';
 import { IoEyeSharp } from 'react-icons/io5';
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+} from "@chakra-ui/react";
 
 type ListItemType = {
   text?: string;
@@ -83,8 +91,13 @@ export default function Clients() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [_isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditConfirmOpen, setIsEditConfirmOpen] = useState(false);
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+  
 
   useEffect(() => {
     fetchClients();
@@ -149,7 +162,6 @@ export default function Clients() {
   
   const handleUpdateClient = async (updatedClient: Client) => {
     try {
-      setIsSubmitting(true);
       const {id, isDeleted, createdAt, updatedAt, ...data} = updatedClient
       const response = await window.electron.updateUser(id, data);
       console.log(response)
@@ -166,7 +178,6 @@ export default function Clients() {
           duration: 5000,
           isClosable: true,
         });
-        setIsSubmitting(false)
         setIsEditClientOpen(false); // Fermer le tiroir
       } else {
         throw new Error('Échec de la mise à jour du client');
@@ -183,7 +194,13 @@ export default function Clients() {
     }
   };
   
-
+  const handleConfirmUpdateClient = async () => {
+    if (!clientToEdit) return;
+    setIsEditSubmitting(true);
+    await handleUpdateClient(clientToEdit);
+    setIsEditSubmitting(false);
+    setIsEditConfirmOpen(false);
+  };
   const fetchClients = async () => {
     try {
       setIsLoading(true);
@@ -231,7 +248,6 @@ export default function Clients() {
   };
   
   const handleAddClient = async () => {
-    setIsSubmitting(true);
     if (!newClient.name || !newClient.surename) {
       toast({
         title: 'Entrée invalide',
@@ -256,7 +272,6 @@ export default function Clients() {
           duration: 5000,
           isClosable: true,
         });
-        setIsSubmitting(false);
       } else {
         throw new Error('Structure de réponse invalide');
       }
@@ -270,6 +285,13 @@ export default function Clients() {
         isClosable: true,
       });
     }
+  };
+
+  const handleConfirmAddClient = async () => {
+    setIsSubmitting(true);
+    await handleAddClient(); // your existing function
+    setIsSubmitting(false);
+    setIsConfirmOpen(false);
   };
 
   return (
@@ -548,10 +570,46 @@ export default function Clients() {
             <Button variant="outline" onClick={() => setIsAddClientOpen(false)}>
               Annuler
             </Button>
-            <Button colorScheme="green" onClick={handleAddClient}>
+            <Button colorScheme="green" onClick={() => setIsConfirmOpen(true)}>
               Ajouter
             </Button>
           </HStack>
+          {/* Confirmation Dialog */}
+          <AlertDialog
+            isOpen={isConfirmOpen}
+            leastDestructiveRef={cancelRef}
+            onClose={() => !isSubmitting && setIsConfirmOpen(false)}
+          >
+            <AlertDialogOverlay>
+              <AlertDialogContent>
+                <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                  Confirmer l'ajout
+                </AlertDialogHeader>
+
+                <AlertDialogBody>
+                  Êtes-vous sûr de vouloir ajouter ce client ?
+                </AlertDialogBody>
+
+                <AlertDialogFooter>
+                  <Button
+                    ref={cancelRef}
+                    onClick={() => setIsConfirmOpen(false)}
+                    disabled={isSubmitting}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    colorScheme="green"
+                    onClick={handleConfirmAddClient}
+                    ml={3}
+                    isLoading={isSubmitting}
+                  >
+                    Oui, ajouter
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialogOverlay>
+          </AlertDialog>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
@@ -643,16 +701,47 @@ export default function Clients() {
             </Button>
             <Button
               colorScheme="green"
-              onClick={() => {
-                if (clientToEdit) {
-                  handleUpdateClient(clientToEdit);
-                }
-              }}
+              onClick={() => setIsEditConfirmOpen(true)}
             >
               Mettre à jour
             </Button>
 
           </HStack>
+               <AlertDialog
+                  isOpen={isEditConfirmOpen}
+                  leastDestructiveRef={cancelRef}
+                  onClose={() => !isEditSubmitting && setIsEditConfirmOpen(false)}
+                >
+                  <AlertDialogOverlay>
+                    <AlertDialogContent>
+                      <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                        Confirmer la mise à jour
+                      </AlertDialogHeader>
+
+                      <AlertDialogBody>
+                        Êtes-vous sûr de vouloir mettre à jour ce client ?
+                      </AlertDialogBody>
+
+                      <AlertDialogFooter>
+                        <Button
+                          ref={cancelRef}
+                          onClick={() => setIsEditConfirmOpen(false)}
+                          disabled={isEditSubmitting}
+                        >
+                          Annuler
+                        </Button>
+                        <Button
+                          colorScheme="blue"
+                          onClick={handleConfirmUpdateClient}
+                          ml={3}
+                          isLoading={isEditSubmitting}
+                        >
+                          Oui, mettre à jour
+                        </Button>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialogOverlay>
+                </AlertDialog>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
