@@ -15,6 +15,7 @@
     "preview": "vite preview",
     "electron": "electron electron.js",
     "package": "npx prisma generate && electron-builder",
+    "package:win": "npm run package -- --win --x64",
     "start": "vite"
   },
   "dependencies": {
