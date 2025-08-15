@@ -103,6 +103,7 @@ export default function Stock() {
   // State for the stock being edited
   const [isEditStockOpen, setIsEditStockOpen] = useState(false);
   const [stockToEdit, setStockToEdit] = useState<StockType | null>(null);
+  const [_isSubmitting, setIsSubmitting] = useState(false);
 
   const toast = useToast();
 
@@ -127,7 +128,7 @@ export default function Stock() {
   const handleUpdateStock = async () => {
     try {
       if (!stockToEdit) return;
-
+      setIsSubmitting(true);
       const data = {...stockToEdit.details, detailsId: stockToEdit.details?.id}
       delete data?.product
       delete data?.id
@@ -150,6 +151,7 @@ export default function Stock() {
           duration: 5000,
           isClosable: true,
         });
+        setIsSubmitting(false);
         setIsEditStockOpen(false); // Fermer le tiroir
       } else {
         throw new Error('Échec de la mise à jour du stock');
@@ -335,6 +337,7 @@ export default function Stock() {
     }
 
     try {
+      setIsSubmitting(true);
       const response = await window.electron.createStock(newStock);
       console.log(response)
       if (response && response.data && response.status === true) {
@@ -350,6 +353,7 @@ export default function Stock() {
           duration: 5000,
           isClosable: true,
         });
+        setIsSubmitting(false);
       } else {
         throw new Error('Invalid response structure');
       }

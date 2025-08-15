@@ -79,6 +79,7 @@ const Puissances: React.FC = () => {
     const [filteredDetails, setFilteredDetails] = useState<ProductDetail[]>([]);
     const [puissanceToEdit, setPuissanceToEdit] = useState<ProductDetail | null>(null);
     const [subtypes, setSubtypes] = useState<SubType[]>([]); // List of subtypes
+    const [_isSubmitting, setIsSubmitting] = useState(false);
     const [filters, setFilters] = useState({
         subType: '',
         category: '',
@@ -91,6 +92,8 @@ const Puissances: React.FC = () => {
 
     const handleUpdatePuissance = async () => {
         try {
+
+            setIsSubmitting(true);
           if (!puissanceToEdit) return;
     
           const {id, productId, quantity, product, ...data} = puissanceToEdit
@@ -105,6 +108,7 @@ const Puissances: React.FC = () => {
               isClosable: true,
             });
             setIsEditPuissanceOpen(false); // Fermer le tiroir
+            setIsSubmitting(false);
           } else {
             throw new Error('Échec de la mise à jour du verre');
           }

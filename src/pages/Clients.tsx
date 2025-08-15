@@ -83,6 +83,7 @@ export default function Clients() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [_isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -148,7 +149,7 @@ export default function Clients() {
   
   const handleUpdateClient = async (updatedClient: Client) => {
     try {
-      
+      setIsSubmitting(true);
       const {id, isDeleted, createdAt, updatedAt, ...data} = updatedClient
       const response = await window.electron.updateUser(id, data);
       console.log(response)
@@ -165,6 +166,7 @@ export default function Clients() {
           duration: 5000,
           isClosable: true,
         });
+        setIsSubmitting(false)
         setIsEditClientOpen(false); // Fermer le tiroir
       } else {
         throw new Error('Échec de la mise à jour du client');
@@ -229,6 +231,7 @@ export default function Clients() {
   };
   
   const handleAddClient = async () => {
+    setIsSubmitting(true);
     if (!newClient.name || !newClient.surename) {
       toast({
         title: 'Entrée invalide',
@@ -253,6 +256,7 @@ export default function Clients() {
           duration: 5000,
           isClosable: true,
         });
+        setIsSubmitting(false);
       } else {
         throw new Error('Structure de réponse invalide');
       }

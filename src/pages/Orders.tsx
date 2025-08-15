@@ -101,6 +101,7 @@ export default function OrderManagement() {
   const [_subtypeFilter, setSubtypeFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [allProducts, setAllProducts] = useState<Product[]>([]); // List of products
+  const [_isSubmitting, setIsSubmitting] = useState(false);
 
 
   const toast = useToast();
@@ -217,6 +218,7 @@ export default function OrderManagement() {
 
   const handleUpdateOrder = async (updatedOrder: Order) => {
     try {
+      setIsSubmitting(true);
       delete updatedOrder.createdAt;
       delete updatedOrder.updatedAt;
       delete updatedOrder.user;
@@ -238,6 +240,7 @@ export default function OrderManagement() {
           duration: 5000,
           isClosable: true,
         });
+        setIsSubmitting(false);
         setIsEditOrderOpen(false); // Fermer le tiroir
       } else {
         throw new Error('Échec de la mise à jour de la commande');
@@ -327,6 +330,7 @@ export default function OrderManagement() {
   );
 
   const handleAddOrder = async () => {
+    setIsSubmitting(true);
     console.log(newOrder)
     if (!newOrder.userId || !newOrder.productId) {
       toast({
@@ -350,7 +354,6 @@ export default function OrderManagement() {
     // Update the new order with the calculated status
     const updatedOrder = { ...newOrder, status, date };
   
-    console.log(updatedOrder)
     try {
       console.log('Sending order data:', updatedOrder);
       const response = await window.electron.createOrder(updatedOrder);
@@ -369,7 +372,6 @@ export default function OrderManagement() {
       }
   
       if (response && response.data) {
-        console.log('order added heeeeeeeeeeeeeeeeeee')
         // Order created successfully
         setOrders((prevOrders) => [...prevOrders, response.data]);
         setSelectedType('')
@@ -398,6 +400,7 @@ export default function OrderManagement() {
           duration: 5000,
           isClosable: true,
         });
+        setIsSubmitting(false);
         await fetchOrders(); // Refresh the order list
       } else {
         // Handle unexpected response
