@@ -39,7 +39,7 @@ import { MdModeEditOutline, MdDelete } from 'react-icons/md';
 import { Head, PreviewOptionsNavbar } from '@src/components';
 import { BrandName } from '@src/constants';
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useUsers } from '../hooks/useUsers';
 import { useProducts } from '../hooks/useProducts';
 import { Product, SubType, Type } from 'types/product.type';
@@ -50,6 +50,15 @@ import { IoMdHome } from 'react-icons/io';
 import { HiUsers } from 'react-icons/hi2';
 import { IoEyeSharp } from 'react-icons/io5';
 import { Select as ChakraSelect } from "chakra-react-select"
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+} from "@chakra-ui/react";
+
 
 type ListItemType = {
   text?: string;
@@ -101,8 +110,11 @@ export default function OrderManagement() {
   const [_subtypeFilter, setSubtypeFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [allProducts, setAllProducts] = useState<Product[]>([]); // List of products
-  const [_isSubmitting, setIsSubmitting] = useState(false);
-
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditConfirmOpen, setIsEditConfirmOpen] = useState(false);
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
   const toast = useToast();
 
@@ -218,7 +230,6 @@ export default function OrderManagement() {
 
   const handleUpdateOrder = async (updatedOrder: Order) => {
     try {
-      setIsSubmitting(true);
       delete updatedOrder.createdAt;
       delete updatedOrder.updatedAt;
       delete updatedOrder.user;
@@ -240,7 +251,6 @@ export default function OrderManagement() {
           duration: 5000,
           isClosable: true,
         });
-        setIsSubmitting(false);
         setIsEditOrderOpen(false); // Fermer le tiroir
       } else {
         throw new Error('Échec de la mise à jour de la commande');
@@ -256,7 +266,14 @@ export default function OrderManagement() {
       });
     }
   };
-  
+
+  const handleConfirmUpdateOrder = async () => {
+    if (!orderToEdit) return;
+    setIsEditSubmitting(true);
+    await handleUpdateOrder(orderToEdit);
+    setIsEditSubmitting(false);
+    setIsEditConfirmOpen(false);
+  };
   const handleDeleteOrder = async (orderId: string) => {
     const toastId = toast({
       title: "Confirmation",
@@ -330,7 +347,6 @@ export default function OrderManagement() {
   );
 
   const handleAddOrder = async () => {
-    setIsSubmitting(true);
     console.log(newOrder)
     if (!newOrder.userId || !newOrder.productId) {
       toast({
@@ -400,7 +416,6 @@ export default function OrderManagement() {
           duration: 5000,
           isClosable: true,
         });
-        setIsSubmitting(false);
         await fetchOrders(); // Refresh the order list
       } else {
         // Handle unexpected response
@@ -418,6 +433,13 @@ export default function OrderManagement() {
     }
   };
     
+  const handleConfirmAddOrder = async () => {
+    setIsSubmitting(true);
+    await handleAddOrder(); // your existing function
+    setIsSubmitting(false);
+    setIsConfirmOpen(false);
+  };
+
   return (
     <>
       <Head>
@@ -844,10 +866,49 @@ export default function OrderManagement() {
                 <Button onClick={() => setIsAddOrderOpen(false)} variant="outline">
                   Annuler
                 </Button>
-                <Button colorScheme="green" onClick={handleAddOrder}>
+                <Button
+                  colorScheme="green"
+                  onClick={() => setIsConfirmOpen(true)}
+                >
                   Ajouter
                 </Button>
               </HStack>
+              {/* Confirmation Dialog */}
+              <AlertDialog
+                isOpen={isConfirmOpen}
+                leastDestructiveRef={cancelRef}
+                onClose={() => !isSubmitting && setIsConfirmOpen(false)}
+              >
+                <AlertDialogOverlay>
+                  <AlertDialogContent>
+                    <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                      Confirmer l'ajout
+                    </AlertDialogHeader>
+
+                    <AlertDialogBody>
+                      Êtes-vous sûr de vouloir ajouter cette commande ?
+                    </AlertDialogBody>
+
+                    <AlertDialogFooter>
+                      <Button
+                        ref={cancelRef}
+                        onClick={() => setIsConfirmOpen(false)}
+                        disabled={isSubmitting}
+                      >
+                        Annuler
+                      </Button>
+                      <Button
+                        colorScheme="green"
+                        onClick={handleConfirmAddOrder}
+                        ml={3}
+                        isLoading={isSubmitting}
+                      >
+                        Oui, ajouter
+                      </Button>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialogOverlay>
+              </AlertDialog>
             </VStack>
           </Box>
         </DrawerContent>
@@ -966,12 +1027,48 @@ export default function OrderManagement() {
                     Annuler
                   </Button>
                   <Button
-                    colorScheme="green"
-                    onClick={() => handleUpdateOrder(orderToEdit)}
+                    colorScheme="blue"
+                    onClick={() => setIsEditConfirmOpen(true)}
                   >
                     Mettre à jour
                   </Button>
                 </HStack>
+                <AlertDialog
+                  isOpen={isEditConfirmOpen}
+                  leastDestructiveRef={cancelRef}
+                  onClose={() => !isEditSubmitting && setIsEditConfirmOpen(false)}
+                >
+                  <AlertDialogOverlay>
+                    <AlertDialogContent>
+                      <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                        Confirmer la mise à jour
+                      </AlertDialogHeader>
+
+                      <AlertDialogBody>
+                        Êtes-vous sûr de vouloir mettre à jour cette commande ?
+                      </AlertDialogBody>
+
+                      <AlertDialogFooter>
+                        <Button
+                          ref={cancelRef}
+                          onClick={() => setIsEditConfirmOpen(false)}
+                          disabled={isEditSubmitting}
+                        >
+                          Annuler
+                        </Button>
+                        <Button
+                          colorScheme="blue"
+                          onClick={handleConfirmUpdateOrder}
+                          ml={3}
+                          isLoading={isEditSubmitting}
+                        >
+                          Oui, mettre à jour
+                        </Button>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialogOverlay>
+                </AlertDialog>
+
                 </>
               )}
             </VStack>
